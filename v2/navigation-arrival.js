@@ -70,18 +70,23 @@ function enhanceAnimalModal(){
   if(enhancing||!activeArrival)return;
   const card=document.querySelector('.animal-modal__card');
   if(!card)return;
-  enhancing=true;
-
-  card.querySelector('.navigation-arrival-banner')?.remove();
-  card.querySelector('.navigation-arrival-actions')?.remove();
 
   const animals=animalsForStation(activeArrival.stationId);
   const currentTitle=document.querySelector('#animal-modal-title')?.textContent?.trim();
   const currentAnimal=animals.find(animal=>animal.name===currentTitle)||animalById(selectedAnimalId)||animals[0];
   if(currentAnimal)selectedAnimalId=currentAnimal.id;
+  const signature=`${activeArrival.stationId}:${activeArrival.nextId||''}:${selectedAnimalId||''}`;
+  const currentBanner=card.querySelector('.navigation-arrival-banner');
+  const currentActions=card.querySelector('.navigation-arrival-actions');
+  if(currentBanner?.dataset.signature===signature&&currentActions?.dataset.signature===signature)return;
+
+  enhancing=true;
+  currentBanner?.remove();
+  currentActions?.remove();
 
   const banner=document.createElement('section');
   banner.className='navigation-arrival-banner';
+  banner.dataset.signature=signature;
   banner.innerHTML=`
     <div class="navigation-arrival-banner__check">✓</div>
     <div><em>Ziel erreicht · Etappe ${Number(activeArrival.index||0)+1} von ${activeArrival.count||1}</em><strong>${escapeHtml(activeArrival.stationName||stationById(activeArrival.stationId)?.name||'Station')}</strong></div>`;
@@ -98,6 +103,7 @@ function enhanceAnimalModal(){
 
   const actions=document.createElement('footer');
   actions.className='navigation-arrival-actions';
+  actions.dataset.signature=signature;
   actions.innerHTML=`
     <div><small>${activeArrival.nextId?'Nächste Etappe':'Letztes Ziel'}</small><strong>${escapeHtml(activeArrival.nextName||'Tour abschließen')}</strong></div>
     <button type="button" data-arrival-continue>${activeArrival.nextId?'Weiter navigieren':'Navigation abschließen'} <span>→</span></button>`;
