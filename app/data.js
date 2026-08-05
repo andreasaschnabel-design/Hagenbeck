@@ -29,6 +29,8 @@ export const BEREICHE = {
   suedamerika: { name: 'Suedamerika', farbe: '#6a8f3c' },
   kinder: { name: 'Fuer Kinder', farbe: '#b8503f' },
   tropen: { name: 'Tropen-Aquarium', farbe: '#3f8f7a' },
+  amerika: { name: 'Amerika', farbe: '#7a6ea0' },
+  australien: { name: 'Australien', farbe: '#b8506e' },
   garten: { name: 'Garten & Ruhe', farbe: '#5f7f5f' },
 };
 
@@ -89,7 +91,7 @@ export const STATIONEN = [
     bereich: 'asien',
     mapX: 87.7, mapY: 8.1,
     dauer: 15,
-    tiere: ['tiger'],
+    tiere: ['tiger', 'leopard'],
     beschreibung:
       'Eine weitlaeufige Anlage mit Wasserbecken und erhoehten Liegeplaetzen. Tiger sind Einzelgaenger und schlafen tagsueber viel - Geduld wird hier oft belohnt.',
     tipp: 'Am spaeten Nachmittag, kurz vor der Fuetterung, sind Grosskatzen deutlich aktiver als mittags.',
@@ -100,7 +102,7 @@ export const STATIONEN = [
     bereich: 'afrika',
     mapX: 33.9, mapY: 59.4,
     dauer: 15,
-    tiere: ['loewe'],
+    tiere: ['loewe', 'mandrill', 'riesenkaenguru'],
     beschreibung:
       'Eine gitterlose Freianlage nach Hagenbeck-Prinzip: Ein breiter Graben trennt Besucher und Tiere, sodass der Blick frei ueber die Anlage geht.',
     tipp: 'Loewen ruhen bis zu 20 Stunden am Tag. Wer Bewegung sehen will, kommt frueh am Morgen oder zur Fuetterungszeit.',
@@ -141,14 +143,14 @@ export const STATIONEN = [
   },
   {
     id: 'seeloewen',
-    name: 'Seeloewenbecken',
+    name: 'Seebaeren-Becken',
     bereich: 'eismeer',
     mapX: 15.6, mapY: 55.8,
     dauer: 20,
-    tiere: ['seeloewe'],
+    tiere: ['seebaer'],
     beschreibung:
-      'Am Becken gibt es taeglich eine Schaufuetterung mit Erklaerungen der Tierpfleger. Das ist einer der wenigen festen Programmpunkte im Park - und einer der beliebtesten.',
-    tipp: 'Etwa 10 Minuten vorher da sein, sonst stehst du in der dritten Reihe. Die Zeiten stehen am Eingang und in dieser App unter "Fuetterungen".',
+      'Am Becken der Suedamerikanischen Seebaeren gibt es taeglich eine Schaufuetterung mit Erklaerungen der Tierpfleger. Das ist einer der wenigen festen Programmpunkte im Park - und einer der beliebtesten.',
+    tipp: 'Etwa 10 Minuten vorher da sein, sonst stehst du in der dritten Reihe. Die Zeiten stehen am Eingang und in dieser App unter "Zeiten".',
     fuetterung: true,
   },
   {
@@ -157,21 +159,21 @@ export const STATIONEN = [
     bereich: 'asien',
     mapX: 72.1, mapY: 53.0,
     dauer: 15,
-    tiere: ['trampeltier'],
+    tiere: ['trampeltier', 'onager', 'kamtschatkabaer'],
     beschreibung:
       'Weitlaeufige Anlage fuer die zweihoeckrigen Trampeltiere. In der Saison werden hier traditionell Reitrunden fuer Kinder angeboten - ob und wann, haengt vom Wetter und vom Tagesbetrieb ab.',
-    tipp: 'Kamele wirken traege, sind aber sehr aufmerksam. Wer ruhig stehenbleibt, wird oft ausgiebig gemustert.',
+    tipp: 'Gleich nebenan wohnen die Onager und die Kamtschatkabaeren - beides seltene Arten, die kaum ein anderer Zoo zeigt.',
   },
   {
     id: 'alpakas',
-    name: 'Suedamerika-Wiese',
+    name: 'Riesenotter-Anlage',
     bereich: 'suedamerika',
     mapX: 58.6, mapY: 30.5,
-    dauer: 10,
-    tiere: ['alpaka'],
+    dauer: 15,
+    tiere: ['riesenotter'],
     beschreibung:
-      'Eine ruhige Wiesenanlage fuer die Kleinkamele aus den Anden. Gut geeignet fuer eine Pause, es gibt Baenke am Weg.',
-    tipp: 'Alpakas spucken nur untereinander, wenn es Streit ums Futter gibt - Besucher sind selten das Ziel.',
+      'Wasseranlage der Suedamerikanischen Riesenotter - der groessten Otter der Welt. Die Familiengruppe ist fast immer in Bewegung und gut zu hoeren: Riesenotter gehoeren zu den gespraechigsten Raubtieren ueberhaupt.',
+    tipp: 'Ein paar Minuten am Unterwasserfenster warten - unter Wasser zeigen die Otter, warum man sie Flusswoelfe nennt.',
   },
   {
     id: 'streichelgehege',
@@ -191,7 +193,7 @@ export const STATIONEN = [
     bereich: 'kinder',
     mapX: 50.5, mapY: 16.7,
     dauer: 30,
-    tiere: [],
+    tiere: ['praeriebison'],
     beschreibung:
       'Grosser Spielbereich mit Klettergeraeten und Wasserspielstellen. Rundherum gibt es Baenke und Gastronomie - der uebliche Wendepunkt eines Familienbesuchs.',
     tipp: 'Bei warmem Wetter Wechselsachen einpacken. Kinder gehen am Wasserspiel zuverlaessig nass nach Hause.',
@@ -340,29 +342,30 @@ export const TIERE = [
     beobachten: 'Achte auf das Profil: gerader, langer Kopf statt runder Hundekopf - das ist die Kegelrobbe.',
   },
   {
-    id: 'seeloewe',
-    name: 'Kalifornischer Seeloewe',
-    lateinisch: 'Zalophus californianus',
+    id: 'seebaer',
+    name: 'Suedamerikanischer Seebaer',
+    lateinisch: 'Arctocephalus australis',
     bereich: 'eismeer',
     station: 'seeloewen',
-    kurz: 'Der laute Akrobat des Parks - und Star der Schaufuetterung.',
+    kurz: 'Die flinke Ohrenrobbe mit dem dichten Pelz - Star der Schaufuetterung.',
     steckbrief: {
-      Groesse: 'Bullen bis 2,4 m',
-      Gewicht: 'Bullen bis 350 kg, Weibchen etwa 100 kg',
+      Groesse: 'Bullen bis 1,9 m, Weibchen deutlich kleiner',
+      Gewicht: 'Bullen bis 200 kg, Weibchen um 50 kg',
       Alter: '20 bis 30 Jahre',
-      Nahrung: 'Fisch und Tintenfisch',
-      Heimat: 'Pazifikkueste Nordamerikas',
+      Nahrung: 'Fisch, Tintenfisch, Krebstiere',
+      Heimat: 'Kuesten Suedamerikas - Pazifik und Atlantik',
       Status: 'nicht gefaehrdet (IUCN: least concern)',
     },
     text: [
-      'Seeloewen gehoeren zu den Ohrenrobben: Sie haben kleine sichtbare Ohrmuscheln und koennen ihre Hinterflossen nach vorn klappen. Deshalb laufen sie an Land auf allen vieren, waehrend Seehunde robben muessen.',
-      'Bei der Schaufuetterung geht es nicht um Kunststuecke um ihrer selbst willen. Die Uebungen sind medizinisches Training: Tiere lernen freiwillig, das Maul zu oeffnen, eine Flosse zu zeigen oder auf die Waage zu gehen, damit Untersuchungen ohne Narkose moeglich sind.',
-      'Bullen erkennt man an der Stirnwulst und an der Lautstaerke. Das typische Bellen traegt ueber den halben Park.',
+      'Seebaeren gehoeren wie die Seeloewen zu den Ohrenrobben: Sie haben kleine sichtbare Ohrmuscheln und koennen ihre Hinterflossen nach vorn klappen. Deshalb laufen sie an Land erstaunlich flink auf allen vieren.',
+      'Ihren Namen verdanken sie dem Fell. Anders als Seeloewen tragen Seebaeren einen dichten, zweischichtigen Pelz mit waermender Unterwolle - die aufgestellte, braeunliche Maehne der Bullen erinnerte Seefahrer an einen Baeren.',
+      'Bei der Schaufuetterung geht es nicht um Kunststuecke um ihrer selbst willen. Die Uebungen sind medizinisches Training: Die Tiere lernen freiwillig, das Maul zu oeffnen, eine Flosse zu zeigen oder auf die Waage zu gehen, damit Untersuchungen ohne Narkose moeglich sind.',
+      'Vor der Kueste jagen Seebaeren vor allem nachts und tauchen dabei meist in den oberen Wasserschichten - Tauchgaenge von zwei bis drei Minuten sind ihr Standard.',
     ],
     wusstest: [
-      'Seeloewen schwimmen mit den Vorderflossen und erreichen kurzzeitig ueber 30 km/h.',
-      'Sie koennen unter Wasser besser sehen als an Land - ihre Augen sind auf das dichtere Medium ausgelegt.',
-      'Ein Seeloewe erkennt seinen Pfleger auf Entfernung an der Stimme.',
+      'Der dichte Pelz war fast ihr Verhaengnis: Wegen des Fells wurden Seebaeren jahrhundertelang stark bejagt.',
+      'Ein Seebaer erkennt seinen Pfleger auf Entfernung an der Stimme.',
+      'Unter Wasser steuern sie mit den Hinterflossen und rudern mit den Vorderflossen - wie Pinguine im Grossformat.',
     ],
     beobachten:
       'Zehn Minuten vor der Fuetterung dasein und einen Platz seitlich zur Sonne suchen, sonst blendet das Wasser auf allen Fotos.',
@@ -651,32 +654,33 @@ export const TIERE = [
     beobachten: 'Sieh dir das Gefieder verschiedener Tiere an - je kraeftiger das Rosa, desto besser die Naehrstoffversorgung.',
   },
   {
-    id: 'alpaka',
-    name: 'Alpaka',
-    lateinisch: 'Vicugna pacos',
+    id: 'riesenotter',
+    name: 'Riesenotter',
+    lateinisch: 'Pteronura brasiliensis',
     bereich: 'suedamerika',
     station: 'alpakas',
-    kurz: 'Kleinkamel aus den Anden - seit ueber 5.000 Jahren wegen der Wolle gehalten.',
+    kurz: 'Der groesste Otter der Welt - lebt in Familie und redet fast ohne Pause.',
     steckbrief: {
-      Groesse: 'Schulterhoehe etwa 1 m',
-      Gewicht: '55 bis 75 kg',
-      Alter: '15 bis 20 Jahre',
-      Nahrung: 'Graeser und Kraeuter',
-      Heimat: 'Hochanden in Peru, Bolivien, Chile',
-      Status: 'Haustierform, nicht gefaehrdet',
+      Groesse: 'bis 1,8 m mit Schwanz',
+      Gewicht: '22 bis 32 kg',
+      Alter: '10 bis 15 Jahre, in Menschenobhut laenger',
+      Nahrung: 'vor allem Fisch, dazu Krebse',
+      Heimat: 'Fluesse des Amazonas- und Orinoco-Gebiets',
+      Status: 'stark gefaehrdet (IUCN: endangered)',
     },
     text: [
-      'Alpakas sind Kamele ohne Hoecker. Sie stammen vom wilden Vikunja ab und wurden von den Andenvoelkern ueber Jahrtausende auf Wollqualitaet gezuechtet.',
-      'Ihre Wolle ist waermer als Schafwolle und enthaelt kein Wollfett, deshalb reagieren viele Menschen mit Wollallergie darauf nicht.',
-      'In der Gruppe klaeren sie Rangfragen mit Halsringen, Spucken und Drohblicken - fuer Menschen ist das Spucken selten ein Thema.',
-      'Alpakas nutzen gemeinsame Kotplaetze. Das haelt die Weide sauber und begrenzt Parasiten.',
+      'Riesenotter leben in Familiengruppen aus einem Elternpaar und dem Nachwuchs mehrerer Jahre. Gejagt wird gemeinsam - eine Gruppe treibt Fischschwaerme zusammen wie ein Rudel Woelfe, daher der suedamerikanische Name "Flusswolf".',
+      'Sie sind ausgesprochen gespraechig: Forscher unterscheiden mehr als 20 verschiedene Rufe, vom Bettel-Quieken der Jungen bis zum Alarmschnauben. Auch an der Anlage ist fast immer etwas zu hoeren.',
+      'Jeder Riesenotter traegt an der Kehle eine helle, unregelmaessige Zeichnung - so individuell wie ein Fingerabdruck. Beim Aufrichten im Wasser zeigen sich die Tiere gegenseitig ihre Kehlflecken.',
+      'In Suedamerika sind Riesenotter durch Jagd, Goldwaesche und Lebensraumverlust selten geworden; Zoos koordinieren die Zucht in einem europaeischen Erhaltungsprogramm.',
     ],
     wusstest: [
-      'Alpakas summen leise, wenn sie unsicher oder neugierig sind.',
-      'Ein Tier liefert pro Schur etwa drei Kilogramm Wolle.',
-      'Sie haben gespaltene Sohlen mit Schwielen statt Hufen und schaedigen die Grasnarbe kaum.',
+      'Der abgeflachte Schwanz wirkt wie ein Paddel - im Sprint schwimmt ein Riesenotter schneller, als ein Mensch laufen kann.',
+      'Riesenotter fressen taeglich etwa drei bis vier Kilogramm Fisch - gehalten wird die Beute mit den Vorderpfoten wie mit Haenden.',
+      'Zum Schlafen und fuer die Jungen graebt die Familie Hoehlen in die Uferboeschung.',
     ],
-    beobachten: 'Ohrenstellung beachten: nach vorn heisst interessiert, flach angelegt heisst genervt.',
+    beobachten:
+      'Auf die Kehlflecken achten: Damit lassen sich die einzelnen Familienmitglieder auseinanderhalten.',
   },
   {
     id: 'zwergziege',
@@ -875,6 +879,176 @@ export const TIERE = [
     beobachten:
       'In der Daemmerungsabteilung erst ein bis zwei Minuten stehenbleiben, bis sich die Augen anpassen - dann sieht man deutlich mehr.',
   },
+  {
+    id: 'kamtschatkabaer',
+    name: 'Kamtschatkabaer',
+    lateinisch: 'Ursus arctos beringianus',
+    bereich: 'asien',
+    station: 'kamele',
+    kurz: 'Einer der groessten Braunbaeren der Welt - Lachsfaenger aus dem fernen Osten Russlands.',
+    steckbrief: {
+      Groesse: 'aufgerichtet bis 3 m',
+      Gewicht: 'Maennchen bis 650 kg',
+      Alter: '25 bis 35 Jahre',
+      Nahrung: 'Allesfresser - Fisch, Beeren, Kraeuter, Aas',
+      Heimat: 'Halbinsel Kamtschatka, Russland',
+      Status: 'Unterart nicht bedroht, streng geschuetzt',
+    },
+    text: [
+      'Der Kamtschatkabaer ist eine der groessten Unterarten des Braunbaeren - nur der Kodiakbaer wird noch schwerer. Auf der Halbinsel Kamtschatka lebt die dichteste Braunbaeren-Population der Erde.',
+      'Sein Speiseplan haengt an der Jahreszeit: Im Sommer stehen die Baeren an den Fluessen und fangen wandernde Lachse, im Herbst fressen sie sich an Beeren einen Winterspeck von weit ueber 100 Kilogramm an.',
+      'Den Winter verbringen Braunbaeren in einer Winterruhe - kein echter Winterschlaf, denn die Koerpertemperatur sinkt nur wenig und die Tiere sind leicht zu wecken.',
+    ],
+    wusstest: [
+      'Trotz seiner Masse sprintet ein Braunbaer kurzzeitig ueber 50 km/h.',
+      'Baeren sehen maessig, riechen aber besser als jeder Spuerhund.',
+      'Hagenbeck zeigt Kamtschatkabaeren als einer von sehr wenigen Zoos in Europa.',
+    ],
+    beobachten:
+      'Fuetterungszeiten beachten - beim Fressen zeigen die Baeren, wie geschickt ihre grossen Pranken sind.',
+  },
+  {
+    id: 'leopard',
+    name: 'Nordchinesischer Leopard',
+    lateinisch: 'Panthera pardus japonensis',
+    bereich: 'asien',
+    station: 'tiger',
+    kurz: 'Eine der seltensten Grosskatzen der Welt - und ein Meister im Klettern.',
+    steckbrief: {
+      Groesse: 'Koerperlaenge bis 1,9 m mit Schwanz',
+      Gewicht: '35 bis 75 kg',
+      Alter: '15 bis 20 Jahre',
+      Nahrung: 'Hirsche, Wildschweine, kleinere Saeugetiere',
+      Heimat: 'Bergwaelder Nordchinas',
+      Status: 'Unterart stark bedroht, in Zoos sehr selten',
+    },
+    text: [
+      'Der Nordchinesische Leopard traegt ein besonders kraeftig gefaerbtes Fell mit grossen, dunkel geraenderten Rosetten. In freier Wildbahn gibt es nur noch wenige hundert Tiere, und auch in Zoos ist die Unterart eine Raritaet.',
+      'Leoparden sind die besten Kletterer unter den Grosskatzen. Ihre Beute ziehen sie in freier Wildbahn auf Baeume, um sie vor Konkurrenten in Sicherheit zu bringen - ein erwachsener Leopard stemmt dabei mehr als sein eigenes Koerpergewicht senkrecht nach oben.',
+      'Wie alle Leoparden sind sie Einzelgaenger und vor allem in der Daemmerung aktiv. Tagsueber ruhen sie gern erhoeht mit Ueberblick.',
+    ],
+    wusstest: [
+      'Jede Rosette im Fell ist einmalig - wie beim Tiger die Streifen.',
+      'Leoparden springen aus dem Stand ueber drei Meter hoch.',
+      'Das europaeische Zuchtprogramm fuer diese Unterart umfasst nur eine Handvoll Zoos - Hagenbeck gehoert dazu.',
+    ],
+    beobachten:
+      'Zuerst die erhoehten Plattformen und Baeume absuchen - Leoparden liegen fast immer oben.',
+  },
+  {
+    id: 'praeriebison',
+    name: 'Praeriebison',
+    lateinisch: 'Bison bison bison',
+    bereich: 'amerika',
+    station: 'spielplatz',
+    kurz: 'Das schwerste Landtier Nordamerikas - und eine Rettungsgeschichte.',
+    steckbrief: {
+      Groesse: 'Schulterhoehe bis 1,9 m',
+      Gewicht: 'Bullen bis 900 kg',
+      Alter: '15 bis 25 Jahre',
+      Nahrung: 'Graeser',
+      Heimat: 'Prairien Nordamerikas',
+      Status: 'Bestand stabil, aber auf Schutzgebiete beschraenkt',
+    },
+    text: [
+      'Einst zogen zig Millionen Bisons durch die nordamerikanischen Prairien. Ende des 19. Jahrhunderts waren nach der Bejagung weniger als tausend Tiere uebrig - erst Schutzprogramme, auch mit Zoo-Tieren, retteten die Art.',
+      'Der maechtige Buckel besteht aus Muskeln, die den riesigen Kopf tragen. Im Winter schiebt ein Bison damit den Schnee beiseite, um an das Gras darunter zu kommen.',
+      'Trotz ihrer Masse sind Bisons erstaunlich beweglich: Sie erreichen im Galopp ueber 50 km/h und springen aus dem Stand hoeher, als ein Weidezaun misst.',
+    ],
+    wusstest: [
+      'Das dichte Winterfell isoliert so gut, dass Schnee auf dem Ruecken liegen bleibt, ohne zu schmelzen.',
+      'Bisons waelzen sich in Staubmulden - das pflegt das Fell und vertreibt Insekten.',
+      'Kaelber kommen rotbraun zur Welt und faerben sich erst nach Monaten dunkel.',
+    ],
+    beobachten:
+      'Im Fruehsommer verlieren Bisons ihr Winterfell in grossen Fetzen - das sieht wild aus, ist aber voellig normal.',
+  },
+  {
+    id: 'mandrill',
+    name: 'Mandrill',
+    lateinisch: 'Mandrillus sphinx',
+    bereich: 'afrika',
+    station: 'loewen',
+    kurz: 'Der bunteste Affe der Welt - je kraeftiger die Farben, desto hoeher der Rang.',
+    steckbrief: {
+      Groesse: 'Maennchen bis 80 cm Koerperlaenge',
+      Gewicht: 'Maennchen bis 35 kg, Weibchen etwa halb so schwer',
+      Alter: '20 bis 30 Jahre',
+      Nahrung: 'Fruechte, Samen, Insekten, kleine Wirbeltiere',
+      Heimat: 'Regenwaelder Zentralafrikas',
+      Status: 'gefaehrdet (IUCN: vulnerable)',
+    },
+    text: [
+      'Mandrille sind die groessten Affen ausserhalb der Menschenaffen - und die farbenpraechtigsten Saeugetiere ueberhaupt: Die Maennchen tragen leuchtend blaue Wuelste und eine rote Nase, dazu ein gelbes Backenbart-Feld.',
+      'Die Farben sind ein Rangabzeichen. Je kraeftiger Blau und Rot leuchten, desto hoeher steht das Maennchen in der Gruppe - verliert es Kaempfe, verblassen die Farben messbar.',
+      'In den Waeldern Zentralafrikas ziehen Mandrille in Horden umher, die zeitweise mehrere hundert Tiere umfassen - die groessten bekannten Affenverbaende der Welt.',
+    ],
+    wusstest: [
+      'In den dehnbaren Backentaschen traegt ein Mandrill einen Vorrat davon, was er unterwegs findet.',
+      'Das Gaehnen mit weit geoeffnetem Maul ist eine Drohung - dabei zeigen die Maennchen ihre bis zu 6 cm langen Eckzaehne.',
+      'Mandrille verstaendigen sich auch ueber Mimik und leise Grunzlaute - dauerhaft laut sind sie nur bei Streit.',
+    ],
+    beobachten:
+      'Auf die Gesichter achten: Ranghohe Maennchen erkennst du sofort an den leuchtenden Farben.',
+  },
+  {
+    id: 'riesenkaenguru',
+    name: 'Rotes Riesenkaenguru',
+    lateinisch: 'Osphranter rufus',
+    bereich: 'australien',
+    station: 'loewen',
+    kurz: 'Das groesste Beuteltier der Welt - springt weiter als ein Auto lang ist.',
+    steckbrief: {
+      Groesse: 'aufgerichtet bis 1,8 m',
+      Gewicht: 'Maennchen bis 90 kg',
+      Alter: '15 bis 20 Jahre',
+      Nahrung: 'Graeser und Kraeuter',
+      Heimat: 'Trockengebiete Australiens',
+      Status: 'nicht gefaehrdet (IUCN: least concern)',
+    },
+    text: [
+      'Rote Riesenkaengurus sind die groessten Beuteltiere der Erde. Ein fluechtendes Tier schafft Spruenge von ueber neun Metern Weite und haelt dabei 50 km/h - der dicke Schwanz dient als Gegengewicht und Stuetze.',
+      'Das Junge kommt nach nur einem Monat Tragzeit winzig zur Welt - nackt, blind und kaum so gross wie ein Gummibaerchen. Es klettert selbststaendig in den Beutel und waechst dort viele Monate weiter.',
+      'Kaengurus koennen ein befruchtetes Ei in Wartestellung halten: Erst wenn der Beutel frei wird, entwickelt es sich weiter. So passt sich der Nachwuchs an Duerrezeiten an.',
+      'Maennchen klaeren Rangfragen im "Boxkampf": Sie stuetzen sich auf den Schwanz und treten mit beiden Hinterbeinen gleichzeitig zu.',
+    ],
+    wusstest: [
+      'Rueckwaerts gehen koennen Kaengurus nicht - ihr Koerperbau laesst es nicht zu.',
+      'Beim Huepfen sparen Kaengurus Energie: Die Sehnen der Hinterbeine federn wie Sprungfedern.',
+      'Zum Abkuehlen lecken sie sich die Unterarme - die verdunstende Feuchtigkeit kuehlt das Blut.',
+    ],
+    beobachten:
+      'In der Mittagshitze doesen Kaengurus im Schatten - morgens und am spaeten Nachmittag sind sie in Bewegung.',
+  },
+  {
+    id: 'onager',
+    name: 'Onager',
+    lateinisch: 'Equus hemionus onager',
+    bereich: 'asien',
+    station: 'kamele',
+    kurz: 'Der Halbesel aus Persien - eines der schnellsten und seltensten Wildpferde.',
+    steckbrief: {
+      Groesse: 'Schulterhoehe bis 1,4 m',
+      Gewicht: '200 bis 260 kg',
+      Alter: '25 bis 30 Jahre',
+      Nahrung: 'harte Graeser und Straeucher',
+      Heimat: 'Halbwuesten des Iran',
+      Status: 'Wildbestand stark bedroht',
+    },
+    text: [
+      'Der Onager ist ein Halbesel: kein Esel und kein Pferd, sondern eine eigene Wildform dazwischen. In seiner iranischen Heimat leben nur noch wenige hundert Tiere in zwei Schutzgebieten.',
+      'Halbesel sind die Sprinter unter den Pferdeartigen - kurzzeitig erreichen sie 70 km/h und halten hohes Tempo laenger durch als die meisten Verfolger.',
+      'An das Leben in der Halbwueste sind Onager bestens angepasst: Sie kommen tagelang mit wenig Wasser aus und fressen Pflanzen, die andere Pflanzenfresser stehen lassen.',
+      'Zoos betreiben fuer den Onager ein europaeisches Erhaltungszuchtprogramm - Nachzuchten wurden bereits im Iran und in Saudi-Arabien ausgewildert.',
+    ],
+    wusstest: [
+      'Schon in der Antike galten Onager als unzaehmbar - anders als Esel liessen sie sich nie als Lasttiere halten.',
+      'Der dunkle Aalstrich auf dem Ruecken ist bei jedem Tier unterschiedlich breit.',
+      'Onager waelzen sich taeglich im Sand - das pflegt Haut und Fell.',
+    ],
+    beobachten:
+      'Onager wirken unscheinbar - aber du siehst hier eines der seltensten Huftiere, die ein Zoo zeigen kann.',
+  },
 ];
 
 /*
@@ -891,7 +1065,7 @@ export const TOUREN = [
     laenge: 'ca. 3 km',
     fuer: 'Erster Besuch, Gaeste, "einmal alles Wichtige"',
     beschreibung:
-      'Die Runde fuer den ersten Besuch: Eismeer, Elefanten, Afrika-Panorama und die Seeloewen-Fuetterung. Wenig Umwege, alle bekannten Anlagen einmal mitgenommen.',
+      'Die Runde fuer den ersten Besuch: Eismeer, Elefanten, Afrika-Panorama und die Seebaeren-Fuetterung. Wenig Umwege, alle bekannten Anlagen einmal mitgenommen.',
     stationen: [
       { id: 'haupteingang', fokus: 'Fuetterungszeiten am Aushang fotografieren' },
       { id: 'elefanten', fokus: 'Zeit lassen - hier bleiben die meisten am laengsten' },
@@ -936,7 +1110,7 @@ export const TOUREN = [
     laenge: 'ca. 1,5 km',
     fuer: 'Halber Tag, heisses Wetter, Eisbaeren-Fans',
     beschreibung:
-      'Konzentriert auf Eismeer und Seeloewen: Eisbaeren, Walrosse, Pinguine, Robben. Viel Wasser, viel Schatten, mehrere Unterwasserfenster.',
+      'Konzentriert auf Eismeer und Seebaeren: Eisbaeren, Walrosse, Pinguine, Robben. Viel Wasser, viel Schatten, mehrere Unterwasserfenster.',
     stationen: [
       { id: 'haupteingang' },
       { id: 'kamele', fokus: 'Kontrastprogramm: Wueste statt Eis' },
@@ -1048,13 +1222,27 @@ export const TOUREN = [
  * Besuchstags anpassen; die Anpassung bleibt auf dem Geraet gespeichert.
  */
 export const FUETTERUNGEN = [
-  { id: 'seeloewen', titel: 'Schaufuetterung Seeloewen', station: 'seeloewen', zeit: '', hinweis: 'Findet in der Regel taeglich statt.' },
+  { id: 'seeloewen', titel: 'Schaufuetterung Seebaeren', station: 'seeloewen', zeit: '', hinweis: 'Findet in der Regel taeglich statt.' },
   { id: 'eisbaeren', titel: 'Fuetterung Eisbaeren', station: 'eismeer', zeit: '', hinweis: 'Zeiten variieren je nach Tagesablauf.' },
   { id: 'walrosse', titel: 'Fuetterung Walrosse', station: 'eismeer', zeit: '', hinweis: 'Oft mit Erklaerungen der Pfleger.' },
   { id: 'pinguine', titel: 'Fuetterung Pinguine', station: 'eismeer', zeit: '', hinweis: '' },
   { id: 'elefanten', titel: 'Elefanten-Vorfuehrung', station: 'elefanten', zeit: '', hinweis: 'Nur an bestimmten Tagen.' },
   { id: 'haie', titel: 'Fuetterung Haie', station: 'tropenaquarium', zeit: '', hinweis: 'Nur an bestimmten Wochentagen.' },
 ];
+
+/* Oeffnungszeiten laut OpenStreetMap (Stand des Karten-Exports, ohne
+ * Gewaehr - Aushang am Eingang und hagenbeck.de gehen vor). */
+export const OEFFNUNG = {
+  quelle: 'laut OpenStreetMap, ohne Gewaehr',
+  regeln: [
+    { monate: [1, 2], zeit: '9:00 bis 16:30 Uhr' },
+    { monate: [3, 4, 5, 6], zeit: '9:00 bis 18:00 Uhr' },
+    { monate: [7, 8], zeit: '9:00 bis 19:00 Uhr' },
+    { vonTag: [9, 1], bisTag: [10, 25], zeit: '9:00 bis 18:00 Uhr' },
+    { vonTag: [10, 26], bisTag: [12, 31], zeit: '9:00 bis 16:30 Uhr' },
+  ],
+  sondertage: { '24.12.': '9:00 bis 13:00 Uhr', '31.12.': '9:00 bis 13:00 Uhr' },
+};
 
 export const WISSEN = [
   {

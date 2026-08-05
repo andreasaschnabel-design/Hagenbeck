@@ -6,7 +6,7 @@
  * es werden keine Daten an einen Server gesendet.
  */
 
-import { META, PARK_BOUNDS, BEREICHE, STATIONEN, TIERE, TOUREN, FUETTERUNGEN, WISSEN } from './data.js';
+import { META, PARK_BOUNDS, BEREICHE, STATIONEN, TIERE, TOUREN, FUETTERUNGEN, WISSEN, OEFFNUNG } from './data.js';
 import { KINDER_TIERE, KINDER_STATIONEN } from './data-kinder.js';
 import * as GEO from './mapgeo.js';
 
@@ -76,6 +76,20 @@ function minutenText(m) {
 }
 
 const istKind = () => S.alter === 'mini' || S.alter === 'kind';
+
+/* Heutige Oeffnungszeit aus den OSM-Regeln (Sondertage vor Monatsregeln). */
+function oeffnungHeute(datum = new Date()) {
+  const monat = datum.getMonth() + 1;
+  const tag = datum.getDate();
+  const sonder = OEFFNUNG.sondertage[`${String(tag).padStart(2, '0')}.${String(monat).padStart(2, '0')}.`];
+  if (sonder) return sonder;
+  const md = monat * 100 + tag;
+  for (const r of OEFFNUNG.regeln) {
+    if (r.monate && r.monate.includes(monat)) return r.zeit;
+    if (r.vonTag && md >= r.vonTag[0] * 100 + r.vonTag[1] && md <= r.bisTag[0] * 100 + r.bisTag[1]) return r.zeit;
+  }
+  return '';
+}
 
 /* Inhalte je nach Altersstufe zusammenstellen.
  * mini: nur das Wichtigste, sehr kurz. kind: die einfachen Texte komplett.
@@ -618,6 +632,7 @@ function seiteTouren() {
 
   return `
     <h1>Welche Runde soll es sein?</h1>
+    ${oeffnungHeute() ? `<p class="schwach">🕘 Heute geoeffnet: <strong>${oeffnungHeute()}</strong> <span style="opacity:.7">(${esc(OEFFNUNG.quelle)})</span></p>` : ''}
     <p class="schwach">${istKind()
       ? 'Such dir eine Tour aus. Die App sagt dir, wo es langgeht.'
       : 'Jede Tour ist ein fertiger Rundweg mit eigenem Schwerpunkt. Du kannst jederzeit wechseln.'}</p>
@@ -968,6 +983,7 @@ function seiteFuetterungen() {
 
   return `
     <h1>Fuetterungen & Vorfuehrungen</h1>
+    ${oeffnungHeute() ? `<div class="karte"><div class="zeile-zwischen"><span>🕘 Heute geoeffnet</span><strong>${oeffnungHeute()}</strong></div><p class="schwach" style="margin:6px 0 0">${esc(OEFFNUNG.quelle)} - Aushang am Eingang geht vor.</p></div>` : ''}
     <div class="hinweis">
       <strong>Zeiten bitte selbst eintragen.</strong> Die tatsaechlichen Zeiten haengen vom Tag ab und haengen am Eingang aus.
       Trag sie hier einmal ein - die App merkt sie sich auf diesem Geraet und sortiert deinen Tag danach.

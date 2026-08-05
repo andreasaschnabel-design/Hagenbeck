@@ -79,22 +79,22 @@ export const KINDER_TIERE = {
       erklaerung: 'Erst wenn sie das weisse Babyfell verlieren, duerfen sie ins Wasser.',
     },
   },
-  seeloewe: {
-    kurz: 'Der lauteste Schwimmer im Park. Er bellt fast wie ein Hund.',
+  seebaer: {
+    kurz: 'Die flinke Robbe mit dem dicken Pelz. Bei der Fuetterung zeigt sie ihre Tricks.',
     text: [
-      'Seeloewen koennen an Land richtig laufen. Sie klappen ihre hinteren Flossen nach vorne und stapfen los.',
+      'Seebaeren koennen an Land richtig laufen. Sie klappen ihre hinteren Flossen nach vorne und stapfen los.',
+      'Ihren Namen haben sie von ihrem Fell: Es ist dick und braun wie bei einem Baeren. Darunter bleibt es kuschelig warm, auch im kalten Wasser.',
       'Bei der Fuetterung zeigen sie Kunststuecke. Das ist wichtig: So lernen sie, dem Tierarzt freiwillig das Maul zu zeigen. Dann tut nichts weh.',
-      'Die grossen Maennchen haben eine dicke Beule auf der Stirn. Daran erkennst du sie sofort.',
     ],
     wusstest: [
-      'Ein Seeloewe erkennt seinen Pfleger an der Stimme.',
-      'Im Wasser sieht er besser als an Land.',
+      'Ein Seebaer erkennt seinen Pfleger an der Stimme.',
+      'Unter Wasser schwimmt er wie ein riesiger Pinguin - mit den Vorderflossen.',
     ],
     quiz: {
-      frage: 'Warum machen die Seeloewen bei der Fuetterung Uebungen?',
-      antworten: ['Damit der Tierarzt sie leicht untersuchen kann', 'Damit sie muede werden', 'Weil sie Zirkus spielen wollen'],
+      frage: 'Warum heisst der Seebaer Seebaer?',
+      antworten: ['Wegen seinem dicken braunen Fell', 'Weil er brummt wie ein Baer', 'Weil er Honig frisst'],
       richtig: 0,
-      erklaerung: 'Es ist Training. So bleiben Untersuchungen ganz ohne Stress.',
+      erklaerung: 'Sein dichter brauner Pelz erinnerte Seefahrer an einen Baeren.',
     },
   },
   elefant: {
@@ -283,23 +283,23 @@ export const KINDER_TIERE = {
       erklaerung: 'Die kleinen Krebse, die er frisst, faerben seine Federn rosa.',
     },
   },
-  alpaka: {
-    kurz: 'Ein kleines Kamel ohne Hoecker - mit besonders warmer Wolle.',
+  riesenotter: {
+    kurz: 'Der groesste Otter der Welt. Er wohnt mit seiner ganzen Familie zusammen.',
     text: [
-      'Alpakas kommen aus den hohen Bergen von Suedamerika. Dort ist es nachts sehr kalt. Deshalb haben sie so dicke Wolle.',
-      'Ihre Wolle waermt besser als Schafwolle. Aus einer Schur wird ungefaehr ein ganzer Pullover und noch eine Muetze.',
-      'Alpakas spucken. Aber fast nur untereinander, wenn sie sich um Futter streiten.',
-      'Wenn ein Alpaka neugierig ist, summt es leise vor sich hin.',
+      'Riesenotter sind so lang wie ein Erwachsener gross ist. Sie leben am Fluss - Mama, Papa und die Kinder alle zusammen.',
+      'Sie reden fast die ganze Zeit miteinander: quieken, schnattern, pfeifen. Hoer mal hin, wenn du an der Anlage stehst!',
+      'Beim Fischen helfen alle zusammen. Sie treiben die Fische in eine Ecke - wie eine Fussballmannschaft beim Angriff.',
+      'Jeder Riesenotter hat einen hellen Fleck am Hals. Daran erkennen sie sich gegenseitig - wie an einem Namensschild.',
     ],
     wusstest: [
-      'Alpakas machen ihr Geschaeft alle an derselben Stelle. So bleibt die Wiese sauber.',
-      'Ohren nach vorn heisst: Ich finde dich interessant. Ohren flach nach hinten heisst: Lass mich in Ruhe.',
+      'Ein Riesenotter haelt seinen Fisch mit den Pfoten fest wie du ein Brot.',
+      'Sein platter Schwanz ist sein Motor - damit schwimmt er superschnell.',
     ],
     quiz: {
-      frage: 'Was macht ein Alpaka, wenn es neugierig ist?',
-      antworten: ['Es summt leise', 'Es bellt', 'Es klatscht'],
+      frage: 'Woran erkennen sich Riesenotter gegenseitig?',
+      antworten: ['Am hellen Fleck am Hals', 'An der Schwanzspitze', 'Am Schnurrbart'],
       richtig: 0,
-      erklaerung: 'Alpakas summen - ganz leise vor sich hin.',
+      erklaerung: 'Jeder hat einen anderen Kehlfleck - wie ein Namensschild.',
     },
   },
   zwergziege: {
@@ -433,6 +433,116 @@ export const KINDER_TIERE = {
       erklaerung: 'Ein Saeugetier - das einzige, das richtig fliegen kann.',
     },
   },
+  kamtschatkabaer: {
+    kurz: 'Ein riesiger brauner Baer, der am liebsten Lachse fängt.',
+    text: [
+      'Der Kamtschatkabaer kommt aus dem kalten Osten von Russland. Er ist einer der groessten Braunbaeren der Welt.',
+      'Im Sommer steht er am Fluss und fängt Lachse - manchmal mitten im Sprung.',
+      'Im Herbst frisst er sich richtig dick und rund. Dann verschlaeft er fast den ganzen Winter in seiner Hoehle.',
+    ],
+    wusstest: [
+      'Ein Baer kann schneller rennen als das schnellste Rennrad faehrt.',
+      'Baeren riechen besser als jeder Spuerhund.',
+    ],
+    quiz: {
+      frage: 'Was frisst der Kamtschatkabaer im Sommer am liebsten?',
+      antworten: ['Lachse aus dem Fluss', 'Honigbrote', 'Pilze'],
+      richtig: 0,
+      erklaerung: 'Er steht am Fluss und faengt die Lachse mit Maul und Pranken.',
+    },
+  },
+  leopard: {
+    kurz: 'Eine seltene Grosskatze mit Punktemuster - und ein Kletterkuenstler.',
+    text: [
+      'Der Nordchinesische Leopard ist sehr, sehr selten. Nur wenige Zoos auf der ganzen Welt haben ihn - Hagenbeck ist einer davon.',
+      'Sein Fell hat dunkle Ringe, die wie Blumen aussehen. Man nennt sie Rosetten.',
+      'Leoparden sind die besten Kletterer von allen Grosskatzen. Sie schleppen sogar ihr Essen auf Baeume, damit es keiner klaut.',
+    ],
+    wusstest: [
+      'Ein Leopard springt aus dem Stand hoeher als eine Tuer.',
+      'Kein Leopard hat das gleiche Punktemuster wie ein anderer.',
+    ],
+    quiz: {
+      frage: 'Was macht der Leopard mit seiner Beute?',
+      antworten: ['Er zieht sie auf einen Baum', 'Er vergraebt sie', 'Er teilt sie mit allen'],
+      richtig: 0,
+      erklaerung: 'Oben im Baum kann ihm niemand das Futter wegnehmen.',
+    },
+  },
+  praeriebison: {
+    kurz: 'Der zottelige Riese aus Amerika mit dem grossen Buckel.',
+    text: [
+      'Bisons sind die schwersten Tiere Amerikas. Frueher liefen Millionen von ihnen durch die Prairie.',
+      'Dann haben Menschen fast alle gejagt. Nur wenige hundert blieben uebrig. Zum Glueck haben Schutzgebiete und Zoos die Bisons gerettet.',
+      'Der grosse Buckel besteht aus Muskeln. Damit schiebt der Bison im Winter den Schnee weg und findet das Gras darunter.',
+    ],
+    wusstest: [
+      'Sein Fell waermt so gut, dass Schnee auf seinem Ruecken liegen bleibt und nicht schmilzt.',
+      'Bison-Babys haben rotbraunes Fell wie ein Fuchs.',
+    ],
+    quiz: {
+      frage: 'Was ist im Buckel vom Bison?',
+      antworten: ['Starke Muskeln', 'Fett', 'Wasser'],
+      richtig: 0,
+      erklaerung: 'Die Muskeln tragen seinen riesigen Kopf - und schieben im Winter den Schnee weg.',
+    },
+  },
+  mandrill: {
+    kurz: 'Der bunteste Affe der Welt - mit blauer und roter Nase.',
+    text: [
+      'Der Mandrill sieht aus wie angemalt: blaue Backen, rote Nase, gelber Bart. Kein anderes Tier mit Fell ist so bunt.',
+      'Die Farben zeigen, wer der Chef ist. Je bunter das Gesicht, desto wichtiger ist das Maennchen in der Gruppe.',
+      'In seinen Backentaschen kann der Mandrill Futter sammeln und mitnehmen - wie in einer eingebauten Brotdose.',
+    ],
+    wusstest: [
+      'Wenn ein Mandrill gaehnt, zeigt er seine langen Eckzaehne - das heisst: Vorsicht!',
+      'In Afrika ziehen manchmal hunderte Mandrille zusammen durch den Wald.',
+    ],
+    quiz: {
+      frage: 'Was bedeutet ein besonders buntes Gesicht beim Mandrill?',
+      antworten: ['Er ist der Chef', 'Er ist krank', 'Er hat sich angemalt'],
+      richtig: 0,
+      erklaerung: 'Je bunter, desto wichtiger ist das Maennchen in seiner Gruppe.',
+    },
+  },
+  riesenkaenguru: {
+    kurz: 'Das groesste Beuteltier der Welt - es springt weiter als ein Auto lang ist.',
+    text: [
+      'Das Rote Riesenkaenguru kommt aus Australien. Mit einem einzigen Sprung schafft es neun Meter - so weit wie zwei Autos hintereinander.',
+      'Sein dicker Schwanz ist wie ein drittes Bein. Beim Sitzen stuetzt er sich darauf.',
+      'Das Baby ist bei der Geburt winzig - so klein wie ein Gummibaerchen. Es krabbelt in Mamas Beutel und waechst dort weiter.',
+      'Kaengurus koennen nicht rueckwaerts gehen. Nur vorwaerts, immer vorwaerts.',
+    ],
+    wusstest: [
+      'Beim Huepfen federn seine Beine wie Sprungfedern - das spart Kraft.',
+      'Wenn ihm heiss ist, leckt sich das Kaenguru die Arme ab - das kuehlt.',
+    ],
+    quiz: {
+      frage: 'Wie gross ist ein Kaenguru-Baby bei der Geburt?',
+      antworten: ['So klein wie ein Gummibaerchen', 'So gross wie eine Katze', 'So gross wie ein Fussball'],
+      richtig: 0,
+      erklaerung: 'Es ist winzig und waechst dann im Beutel der Mama weiter.',
+    },
+  },
+  onager: {
+    kurz: 'Ein wilder Esel aus Persien - schneller als fast jedes Pferd.',
+    text: [
+      'Der Onager sieht aus wie ein Esel, ist aber ein Wildtier. Zaehmen laesst er sich nicht - das haben schon die Menschen vor tausenden Jahren versucht.',
+      'Er ist ein Sprinter: 70 Kilometer pro Stunde schafft er - so schnell faehrt ein Auto in der Stadt.',
+      'Onager leben in der Halbwueste und brauchen tagelang kein Wasser.',
+      'In der Wildnis gibt es nur noch ganz wenige. Zoos wie Hagenbeck helfen, dass sie nicht aussterben.',
+    ],
+    wusstest: [
+      'Onager waelzen sich jeden Tag im Sand - das ist ihre Dusche.',
+      'Auf seinem Ruecken hat er einen dunklen Streifen, den Aalstrich.',
+    ],
+    quiz: {
+      frage: 'Kann man einen Onager zaehmen und auf ihm reiten?',
+      antworten: ['Nein, er bleibt wild', 'Ja, wie ein Pony', 'Nur im Winter'],
+      richtig: 0,
+      erklaerung: 'Onager sind Wildtiere geblieben - anders als unsere Hausesel.',
+    },
+  },
 };
 
 /* Kurze, kindgerechte Beschreibung der Stationen. Faellt eine Station hier
@@ -447,9 +557,9 @@ export const KINDER_STATIONEN = {
   afrikapanorama: 'Giraffen, Zebras und Strausse - alle sehen aus, als waeren sie auf einer Wiese.',
   strausse: 'Schau nach unten: Die Erdmaennchen stehen wie kleine Wachposten da.',
   eismeer: 'Eisbaeren, Walrosse und Pinguine. Am besten sind die Fenster unter Wasser.',
-  seeloewen: 'Hier gibt es eine Show mit Fuetterung. Komm frueh, dann siehst du am meisten.',
+  seeloewen: 'Hier wohnen die Seebaeren. Bei der Fuetterung zeigen sie ihre Tricks - komm frueh, dann siehst du am meisten.',
   kamele: 'Kamele mit zwei Hoeckern. Im Hoecker ist Fett, kein Wasser.',
-  alpakas: 'Kleine Kamele mit dicker Wolle. Sie summen, wenn sie neugierig sind.',
+  alpakas: 'Hier wohnen die Riesenotter. Sei leise und hoer mal, wie viel sie miteinander reden.',
   streichelgehege: 'Hier darfst du rein und die Ziegen streicheln. Nur am Hals, nicht an den Hoernern.',
   spielplatz: 'Klettern, rutschen, planschen. Zeit zum Toben!',
   japangarten: 'Ein ruhiger Garten mit Teich und dicken Fischen. Gut fuer eine Pause.',
