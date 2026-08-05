@@ -290,6 +290,30 @@ main {
   z-index: 5;
 }
 .karten-tipp.sichtbar { opacity: 1; }
+.kompass {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 4;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--karte);
+  box-shadow: var(--schatten);
+  display: grid;
+  place-items: center;
+  font-size: 1rem;
+  line-height: 1;
+  color: var(--akzent);
+  pointer-events: none;
+}
+.kompass span {
+  position: absolute;
+  bottom: 3px;
+  font-size: 0.55rem;
+  font-weight: 700;
+  color: var(--text-schwach);
+}
 .kartenbox svg { display: block; width: 100%; height: auto; }
 .marker-kreis { cursor: pointer; }
 .marker-text { font-size: 2.6px; font-weight: 700; fill: #fff; pointer-events: none; text-anchor: middle; }

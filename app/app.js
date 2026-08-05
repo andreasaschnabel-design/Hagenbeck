@@ -25,6 +25,7 @@ const STANDARD = {
   zeiten: {}, // { [fuetterungId]: 'HH:MM' }
   quizGeloest: {}, // { [tierId]: true }
   karte3d: false,
+  karteDrehung: 45,
   erstbesuch: true,
 };
 
@@ -298,8 +299,17 @@ function vorleserLeiste(textFn) {
 const blickStart = () => {
   const { w, h } = GEO.MASS;
   if (!S.karte3d) return { x: -3, y: -3, w: w + 6, h: h + 6 };
-  /* 3D-Projektion: X = (x - y), Y = (x + y) / 2 */
-  return { x: -h - 4, y: -6, w: w + h + 8, h: (w + h) / 2 + 12 };
+  /* Projizierte Parkgrenze einrahmen - haengt vom Drehwinkel ab. */
+  let minX = 1e9, maxX = -1e9, minY = 1e9, maxY = -1e9;
+  for (const [gx, gy] of GEO.GRENZE) {
+    const p = proj(gx, gy);
+    if (p.X < minX) minX = p.X;
+    if (p.X > maxX) maxX = p.X;
+    if (p.Y < minY) minY = p.Y;
+    if (p.Y > maxY) maxY = p.Y;
+  }
+  minY -= 10; /* Platz fuer Gebaeudehoehen und Marker-Nadeln */
+  return { x: minX - 4, y: minY - 4, w: maxX - minX + 8, h: maxY - minY + 8 };
 };
 
 let kartenBlick = blickStart();
@@ -309,7 +319,14 @@ let kartenBlick = blickStart();
  * h hebt Punkte (Gebaeudehoehen) an. */
 function proj(x, y, h = 0) {
   if (!S.karte3d) return { X: x, Y: y };
-  return { X: (x - y) * 1.0, Y: (x + y) * 0.5 - h };
+  /* Drehung um die Parkmitte, dann isometrisch abflachen. Bei 45 Grad
+   * entspricht das der klassischen Ansicht X=(x-y), Y=(x+y)/2. */
+  const w = (S.karteDrehung * Math.PI) / 180;
+  const dx = x - GEO.MASS.w / 2;
+  const dy = y - GEO.MASS.h / 2;
+  const rx = dx * Math.cos(w) - dy * Math.sin(w);
+  const ry = dx * Math.sin(w) + dy * Math.cos(w);
+  return { X: rx * 1.414, Y: ry * 0.707 - h };
 }
 
 const rund = (n) => Math.round(n * 100) / 100;
@@ -325,7 +342,8 @@ function pfadAus(punkte, h = 0, schliessen = true) {
 }
 
 function tiefe(punkte) {
-  const s = punkte.reduce((a, [x, y]) => a + x + y, 0);
+  let s = 0;
+  for (const [x, y] of punkte) s += proj(x, y).Y;
   return s / punkte.length;
 }
 
@@ -386,7 +404,7 @@ function kartenSvg({ tour = null, aktiveStation = null, position = null } = {}) 
   /* Gebaeude und Baeume von hinten nach vorn zeichnen (Tiefe = x+y). */
   const objekte = [
     ...GEO.GEBAEUDE.map((g) => ({ t: tiefe(g.punkte), html: gebaeudeSvg(g) })),
-    ...GEO.BAEUME.map((b) => ({ t: b[0] + b[1], html: baumSvg(b) })),
+    ...GEO.BAEUME.map((b) => ({ t: proj(b[0], b[1]).Y, html: baumSvg(b) })),
   ]
     .sort((a, b) => a.t - b.t)
     .map((o) => o.html)
@@ -428,7 +446,16 @@ function kartenSvg({ tour = null, aktiveStation = null, position = null } = {}) 
     ? `<g><circle class="ich-punkt" cx="${rund(ichP.X)}" cy="${rund(ichP.Y)}" r="2.4"/><circle cx="${rund(ichP.X)}" cy="${rund(ichP.Y)}" r="5" fill="#2f6f9f" opacity="0.2"/></g>`
     : '';
 
-  return `
+  /* Nordpfeil: Bildschirmrichtung des Vektors (0,-1) in Kartenkoordinaten */
+  const nord = d3
+    ? (() => {
+        const wRad = (S.karteDrehung * Math.PI) / 180;
+        const winkel = (Math.atan2(-Math.cos(wRad) * 0.707, Math.sin(wRad) * 1.414) * 180) / Math.PI + 90;
+        return `<div class="kompass" style="transform:rotate(${Math.round(winkel)}deg)" aria-label="Norden">⬆<span>N</span></div>`;
+      })()
+    : '';
+
+  return `${nord}
   <svg viewBox="${kartenBlick.x} ${kartenBlick.y} ${kartenBlick.w} ${kartenBlick.h}" role="img"
        class="${d3 ? 'svg3d' : ''}"
        aria-label="Schematische ${d3 ? '3D-' : ''}Uebersichtskarte des Tierparks">
@@ -453,6 +480,9 @@ function kartenWerkzeug(mitZoom = true) {
       <button class="btn btn--zweit btn--klein" data-zoom="raus" aria-label="Karte verkleinern">−</button>
       <button class="btn btn--zweit btn--klein" data-zoom="reset">Ansicht zuruecksetzen</button>` : ''}
     <button class="btn btn--zweit btn--klein" data-dim>${S.karte3d ? '🗺 2D-Ansicht' : '⛰ 3D-Ansicht'}</button>
+    ${S.karte3d ? `
+      <button class="btn btn--zweit btn--klein" data-drehen="-45" aria-label="Karte nach links drehen">⟲</button>
+      <button class="btn btn--zweit btn--klein" data-drehen="45" aria-label="Karte nach rechts drehen">⟳</button>` : ''}
     <button class="btn btn--zweit btn--klein" data-ortung>📍 Wo bin ich?</button>
     <span class="osm-hinweis">${GEO.ATTRIBUTION}</span>
   </div>`;
@@ -1298,6 +1328,19 @@ document.addEventListener('click', (e) => {
     const id = reset.dataset.tourReset;
     setze({ besucht: { ...S.besucht, [id]: [] } });
     location.hash = `#/tour/${id}`;
+    zeichne();
+    return;
+  }
+
+  const drehen = ziel('[data-drehen]');
+  if (drehen) {
+    const zoomfaktor = kartenBlick.w / blickStart().w;
+    setze({ karteDrehung: (((S.karteDrehung + Number(drehen.dataset.drehen)) % 360) + 360) % 360 });
+    const start = blickStart();
+    /* Zoomstufe beibehalten, Ausschnitt auf die gedrehte Mitte setzen */
+    const w = start.w * zoomfaktor;
+    const h = start.h * zoomfaktor;
+    kartenBlick = { x: start.x + (start.w - w) / 2, y: start.y + (start.h - h) / 2, w, h };
     zeichne();
     return;
   }
