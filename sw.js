@@ -1,5 +1,5 @@
 /* Offline-Cache fuer klassische App und Erlebnis-V2. */
-const VERSION = 'v14-smooth-map-controls';
+const VERSION = 'v15-mobile-navigation';
 const CACHE = `tierpark-begleiter-${VERSION}`;
 const DATEIEN = [
   './',
@@ -19,6 +19,7 @@ const DATEIEN = [
   './v2/map-rotation.js',
   './v2/map-gestures.js',
   './v2/route-controls.js',
+  './v2/mobile-navigation.js',
   './v2/README.md',
   './icons/icon-192.png',
   './icons/icon-512.png',
