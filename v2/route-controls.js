@@ -1,4 +1,5 @@
 const STORAGE_KEY = 'hagenbeck-v24';
+const NAV_TARGET_KEY = 'hagenbeck-v24-navigation-target';
 
 function hasActiveRoute() {
   try {
@@ -9,7 +10,7 @@ function hasActiveRoute() {
   }
 }
 
-function cancelRoute() {
+function clearRouteState() {
   try {
     const state = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
     state.route = [];
@@ -20,6 +21,15 @@ function cancelRoute() {
   } catch {
     // Bei blockiertem Speicher wird die Seite trotzdem neu geladen.
   }
+}
+
+function cancelRoute() {
+  const trackedNavigation = Boolean(sessionStorage.getItem(NAV_TARGET_KEY));
+  if (trackedNavigation) {
+    window.dispatchEvent(new CustomEvent('hagenbeck:route-cancel'));
+    return;
+  }
+  clearRouteState();
   window.location.reload();
 }
 
