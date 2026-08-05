@@ -40,6 +40,7 @@ html { -webkit-text-size-adjust: 100%; }
 
 body {
   margin: 0;
+  touch-action: manipulation;
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   background: var(--sand);
   color: var(--text);
@@ -319,6 +320,8 @@ main {
 .marker-text { font-size: 2.6px; font-weight: 700; fill: #fff; pointer-events: none; text-anchor: middle; }
 .marker-label {
   font-size: 2px;
+  opacity: 0;
+  transition: opacity 0.25s;
   fill: var(--text);
   text-anchor: middle;
   paint-order: stroke;
@@ -327,6 +330,8 @@ main {
   pointer-events: none;
 }
 .route-linie { fill: none; stroke: var(--akzent); stroke-width: 0.9; stroke-dasharray: 2.4 1.8; stroke-linecap: round; }
+svg.zeige-labels .marker-label,
+.marker--aktiv .marker-label { opacity: 1; }
 .flaechen-label {
   font-size: 1.9px;
   font-style: italic;

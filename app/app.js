@@ -331,6 +331,14 @@ function proj(x, y, h = 0) {
 
 const rund = (n) => Math.round(n * 100) / 100;
 
+/* Stationsnamen erst zeigen, wenn nah genug herangezoomt ist -
+ * in der Uebersicht ueberlappen sie sich sonst. */
+const labelsSichtbar = () => kartenBlick.w < (S.karte3d ? 150 : 80);
+
+function labelsAktualisieren(svg) {
+  if (svg) svg.classList.toggle('zeige-labels', labelsSichtbar());
+}
+
 function pfadAus(punkte, h = 0, schliessen = true) {
   const d = punkte
     .map(([x, y], i) => {
@@ -443,7 +451,7 @@ function kartenSvg({ tour = null, aktiveStation = null, position = null } = {}) 
            <ellipse cx="${rund(fuss.X)}" cy="${rund(fuss.Y)}" rx="1.6" ry="0.8" fill="rgba(0,0,0,0.25)"/>`
         : '';
       return `
-        <g class="marker" data-station="${st.id}" data-t="${rund(st.mapX + st.mapY)}">
+        <g class="marker ${aktiv ? 'marker--aktiv' : ''}" data-station="${st.id}" data-t="${rund(st.mapX + st.mapY)}">
           ${nadel}
           ${aktiv ? `<circle cx="${rund(kopf.X)}" cy="${rund(kopf.Y)}" r="${r + 2}" fill="${farbe}" opacity="0.25"/>` : ''}
           <!-- unsichtbare, grosszuegige Tippflaeche fuer Finger -->
@@ -471,7 +479,7 @@ function kartenSvg({ tour = null, aktiveStation = null, position = null } = {}) 
 
   return `${nord}
   <svg viewBox="${kartenBlick.x} ${kartenBlick.y} ${kartenBlick.w} ${kartenBlick.h}" role="img"
-       class="${d3 ? 'svg3d' : ''}"
+       class="${d3 ? 'svg3d' : ''} ${labelsSichtbar() ? 'zeige-labels' : ''}"
        aria-label="Schematische ${d3 ? '3D-' : ''}Uebersichtskarte des Tierparks">
     <rect x="-160" y="-60" width="420" height="280" fill="${d3 ? '#dde7db' : '#e9efe4'}"/>
     <path d="${pfadAus(GEO.GRENZE)}" fill="#d3e0c8" stroke="#b9c9ab" stroke-width="0.6"/>
@@ -521,7 +529,9 @@ function kartenInteraktion(box) {
 
   const anwenden = () => {
     const svg = svgEl();
-    if (svg) svg.setAttribute('viewBox', `${kartenBlick.x} ${kartenBlick.y} ${kartenBlick.w} ${kartenBlick.h}`);
+    if (!svg) return;
+    svg.setAttribute('viewBox', `${kartenBlick.x} ${kartenBlick.y} ${kartenBlick.w} ${kartenBlick.h}`);
+    labelsAktualisieren(svg);
   };
 
   const punkte = () => [...zeiger.values()];
@@ -562,6 +572,18 @@ function kartenInteraktion(box) {
     tippTimer = setTimeout(() => tipp.classList.remove('sichtbar'), 1400);
   };
 
+  /* iOS Safari zoomt sonst die ganze Seite mit, waehrend die Karte zoomt -
+   * das wirkt hakelig und "doppelt". Zwei-Finger-Gesten auf der Karte
+   * gehoeren allein der Karte. */
+  box.addEventListener('touchmove', (e) => {
+    if (e.touches.length > 1 && e.target.closest('svg')) e.preventDefault();
+  }, { passive: false });
+  for (const typ of ['gesturestart', 'gesturechange']) {
+    box.addEventListener(typ, (e) => {
+      if (e.target.closest && e.target.closest('svg')) e.preventDefault();
+    });
+  }
+
   box.addEventListener('pointerdown', (e) => {
     if (!e.target.closest('svg')) return; // Werkzeugknoepfe sind keine Kartengeste
     zeiger.set(e.pointerId, { x: e.clientX, y: e.clientY });
@@ -578,9 +600,10 @@ function kartenInteraktion(box) {
     /* Ein Finger auf dem Touchscreen scrollt die Seite, nicht die Karte -
      * sonst kommt man an der Karte beim Scrollen nicht vorbei. */
     if (e.pointerType === 'touch' && zeiger.size === 1) {
-      if (Math.hypot(m.x - geste.mitte.x, m.y - geste.mitte.y) > 10) zeigeTipp();
+      if (Math.hypot(m.x - geste.mitte.x, m.y - geste.mitte.y) > 25) zeigeTipp();
       return;
     }
+    if (zeiger.size > 1) tipp.classList.remove('sichtbar');
 
     if (!bewegt && (zeiger.size > 1 || Math.hypot(m.x - geste.mitte.x, m.y - geste.mitte.y) > 6)) {
       bewegt = true;
@@ -591,8 +614,10 @@ function kartenInteraktion(box) {
     if (!bewegt) return;
 
     if (p.length >= 2 && geste.spann > 0) {
-      /* Pinch: Faktor aus dem Fingerabstand, Fixpunkt ist die Mitte der Finger. */
-      const faktor = geste.spann / (spann(p) || geste.spann);
+      /* Pinch: Faktor aus dem Fingerabstand, gedaempft (Exponent < 1),
+       * damit der Zoom ruhig folgt statt zu springen. Fixpunkt ist die
+       * Mitte der Finger. */
+      const faktor = Math.pow(geste.spann / (spann(p) || geste.spann), 0.75);
       const w = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, geste.blick.w * faktor));
       const fix = kartenPunkt(geste.mitte.x, geste.mitte.y, geste.blick, geste.rect);
       kartenBlick.w = w;
@@ -674,7 +699,10 @@ function zoomen(richtung) {
     kartenBlick = { w: neu, h, x: mitte.x - neu / 2, y: mitte.y - h / 2 };
   }
   const svg = $('.kartenbox svg');
-  if (svg) svg.setAttribute('viewBox', `${kartenBlick.x} ${kartenBlick.y} ${kartenBlick.w} ${kartenBlick.h}`);
+  if (svg) {
+    svg.setAttribute('viewBox', `${kartenBlick.x} ${kartenBlick.y} ${kartenBlick.w} ${kartenBlick.h}`);
+    labelsAktualisieren(svg);
+  }
 }
 
 function orten(beiErfolg) {
