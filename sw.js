@@ -1,5 +1,5 @@
 /* Offline-Cache fuer klassische App und Erlebnis-V2. */
-const VERSION = 'v12-erlebnis-routing';
+const VERSION = 'v13-routing-rotation';
 const CACHE = `tierpark-begleiter-${VERSION}`;
 const DATEIEN = [
   './',
@@ -16,6 +16,7 @@ const DATEIEN = [
   './v2/styles.css',
   './v2/app.js',
   './v2/routing-fix.js',
+  './v2/map-rotation.js',
   './v2/README.md',
   './icons/icon-192.png',
   './icons/icon-512.png',
