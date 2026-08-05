@@ -32,6 +32,10 @@ drei Altersstufen.
   und *Ab 12 / Erwachsene*. Kinder bekommen eigene, einfach erzaehlte
   Texte in Du-Ansprache, groessere Schrift und ein Mini-Quiz zu jedem Tier;
   die Kleinsten extra kurze Texte zum Vorlesen.
+- **Pfeil-Navigation** - "Bring mich hin" auf jeder Station: Die App
+  sucht den kuerzesten Weg ueber das echte Wegenetz des Parks (Dijkstra
+  ueber die OSM-Wege) und zeigt ihn mit animierten Pfeilen, Ziel-Emoji
+  und Restdistanz an; mit GPS wandert der Startpunkt live mit.
 - **Fuetterungszeiten als Tagesplan** - die tagesaktuellen Zeiten vom
   Aushang einmal eintippen, die App sortiert den Tag danach.
 - **Offline nutzbar** - als PWA installierbar ("Zum Startbildschirm

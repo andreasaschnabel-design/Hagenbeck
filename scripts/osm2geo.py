@@ -22,15 +22,21 @@ for n in root.iter('node'):
     if tags:
         node_tags[nid] = tags
 
+WEGTYPEN = ('footway', 'path', 'pedestrian', 'track', 'steps')
+
 ways = []
 zoo_way = None
+nutzung = {}  # node-ref -> Anzahl Wege, die ihn nutzen (nur Fusswege)
 for w in root.iter('way'):
     tags = {tg.get('k'): tg.get('v') for tg in w.findall('tag')}
     refs = [nd.get('ref') for nd in w.findall('nd')]
     pts = [nodes[r] for r in refs if r in nodes]
     if len(pts) < 2:
         continue
-    ways.append((tags, pts))
+    ways.append((tags, pts, refs))
+    if tags.get('highway') in WEGTYPEN:
+        for r in refs:
+            nutzung[r] = nutzung.get(r, 0) + 1
     if tags.get('tourism') == 'zoo':
         zoo_way = pts
 
@@ -89,6 +95,18 @@ def rdp(pts, eps):
         return l[:-1] + r
     return [pts[0], pts[-1]]
 
+def form_weg(pts, refs, eps=0.25):
+    """Vereinfachung fuer Wege: an Kreuzungspunkten (von mehreren Wegen
+    genutzte OSM-Knoten) wird nie gekuerzt - sonst zerfaellt das Netz
+    fuer die Navigation in Inseln."""
+    p = [proj(*q) for q in pts]
+    fest = [i for i, r in enumerate(refs[:len(p)]) if i in (0, len(p) - 1) or nutzung.get(r, 0) > 1]
+    heraus = []
+    for a, b in zip(fest, fest[1:]):
+        stueck = rdp(p[a:b + 1], eps)
+        heraus.extend(stueck if not heraus else stueck[1:])
+    return heraus if heraus else p
+
 def form(pts, eps=0.35):
     p = [proj(*q) for q in pts]
     geschlossen = p[0] == p[-1]
@@ -117,11 +135,14 @@ def bereich_fuer(name):
 gehege, wasser, wege, gebaeude = [], [], [], []
 spielplaetze = []
 japan = None
-for tags, pts in ways:
+for tags, pts, refs in ways:
     if tags.get('tourism') == 'zoo':
         continue
     c = centroid([proj(*p) for p in pts])
     innen = innerhalb(c)
+    # Wege zaehlen schon, wenn ein Teil im Park liegt - sonst reissen
+    # Verbindungen am Rand ab
+    teils_innen = innen or any(innerhalb(proj(*p), rand=0) for p in pts[:: max(1, len(pts) // 6)])
     name = tags.get('name', '')
     if tags.get('attraction') in ('animal', 'petting_zoo') and innen:
         gehege.append({'name': name, 'bereich': bereich_fuer(name), 'punkte': form(pts, 0.4),
@@ -130,8 +151,8 @@ for tags, pts in ways:
         wasser.append({'name': name, 'punkte': form(pts, 0.3)})
         if 'japan' in name.lower():
             japan = c
-    elif tags.get('highway') in ('footway', 'path', 'pedestrian', 'track', 'steps') and innen:
-        wege.append(form(pts, 0.25))
+    elif tags.get('highway') in WEGTYPEN and teils_innen:
+        wege.append(form_weg(pts, refs))
     elif tags.get('building') and innen and tags.get('building') not in ('residential', 'apartments'):
         gebaeude.append({'name': name, 'punkte': form(pts, 0.3), 'c': c})
     elif tags.get('leisure') == 'playground' and innen:

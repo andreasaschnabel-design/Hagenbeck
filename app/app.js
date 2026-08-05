@@ -26,6 +26,7 @@ const STANDARD = {
   quizGeloest: {}, // { [tierId]: true }
   karte3d: false,
   karteDrehung: 45,
+  navZiel: null, // Stations-ID, zu der die Pfeil-Navigation fuehrt
   erstbesuch: true,
 };
 
@@ -339,6 +340,146 @@ function labelsAktualisieren(svg) {
   if (svg) svg.classList.toggle('zeige-labels', labelsSichtbar());
 }
 
+/* =========================================================
+ * Navigation: kuerzester Weg ueber das OSM-Wegenetz
+ * ======================================================= */
+
+const NAV_EMOJI = {
+  haupteingang: '🚪', flamingoteich: '🦩', elefanten: '🐘', orangutans: '🦧',
+  tiger: '🐅', loewen: '🦁', afrikapanorama: '🦒', strausse: '🪶',
+  eismeer: '🐻‍❄️', seeloewen: '🦭', kamele: '🐫', alpakas: '🦦',
+  streichelgehege: '🐐', spielplatz: '🛝', japangarten: '🎏', tropenaquarium: '🦈',
+};
+
+let navGraph = null;
+let navPosition = null; // letzte bekannte eigene Position in Kartenkoordinaten
+let navWatchId = null;
+
+function bauNavGraph() {
+  if (navGraph) return navGraph;
+  /* Punkte mit gleichen Koordinaten verschmelzen: Kreuzungen liegen dank
+   * kreuzungstreuer Vereinfachung exakt uebereinander in mehreren Wegen. */
+  const knoten = [];
+  const index = new Map(); // "x,y" -> Knotenindex
+  const kanten = new Map();
+  const knotenFuer = (x, y) => {
+    const k = `${x},${y}`;
+    if (index.has(k)) return index.get(k);
+    knoten.push([x, y]);
+    index.set(k, knoten.length - 1);
+    return knoten.length - 1;
+  };
+  const kante = (a, b) => {
+    if (a === b) return;
+    const w = Math.hypot(knoten[a][0] - knoten[b][0], knoten[a][1] - knoten[b][1]);
+    if (!kanten.has(a)) kanten.set(a, []);
+    if (!kanten.has(b)) kanten.set(b, []);
+    kanten.get(a).push({ j: b, w });
+    kanten.get(b).push({ j: a, w });
+  };
+  const enden = [];
+  for (const weg of GEO.WEGE) {
+    let vorher = -1;
+    weg.forEach(([x, y], i) => {
+      const idx = knotenFuer(x, y);
+      if (vorher >= 0) kante(vorher, idx);
+      if (i === 0 || i === weg.length - 1) enden.push(idx);
+      vorher = idx;
+    });
+  }
+  /* Restluecken (z. B. an der Parkgrenze gekappte Wege) ueberbruecken. */
+  for (let a = 0; a < enden.length; a++) {
+    for (let b = a + 1; b < enden.length; b++) {
+      const i = enden[a]; const j = enden[b];
+      const d = Math.hypot(knoten[i][0] - knoten[j][0], knoten[i][1] - knoten[j][1]);
+      if (d > 0 && d < 3) kante(i, j);
+    }
+  }
+  navGraph = { knoten, kanten };
+  return navGraph;
+}
+
+function naechsterKnoten(p) {
+  const { knoten } = bauNavGraph();
+  let best = 0; let bestD = Infinity;
+  for (let i = 0; i < knoten.length; i++) {
+    const d = Math.hypot(knoten[i][0] - p[0], knoten[i][1] - p[1]);
+    if (d < bestD) { bestD = d; best = i; }
+  }
+  return best;
+}
+
+/* Dijkstra vom Start- zum Zielpunkt; Rueckgabe: Punktliste + Laenge in m. */
+function navRoute(von, nach) {
+  const { knoten, kanten } = bauNavGraph();
+  const start = naechsterKnoten(von);
+  const ziel = naechsterKnoten(nach);
+  const dist = new Map([[start, 0]]);
+  const vorgaenger = new Map();
+  const offen = new Set([start]);
+  while (offen.size) {
+    let u = null; let uD = Infinity;
+    for (const k of offen) { const d = dist.get(k); if (d < uD) { uD = d; u = k; } }
+    offen.delete(u);
+    if (u === ziel) break;
+    for (const { j, w } of kanten.get(u) || []) {
+      const d = uD + w;
+      if (d < (dist.get(j) ?? Infinity)) {
+        dist.set(j, d);
+        vorgaenger.set(j, u);
+        offen.add(j);
+      }
+    }
+  }
+  if (!dist.has(ziel)) {
+    const meter = Math.hypot(von[0] - nach[0], von[1] - nach[1]) * GEO.MASS.meterProEinheit;
+    return { punkte: [von, nach], meter: Math.round(meter), luftlinie: true };
+  }
+  const folge = [ziel];
+  while (vorgaenger.has(folge[0])) folge.unshift(vorgaenger.get(folge[0]));
+  const punkte = [von, ...folge.map((i) => knoten[i]), nach];
+  let laenge = 0;
+  for (let i = 1; i < punkte.length; i++) {
+    laenge += Math.hypot(punkte[i][0] - punkte[i - 1][0], punkte[i][1] - punkte[i - 1][1]);
+  }
+  return { punkte, meter: Math.round(laenge * GEO.MASS.meterProEinheit), luftlinie: false };
+}
+
+function navStartpunkt() {
+  if (navPosition) return navPosition;
+  const eingang = stationVon('haupteingang');
+  return [eingang.mapX, eingang.mapY];
+}
+
+/* GPS-Position laufend verfolgen, solange navigiert wird. */
+function navVerfolgung(anAus) {
+  if (!anAus) {
+    if (navWatchId !== null && navigator.geolocation) navigator.geolocation.clearWatch(navWatchId);
+    navWatchId = null;
+    return;
+  }
+  if (navWatchId !== null || !navigator.geolocation) return;
+  navWatchId = navigator.geolocation.watchPosition(
+    (pos) => {
+      const x = ((pos.coords.longitude - PARK_BOUNDS.west) / (PARK_BOUNDS.ost - PARK_BOUNDS.west)) * GEO.MASS.w;
+      const y = ((PARK_BOUNDS.nord - pos.coords.latitude) / (PARK_BOUNDS.nord - PARK_BOUNDS.sued)) * GEO.MASS.h;
+      if (x < -5 || x > GEO.MASS.w + 5 || y < -5 || y > GEO.MASS.h + 5) return; // ausserhalb des Parks
+      navPosition = [x, y];
+      const box = $('.kartenbox');
+      if (box && S.navZiel) {
+        karteNeuZeichnen(box);
+        const banner = $('#nav-meter');
+        if (banner) {
+          const ziel = stationVon(S.navZiel);
+          banner.textContent = `noch ca. ${navRoute(navPosition, [ziel.mapX, ziel.mapY]).meter} m`;
+        }
+      }
+    },
+    () => { /* kein GPS - Navigation zeigt den Weg ab Haupteingang */ },
+    { enableHighAccuracy: true, maximumAge: 4000, timeout: 15000 }
+  );
+}
+
 function pfadAus(punkte, h = 0, schliessen = true) {
   const d = punkte
     .map(([x, y], i) => {
@@ -463,6 +604,43 @@ function kartenSvg({ tour = null, aktiveStation = null, position = null } = {}) 
     })
     .join('');
 
+  /* Aktive Pfeil-Navigation einzeichnen */
+  let nav = '';
+  if (S.navZiel) {
+    const zielSt = stationVon(S.navZiel);
+    if (zielSt) {
+      const route = navRoute(navStartpunkt(), [zielSt.mapX, zielSt.mapY]);
+      const pfad = pfadAus(route.punkte, 0, false);
+      /* Pfeile alle ~7 Einheiten entlang der Route, in Laufrichtung gedreht */
+      const pfeile = [];
+      let rest = 5;
+      for (let i = 1; i < route.punkte.length; i++) {
+        const [ax, ay] = route.punkte[i - 1];
+        const [bx, by] = route.punkte[i];
+        const l = Math.hypot(bx - ax, by - ay);
+        let t = rest;
+        while (t < l) {
+          const px = ax + ((bx - ax) * t) / l;
+          const py = ay + ((by - ay) * t) / l;
+          const p1 = proj(ax, ay);
+          const p2 = proj(bx, by);
+          const winkel = (Math.atan2(p2.Y - p1.Y, p2.X - p1.X) * 180) / Math.PI;
+          const pp = proj(px, py);
+          pfeile.push(`<path class="nav-pfeil" d="M-1.4 -1.1 L1.4 0 L-1.4 1.1 Z" transform="translate(${rund(pp.X)} ${rund(pp.Y)}) rotate(${rund(winkel)})"/>`);
+          t += 7;
+        }
+        rest = t - l;
+      }
+      const zielP = proj(zielSt.mapX, zielSt.mapY);
+      const startP = proj(...route.punkte[0]);
+      nav = `
+        <path class="nav-linie" d="${pfad}"/>
+        ${pfeile.join('')}
+        <circle cx="${rund(startP.X)}" cy="${rund(startP.Y)}" r="2" fill="#2f6f9f" stroke="#fff" stroke-width="0.6"/>
+        <text class="nav-ziel" x="${rund(zielP.X)}" y="${rund(zielP.Y - (d3 ? 9 : 4))}">${NAV_EMOJI[S.navZiel] || '📍'}</text>`;
+    }
+  }
+
   const ichP = position ? proj(position.x, position.y) : null;
   const ich = ichP
     ? `<g><circle class="ich-punkt" cx="${rund(ichP.X)}" cy="${rund(ichP.Y)}" r="2.4"/><circle cx="${rund(ichP.X)}" cy="${rund(ichP.Y)}" r="5" fill="#2f6f9f" opacity="0.2"/></g>`
@@ -490,6 +668,7 @@ function kartenSvg({ tour = null, aktiveStation = null, position = null } = {}) 
     ${labels}
     ${objekte}
     ${marker}
+    ${nav}
     ${ich}
   </svg>`;
 }
@@ -1046,6 +1225,18 @@ function seiteKarte(parameter = '') {
 
   return `
     <h1>Parkkarte</h1>
+    ${S.navZiel && stationVon(S.navZiel) ? `
+      <div class="karte nav-banner">
+        <div class="zeile-zwischen">
+          <div>
+            <div class="schwach">Folge den orangen Pfeilen</div>
+            <strong>${NAV_EMOJI[S.navZiel] || '📍'} ${esc(stationVon(S.navZiel).name)}</strong>
+            <span class="chip" id="nav-meter">noch ca. ${navRoute(navStartpunkt(), [stationVon(S.navZiel).mapX, stationVon(S.navZiel).mapY]).meter} m</span>
+          </div>
+          <button class="btn btn--klein btn--zweit" data-nav-stop>Beenden</button>
+        </div>
+        ${navPosition ? '' : '<p class="schwach" style="margin:8px 0 0">Ohne GPS-Freigabe startet der Weg am Haupteingang. Tippe "Wo bin ich?", um deine Position zu nutzen.</p>'}
+      </div>` : ''}
     <div class="kartenbox">
       ${kartenSvg({ tour, aktiveStation: gewaehlt })}
       ${kartenWerkzeug()}
@@ -1081,6 +1272,9 @@ function zeigeStationsBlatt(id) {
     <div class="zeile-zwischen">
       <strong>${esc(st.name)}</strong>
       <button class="btn btn--klein btn--zweit" data-blatt-zu>Schliessen</button>
+    </div>
+    <div class="knopfreihe" style="margin-top:10px">
+      <button class="btn btn--klein" data-nav-start="${st.id}">🧭 Bring mich hin</button>
     </div>
     <p class="schwach" style="margin-top:8px">${esc(inhalt.beschreibung)}</p>
     ${tiere.length ? `<div class="tour-karte__meta">${tiere.map((t) => `<span class="chip">${esc(t.name)}</span>`).join('')}</div>` : ''}
@@ -1281,6 +1475,8 @@ function zeichne() {
       html = seiteTouren(); seitenTitel = 'Touren'; tiefe = false;
   }
 
+  navVerfolgung(Boolean(S.navZiel) && teile[0] === 'karte');
+
   inhalt.innerHTML = html;
   titel.textContent = seitenTitel;
   zurueck.hidden = !tiefe;
@@ -1456,6 +1652,8 @@ document.addEventListener('click', (e) => {
         const x = ((mir.lon - PARK_BOUNDS.west) / (PARK_BOUNDS.ost - PARK_BOUNDS.west)) * GEO.MASS.w;
         const y = ((PARK_BOUNDS.nord - mir.lat) / (PARK_BOUNDS.nord - PARK_BOUNDS.sued)) * GEO.MASS.h;
         if (x > -10 && x < GEO.MASS.w + 10 && y > -10 && y < GEO.MASS.h + 10) {
+          navPosition = [x, y];
+          if (S.navZiel) { zeichne(); return; }
           const p = proj(x, y);
           svg.insertAdjacentHTML('beforeend',
             `<circle class="ich-punkt" cx="${p.X}" cy="${p.Y}" r="2.4"/>`);
@@ -1493,6 +1691,28 @@ document.addEventListener('click', (e) => {
       : '<p style="color:var(--akzent);font-weight:650">Fast! Die gruene Antwort stimmt.</p>';
     $('.quiz-erklaerung', block).hidden = false;
     if (treffer) setze({ quizGeloest: { ...S.quizGeloest, [block.dataset.quiz]: true } });
+    return;
+  }
+
+  const navStart = ziel('[data-nav-start]');
+  if (navStart) {
+    const id = navStart.dataset.navStart;
+    setze({ navZiel: id });
+    document.querySelectorAll('[data-blatt]').forEach((x) => x.remove());
+    navVerfolgung(true);
+    const st = stationVon(id);
+    if (Vorleser.verfuegbar() && st) {
+      Vorleser.starten(`Los geht's! Folge den orangen Pfeilen zur Station ${st.name}.`);
+    }
+    if (location.hash.startsWith('#/karte')) zeichne();
+    else location.hash = '#/karte';
+    return;
+  }
+
+  if (ziel('[data-nav-stop]')) {
+    setze({ navZiel: null });
+    navVerfolgung(false);
+    zeichne();
     return;
   }
 
