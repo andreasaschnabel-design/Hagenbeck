@@ -120,8 +120,8 @@ function stationInhalt(station) {
 function koordinaten(station) {
   const eigen = S.koordinaten[station.id];
   if (eigen) return eigen;
-  const lat = PARK_BOUNDS.nord - (station.mapY / 100) * (PARK_BOUNDS.nord - PARK_BOUNDS.sued);
-  const lon = PARK_BOUNDS.west + (station.mapX / 100) * (PARK_BOUNDS.ost - PARK_BOUNDS.west);
+  const lat = PARK_BOUNDS.nord - (station.mapY / GEO.MASS.h) * (PARK_BOUNDS.nord - PARK_BOUNDS.sued);
+  const lon = PARK_BOUNDS.west + (station.mapX / GEO.MASS.w) * (PARK_BOUNDS.ost - PARK_BOUNDS.west);
   return { lat, lon, geschaetzt: true };
 }
 
@@ -281,8 +281,12 @@ function vorleserLeiste(textFn) {
 
 /* Anfangsausschnitt je Ansicht. In 3D ist der projizierte Inhalt breiter
  * (X etwa -81..76) und flacher (Y etwa 1..76). */
-const blickStart = () =>
-  S.karte3d ? { x: -94, y: 2, w: 188, h: 100 } : { x: 0, y: 0, w: 100, h: 100 };
+const blickStart = () => {
+  const { w, h } = GEO.MASS;
+  if (!S.karte3d) return { x: -3, y: -3, w: w + 6, h: h + 6 };
+  /* 3D-Projektion: X = (x - y), Y = (x + y) / 2 */
+  return { x: -h - 4, y: -6, w: w + h + 8, h: (w + h) / 2 + 12 };
+};
 
 let kartenBlick = blickStart();
 
@@ -436,6 +440,7 @@ function kartenWerkzeug(mitZoom = true) {
       <button class="btn btn--zweit btn--klein" data-zoom="reset">Ansicht zuruecksetzen</button>` : ''}
     <button class="btn btn--zweit btn--klein" data-dim>${S.karte3d ? '🗺 2D-Ansicht' : '⛰ 3D-Ansicht'}</button>
     <button class="btn btn--zweit btn--klein" data-ortung>📍 Wo bin ich?</button>
+    <span class="osm-hinweis">${GEO.ATTRIBUTION}</span>
   </div>`;
 }
 
@@ -916,7 +921,7 @@ function seiteKarte(parameter = '') {
       ${kartenSvg({ tour, aktiveStation: gewaehlt })}
       ${kartenWerkzeug()}
     </div>
-    <p class="schwach">Schematische Uebersicht: Die Stationen stehen in ihrer ungefaehren Lage zueinander. Fuer den offiziellen Lageplan bitte den Parkplan am Eingang nutzen.</p>
+    <p class="schwach">Wege, Gehege und Gebaeude stammen aus OpenStreetMap und entsprechen der realen Lage im Park. Fuer den offiziellen Lageplan bitte den Parkplan am Eingang nutzen.</p>
     ${tour ? `<div class="hinweis">Eingezeichnet ist die Route <strong>${esc(tour.titel)}</strong>. Die gestrichelte Linie zeigt die Reihenfolge der Stationen.</div>` : ''}
     <div id="ortungsergebnis"></div>
 
@@ -1305,9 +1310,9 @@ document.addEventListener('click', (e) => {
 
       const svg = $('.kartenbox svg');
       if (svg) {
-        const x = ((mir.lon - PARK_BOUNDS.west) / (PARK_BOUNDS.ost - PARK_BOUNDS.west)) * 100;
-        const y = ((PARK_BOUNDS.nord - mir.lat) / (PARK_BOUNDS.nord - PARK_BOUNDS.sued)) * 100;
-        if (x > -10 && x < 110 && y > -10 && y < 110) {
+        const x = ((mir.lon - PARK_BOUNDS.west) / (PARK_BOUNDS.ost - PARK_BOUNDS.west)) * GEO.MASS.w;
+        const y = ((PARK_BOUNDS.nord - mir.lat) / (PARK_BOUNDS.nord - PARK_BOUNDS.sued)) * GEO.MASS.h;
+        if (x > -10 && x < GEO.MASS.w + 10 && y > -10 && y < GEO.MASS.h + 10) {
           const p = proj(x, y);
           svg.insertAdjacentHTML('beforeend',
             `<circle class="ich-punkt" cx="${p.X}" cy="${p.Y}" r="2.4"/>`);

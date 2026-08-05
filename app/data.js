@@ -16,10 +16,10 @@ export const META = {
     'Tierbestand und Zeiten koennen sich kurzfristig aendern. Aktuelles immer auf hagenbeck.de oder am Aushang am Eingang pruefen.',
 };
 
-/* Der Park liegt in Hamburg-Stellingen. Das Rechteck umschliesst das
- * Parkgelaende grob und dient dazu, aus den Kartenpositionen (0..100)
- * ungefaehre GPS-Koordinaten zu berechnen. */
-export const PARK_BOUNDS = { nord: 53.5993, sued: 53.5941, west: 9.9331, ost: 9.9421 };
+/* Umgrenzendes Rechteck der Parkgrenze aus OpenStreetMap. Zusammen mit
+ * MASS aus mapgeo.js rechnet es Kartenpositionen in GPS-Koordinaten um
+ * (x: 0..100 West->Ost, y: 0..MASS.h Nord->Sued). */
+export const PARK_BOUNDS = { nord: 53.5990236, sued: 53.5946671, west: 9.9338863, ost: 9.9422995 };
 
 export const BEREICHE = {
   eingang: { name: 'Eingang & Wege', farbe: '#8d7b5f' },
@@ -42,7 +42,7 @@ export const STATIONEN = [
     id: 'haupteingang',
     name: 'Haupteingang',
     bereich: 'eingang',
-    mapX: 54, mapY: 89,
+    mapX: 90.3, mapY: 81.6,
     dauer: 5,
     tiere: [],
     beschreibung:
@@ -53,7 +53,7 @@ export const STATIONEN = [
     id: 'flamingoteich',
     name: 'Flamingoteich',
     bereich: 'afrika',
-    mapX: 45, mapY: 76,
+    mapX: 45.1, mapY: 27.2,
     dauer: 10,
     tiere: ['flamingo'],
     beschreibung:
@@ -64,7 +64,7 @@ export const STATIONEN = [
     id: 'elefanten',
     name: 'Elefanten-Freianlage',
     bereich: 'asien',
-    mapX: 70, mapY: 68,
+    mapX: 82.8, mapY: 62.2,
     dauer: 25,
     tiere: ['elefant'],
     beschreibung:
@@ -75,7 +75,7 @@ export const STATIONEN = [
     id: 'orangutans',
     name: 'Menschenaffen-Haus',
     bereich: 'asien',
-    mapX: 64, mapY: 46,
+    mapX: 92.2, mapY: 41.3,
     dauer: 20,
     tiere: ['orangutan'],
     innen: true,
@@ -87,7 +87,7 @@ export const STATIONEN = [
     id: 'tiger',
     name: 'Tigeranlage',
     bereich: 'asien',
-    mapX: 79, mapY: 48,
+    mapX: 87.7, mapY: 8.1,
     dauer: 15,
     tiere: ['tiger'],
     beschreibung:
@@ -98,7 +98,7 @@ export const STATIONEN = [
     id: 'loewen',
     name: 'Loewen-Freianlage',
     bereich: 'afrika',
-    mapX: 70, mapY: 34,
+    mapX: 33.9, mapY: 59.4,
     dauer: 15,
     tiere: ['loewe'],
     beschreibung:
@@ -109,7 +109,7 @@ export const STATIONEN = [
     id: 'afrikapanorama',
     name: 'Afrika-Panorama',
     bereich: 'afrika',
-    mapX: 53, mapY: 30,
+    mapX: 26.9, mapY: 53.5,
     dauer: 25,
     tiere: ['giraffe', 'zebra', 'strauss'],
     beschreibung:
@@ -120,7 +120,7 @@ export const STATIONEN = [
     id: 'strausse',
     name: 'Steppenweg',
     bereich: 'afrika',
-    mapX: 36, mapY: 21,
+    mapX: 28.1, mapY: 65.1,
     dauer: 10,
     tiere: ['strauss', 'erdmaennchen'],
     beschreibung:
@@ -131,7 +131,7 @@ export const STATIONEN = [
     id: 'eismeer',
     name: 'Eismeer',
     bereich: 'eismeer',
-    mapX: 27, mapY: 38,
+    mapX: 7.3, mapY: 58.0,
     dauer: 40,
     tiere: ['eisbaer', 'walross', 'pinguin', 'kegelrobbe'],
     innen: true,
@@ -143,7 +143,7 @@ export const STATIONEN = [
     id: 'seeloewen',
     name: 'Seeloewenbecken',
     bereich: 'eismeer',
-    mapX: 27, mapY: 53,
+    mapX: 15.6, mapY: 55.8,
     dauer: 20,
     tiere: ['seeloewe'],
     beschreibung:
@@ -155,7 +155,7 @@ export const STATIONEN = [
     id: 'kamele',
     name: 'Kamele & Trampeltiere',
     bereich: 'asien',
-    mapX: 19, mapY: 60,
+    mapX: 72.1, mapY: 53.0,
     dauer: 15,
     tiere: ['trampeltier'],
     beschreibung:
@@ -166,7 +166,7 @@ export const STATIONEN = [
     id: 'alpakas',
     name: 'Suedamerika-Wiese',
     bereich: 'suedamerika',
-    mapX: 31, mapY: 71,
+    mapX: 58.6, mapY: 30.5,
     dauer: 10,
     tiere: ['alpaka'],
     beschreibung:
@@ -177,7 +177,7 @@ export const STATIONEN = [
     id: 'streichelgehege',
     name: 'Streichelgehege',
     bereich: 'kinder',
-    mapX: 39, mapY: 61,
+    mapX: 33.0, mapY: 42.0,
     dauer: 25,
     tiere: ['zwergziege'],
     beschreibung:
@@ -189,7 +189,7 @@ export const STATIONEN = [
     id: 'spielplatz',
     name: 'Spielplatz & Wasserspiel',
     bereich: 'kinder',
-    mapX: 52, mapY: 62,
+    mapX: 50.5, mapY: 16.7,
     dauer: 30,
     tiere: [],
     beschreibung:
@@ -201,7 +201,7 @@ export const STATIONEN = [
     id: 'japangarten',
     name: 'Japanischer Inselgarten',
     bereich: 'garten',
-    mapX: 57, mapY: 51,
+    mapX: 46.4, mapY: 40.2,
     dauer: 15,
     tiere: [],
     beschreibung:
@@ -213,7 +213,7 @@ export const STATIONEN = [
     id: 'tropenaquarium',
     name: 'Tropen-Aquarium',
     bereich: 'tropen',
-    mapX: 71, mapY: 87,
+    mapX: 91.5, mapY: 73.2,
     dauer: 75,
     tiere: ['hai', 'krokodil', 'rochen', 'clownfisch', 'riesenschlange', 'flughund'],
     innen: true,
@@ -894,15 +894,15 @@ export const TOUREN = [
       'Die Runde fuer den ersten Besuch: Eismeer, Elefanten, Afrika-Panorama und die Seeloewen-Fuetterung. Wenig Umwege, alle bekannten Anlagen einmal mitgenommen.',
     stationen: [
       { id: 'haupteingang', fokus: 'Fuetterungszeiten am Aushang fotografieren' },
-      { id: 'flamingoteich' },
       { id: 'elefanten', fokus: 'Zeit lassen - hier bleiben die meisten am laengsten' },
       { id: 'orangutans' },
       { id: 'tiger' },
+      { id: 'flamingoteich' },
+      { id: 'japangarten', fokus: 'Ruhige Pause auf halber Strecke' },
       { id: 'loewen' },
       { id: 'afrikapanorama', fokus: 'Die beruehmte Panorama-Perspektive' },
-      { id: 'eismeer', fokus: 'Unterwasserfenster nicht auslassen' },
       { id: 'seeloewen', fokus: 'Zeitlich an der Schaufuetterung ausrichten' },
-      { id: 'japangarten', fokus: 'Pause vor dem Rueckweg' },
+      { id: 'eismeer', fokus: 'Unterwasserfenster nicht auslassen' },
     ],
   },
   {
@@ -917,14 +917,14 @@ export const TOUREN = [
       'Kurze Wege, viel Anfassen und Spielen, planbare Pausen. Die Route wechselt bewusst zwischen Tieren schauen und Toben - so haelt die Laune laenger.',
     stationen: [
       { id: 'haupteingang' },
-      { id: 'flamingoteich', fokus: 'Kurzer Halt zum Ankommen' },
-      { id: 'streichelgehege', fokus: 'Erster grosser Programmpunkt, solange alle frisch sind' },
       { id: 'elefanten' },
-      { id: 'spielplatz', fokus: 'Lange Pause einplanen, Verpflegung in der Naehe' },
+      { id: 'kamele' },
       { id: 'alpakas' },
+      { id: 'spielplatz', fokus: 'Lange Pause einplanen, Verpflegung in der Naehe' },
+      { id: 'flamingoteich', fokus: 'Kurzer Halt am Wasser' },
+      { id: 'streichelgehege', fokus: 'Zum Anfassen - Haende waschen nicht vergessen' },
       { id: 'seeloewen', fokus: 'Schaufuetterung - fuer Kinder das Highlight' },
       { id: 'eismeer', fokus: 'Pinguine und Unterwasserfenster' },
-      { id: 'kamele' },
     ],
   },
   {
@@ -939,10 +939,10 @@ export const TOUREN = [
       'Konzentriert auf Eismeer und Seeloewen: Eisbaeren, Walrosse, Pinguine, Robben. Viel Wasser, viel Schatten, mehrere Unterwasserfenster.',
     stationen: [
       { id: 'haupteingang' },
-      { id: 'eismeer', fokus: 'Kernstueck - mindestens 40 Minuten' },
-      { id: 'seeloewen', fokus: 'Schaufuetterung mit Erklaerungen' },
       { id: 'kamele', fokus: 'Kontrastprogramm: Wueste statt Eis' },
       { id: 'japangarten' },
+      { id: 'seeloewen', fokus: 'Schaufuetterung mit Erklaerungen' },
+      { id: 'eismeer', fokus: 'Kernstueck - mindestens 40 Minuten' },
     ],
   },
   {
@@ -957,10 +957,10 @@ export const TOUREN = [
       'Die Route entlang der Freianlagen, fuer die Hagenbeck beruehmt ist: Giraffen, Zebras, Strausse, Loewen - alle ohne Gitter, nur durch Graeben getrennt.',
     stationen: [
       { id: 'haupteingang' },
-      { id: 'flamingoteich' },
+      { id: 'loewen' },
       { id: 'afrikapanorama', fokus: 'Der beste Blick des Parks' },
       { id: 'strausse', fokus: 'Erdmaennchen nicht uebersehen' },
-      { id: 'loewen' },
+      { id: 'flamingoteich' },
       { id: 'elefanten' },
     ],
   },
@@ -976,8 +976,8 @@ export const TOUREN = [
       'Von der Grosskatze bis zum Riffhai: eine Route entlang der Jaeger. Am besten am spaeten Nachmittag - dann sind die meisten Raubtiere wach.',
     stationen: [
       { id: 'haupteingang' },
-      { id: 'loewen' },
       { id: 'tiger', fokus: 'Erhoehte Liegeplaetze absuchen' },
+      { id: 'loewen' },
       { id: 'eismeer', fokus: 'Eisbaer - das groesste Landraubtier der Welt' },
       { id: 'strausse', fokus: 'Erdmaennchen: Raubtier im Kleinformat' },
       { id: 'tropenaquarium', fokus: 'Haie und Krokodile - eigenes Ticket noetig' },
@@ -1032,9 +1032,9 @@ export const TOUREN = [
       'Die Wege im Park sind ueberwiegend befestigt, es gibt aber Steigungen. Aktuelle Angaben zur Barrierefreiheit stehen auf hagenbeck.de.',
     stationen: [
       { id: 'haupteingang' },
-      { id: 'flamingoteich', fokus: 'Baenke direkt am Weg' },
       { id: 'elefanten' },
       { id: 'japangarten', fokus: 'Ruhigster Ort im Park' },
+      { id: 'flamingoteich', fokus: 'Baenke direkt am Weg' },
       { id: 'afrikapanorama' },
       { id: 'seeloewen', fokus: 'Sitzplaetze an der Tribuene' },
     ],

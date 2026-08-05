@@ -304,7 +304,7 @@ main {
 }
 .route-linie { fill: none; stroke: var(--akzent); stroke-width: 0.9; stroke-dasharray: 2.4 1.8; stroke-linecap: round; }
 .flaechen-label {
-  font-size: 2.6px;
+  font-size: 1.9px;
   font-style: italic;
   fill: #6d7a66;
   text-anchor: middle;
@@ -319,7 +319,9 @@ main {
 .karten-werkzeug {
   display: flex; gap: 8px; padding: 10px; border-top: 1px solid var(--linie);
   flex-wrap: wrap;
+  align-items: center;
 }
+.osm-hinweis { font-size: 0.68rem; color: var(--text-schwach); margin-left: auto; }
 
 /* ---------- Suche & Filter ---------- */
 .suche {

@@ -18,9 +18,11 @@ drei Altersstufen.
   (isometrische Perspektive mit Gebaeuden und Baeumen). "Wo bin ich?"
   zeigt per GPS die naechstgelegene Station; vor Ort lassen sich die
   Stationspositionen kalibrieren, damit die Ortung genauer wird.
-  Der offizielle Wegeplan des Tierparks ist urheberrechtlich geschuetzt
-  und wird nicht uebernommen - die Karte ist eine eigene, schematische
-  Nachzeichnung.
+  Die Kartengeometrie (Parkgrenze, Wege, Teiche, Gehege, Gebaeude,
+  Baeume) stammt aus OpenStreetMap und entspricht der realen Lage im
+  Park: Kartendaten (c) OpenStreetMap-Mitwirkende, Lizenz ODbL 1.0
+  (openstreetmap.org/copyright). Quelldaten liegen in `osm/map.osm`;
+  `python3 scripts/osm2geo.py` erzeugt daraus `app/mapgeo.js` neu.
 - **Tierlexikon** - 22 Tierartikel mit Steckbrief, Beobachtungstipps und
   "Wusstest du schon"-Fakten, durchsuchbar und nach Parkbereich filterbar.
 - **Vorlesen** - alle Texte lassen sich ueber die Sprachausgabe des Geraets
