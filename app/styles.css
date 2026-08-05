@@ -292,9 +292,9 @@ main {
 .karten-tipp.sichtbar { opacity: 1; }
 .kartenbox svg { display: block; width: 100%; height: auto; }
 .marker-kreis { cursor: pointer; }
-.marker-text { font-size: 3.2px; font-weight: 700; fill: #fff; pointer-events: none; text-anchor: middle; }
+.marker-text { font-size: 2.6px; font-weight: 700; fill: #fff; pointer-events: none; text-anchor: middle; }
 .marker-label {
-  font-size: 2.4px;
+  font-size: 2px;
   fill: var(--text);
   text-anchor: middle;
   paint-order: stroke;
@@ -303,6 +303,17 @@ main {
   pointer-events: none;
 }
 .route-linie { fill: none; stroke: var(--akzent); stroke-width: 0.9; stroke-dasharray: 2.4 1.8; stroke-linecap: round; }
+.flaechen-label {
+  font-size: 2.6px;
+  font-style: italic;
+  fill: #6d7a66;
+  text-anchor: middle;
+  pointer-events: none;
+}
+/* 3D-Ansicht: breiterer Ausschnitt, daher etwas groessere Schrift und Linien */
+.svg3d .marker-label { font-size: 2.8px; }
+.svg3d .marker-text { font-size: 3.2px; }
+.svg3d .route-linie { stroke-width: 1.3; }
 .ich-punkt { fill: #2f6f9f; stroke: #fff; stroke-width: 0.8; }
 
 .karten-werkzeug {

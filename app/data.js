@@ -42,7 +42,7 @@ export const STATIONEN = [
     id: 'haupteingang',
     name: 'Haupteingang',
     bereich: 'eingang',
-    mapX: 50, mapY: 92,
+    mapX: 54, mapY: 89,
     dauer: 5,
     tiere: [],
     beschreibung:
@@ -53,7 +53,7 @@ export const STATIONEN = [
     id: 'flamingoteich',
     name: 'Flamingoteich',
     bereich: 'afrika',
-    mapX: 44, mapY: 80,
+    mapX: 45, mapY: 76,
     dauer: 10,
     tiere: ['flamingo'],
     beschreibung:
@@ -64,7 +64,7 @@ export const STATIONEN = [
     id: 'elefanten',
     name: 'Elefanten-Freianlage',
     bereich: 'asien',
-    mapX: 62, mapY: 72,
+    mapX: 70, mapY: 68,
     dauer: 25,
     tiere: ['elefant'],
     beschreibung:
@@ -75,7 +75,7 @@ export const STATIONEN = [
     id: 'orangutans',
     name: 'Menschenaffen-Haus',
     bereich: 'asien',
-    mapX: 72, mapY: 62,
+    mapX: 64, mapY: 46,
     dauer: 20,
     tiere: ['orangutan'],
     innen: true,
@@ -87,7 +87,7 @@ export const STATIONEN = [
     id: 'tiger',
     name: 'Tigeranlage',
     bereich: 'asien',
-    mapX: 78, mapY: 48,
+    mapX: 79, mapY: 48,
     dauer: 15,
     tiere: ['tiger'],
     beschreibung:
@@ -98,7 +98,7 @@ export const STATIONEN = [
     id: 'loewen',
     name: 'Loewen-Freianlage',
     bereich: 'afrika',
-    mapX: 70, mapY: 38,
+    mapX: 70, mapY: 34,
     dauer: 15,
     tiere: ['loewe'],
     beschreibung:
@@ -109,7 +109,7 @@ export const STATIONEN = [
     id: 'afrikapanorama',
     name: 'Afrika-Panorama',
     bereich: 'afrika',
-    mapX: 56, mapY: 32,
+    mapX: 53, mapY: 30,
     dauer: 25,
     tiere: ['giraffe', 'zebra', 'strauss'],
     beschreibung:
@@ -120,7 +120,7 @@ export const STATIONEN = [
     id: 'strausse',
     name: 'Steppenweg',
     bereich: 'afrika',
-    mapX: 48, mapY: 26,
+    mapX: 36, mapY: 21,
     dauer: 10,
     tiere: ['strauss', 'erdmaennchen'],
     beschreibung:
@@ -131,7 +131,7 @@ export const STATIONEN = [
     id: 'eismeer',
     name: 'Eismeer',
     bereich: 'eismeer',
-    mapX: 32, mapY: 34,
+    mapX: 27, mapY: 38,
     dauer: 40,
     tiere: ['eisbaer', 'walross', 'pinguin', 'kegelrobbe'],
     innen: true,
@@ -143,7 +143,7 @@ export const STATIONEN = [
     id: 'seeloewen',
     name: 'Seeloewenbecken',
     bereich: 'eismeer',
-    mapX: 26, mapY: 48,
+    mapX: 27, mapY: 53,
     dauer: 20,
     tiere: ['seeloewe'],
     beschreibung:
@@ -155,7 +155,7 @@ export const STATIONEN = [
     id: 'kamele',
     name: 'Kamele & Trampeltiere',
     bereich: 'asien',
-    mapX: 22, mapY: 60,
+    mapX: 19, mapY: 60,
     dauer: 15,
     tiere: ['trampeltier'],
     beschreibung:
@@ -166,7 +166,7 @@ export const STATIONEN = [
     id: 'alpakas',
     name: 'Suedamerika-Wiese',
     bereich: 'suedamerika',
-    mapX: 30, mapY: 68,
+    mapX: 31, mapY: 71,
     dauer: 10,
     tiere: ['alpaka'],
     beschreibung:
@@ -177,7 +177,7 @@ export const STATIONEN = [
     id: 'streichelgehege',
     name: 'Streichelgehege',
     bereich: 'kinder',
-    mapX: 38, mapY: 72,
+    mapX: 39, mapY: 61,
     dauer: 25,
     tiere: ['zwergziege'],
     beschreibung:
@@ -189,7 +189,7 @@ export const STATIONEN = [
     id: 'spielplatz',
     name: 'Spielplatz & Wasserspiel',
     bereich: 'kinder',
-    mapX: 44, mapY: 62,
+    mapX: 52, mapY: 62,
     dauer: 30,
     tiere: [],
     beschreibung:
@@ -201,7 +201,7 @@ export const STATIONEN = [
     id: 'japangarten',
     name: 'Japanischer Inselgarten',
     bereich: 'garten',
-    mapX: 58, mapY: 54,
+    mapX: 57, mapY: 51,
     dauer: 15,
     tiere: [],
     beschreibung:
@@ -213,7 +213,7 @@ export const STATIONEN = [
     id: 'tropenaquarium',
     name: 'Tropen-Aquarium',
     bereich: 'tropen',
-    mapX: 62, mapY: 86,
+    mapX: 71, mapY: 87,
     dauer: 75,
     tiere: ['hai', 'krokodil', 'rochen', 'clownfisch', 'riesenschlange', 'flughund'],
     innen: true,

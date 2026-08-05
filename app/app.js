@@ -8,6 +8,7 @@
 
 import { META, PARK_BOUNDS, BEREICHE, STATIONEN, TIERE, TOUREN, FUETTERUNGEN, WISSEN } from './data.js';
 import { KINDER_TIERE, KINDER_STATIONEN } from './data-kinder.js';
+import * as GEO from './mapgeo.js';
 
 /* =========================================================
  * Zustand
@@ -23,6 +24,7 @@ const STANDARD = {
   koordinaten: {}, // { [stationId]: {lat, lon} } - vor Ort kalibriert
   zeiten: {}, // { [fuetterungId]: 'HH:MM' }
   quizGeloest: {}, // { [tierId]: true }
+  karte3d: false,
   erstbesuch: true,
 };
 
@@ -277,59 +279,149 @@ function vorleserLeiste(textFn) {
  * Karte
  * ======================================================= */
 
-/* Plausibler Rundweg fuer die schematische Darstellung. Die Linie zeigt die
- * ungefaehre Wegefuehrung, keinen vermessenen Verlauf. */
-const WEGE_REIHENFOLGE = [
-  'haupteingang', 'flamingoteich', 'streichelgehege', 'alpakas', 'kamele',
-  'seeloewen', 'eismeer', 'strausse', 'afrikapanorama', 'loewen', 'tiger',
-  'orangutans', 'elefanten', 'japangarten', 'spielplatz', 'flamingoteich',
-];
+/* Anfangsausschnitt je Ansicht. In 3D ist der projizierte Inhalt breiter
+ * (X etwa -81..76) und flacher (Y etwa 1..76). */
+const blickStart = () =>
+  S.karte3d ? { x: -94, y: 2, w: 188, h: 100 } : { x: 0, y: 0, w: 100, h: 100 };
 
-let kartenBlick = { x: 0, y: 0, w: 100, h: 100 };
+let kartenBlick = blickStart();
+
+/* Projektion Kartenkoordinate -> Zeichenflaeche.
+ * 2D: unveraendert. 3D: um 45 Grad gedrehte, abgeflachte Isometrie;
+ * h hebt Punkte (Gebaeudehoehen) an. */
+function proj(x, y, h = 0) {
+  if (!S.karte3d) return { X: x, Y: y };
+  return { X: (x - y) * 1.0, Y: (x + y) * 0.5 - h };
+}
+
+const rund = (n) => Math.round(n * 100) / 100;
+
+function pfadAus(punkte, h = 0, schliessen = true) {
+  const d = punkte
+    .map(([x, y], i) => {
+      const p = proj(x, y, h);
+      return `${i ? 'L' : 'M'}${rund(p.X)} ${rund(p.Y)}`;
+    })
+    .join(' ');
+  return schliessen ? d + ' Z' : d;
+}
+
+function tiefe(punkte) {
+  const s = punkte.reduce((a, [x, y]) => a + x + y, 0);
+  return s / punkte.length;
+}
+
+function gebaeudeSvg(g) {
+  if (!S.karte3d) {
+    return `<path d="${pfadAus(g.punkte)}" fill="${g.farbe}" opacity="0.9" stroke="${g.dach}" stroke-width="0.4"/>`;
+  }
+  /* Erst alle Seitenwaende, dann die Dachflaeche - einfache Maler-Reihenfolge. */
+  const waende = g.punkte
+    .map((a, i) => {
+      const b = g.punkte[(i + 1) % g.punkte.length];
+      const p1 = proj(a[0], a[1]);
+      const p2 = proj(b[0], b[1]);
+      const p3 = proj(b[0], b[1], g.hoehe);
+      const p4 = proj(a[0], a[1], g.hoehe);
+      return `<path d="M${rund(p1.X)} ${rund(p1.Y)} L${rund(p2.X)} ${rund(p2.Y)} L${rund(p3.X)} ${rund(p3.Y)} L${rund(p4.X)} ${rund(p4.Y)} Z" fill="${g.farbe}" stroke="${g.dach}" stroke-width="0.15"/>`;
+    })
+    .join('');
+  return `<g>${waende}<path d="${pfadAus(g.punkte, g.hoehe)}" fill="${g.dach}"/></g>`;
+}
+
+function baumSvg([x, y, s]) {
+  const fuss = proj(x, y);
+  if (!S.karte3d) {
+    return `<circle cx="${rund(fuss.X)}" cy="${rund(fuss.Y)}" r="${s * 0.8}" fill="#7fa06a" opacity="0.55"/>`;
+  }
+  const krone = proj(x, y, 2.2 + s);
+  return `<g>
+    <line x1="${rund(fuss.X)}" y1="${rund(fuss.Y)}" x2="${rund(krone.X)}" y2="${rund(krone.Y)}" stroke="#7a5a3a" stroke-width="0.5"/>
+    <circle cx="${rund(krone.X)}" cy="${rund(krone.Y)}" r="${s * 1.15}" fill="#6b955a"/>
+    <circle cx="${rund(krone.X - s * 0.35)}" cy="${rund(krone.Y - s * 0.35)}" r="${s * 0.55}" fill="#7fa96c"/>
+  </g>`;
+}
 
 function kartenSvg({ tour = null, aktiveStation = null, position = null } = {}) {
   const stationen = tour ? tour.stationen.map((s) => stationVon(s.id)) : STATIONEN;
-  const punkte = WEGE_REIHENFOLGE.map((id) => stationVon(id)).filter(Boolean);
-  const wegPfad = punkte.map((s, i) => `${i ? 'L' : 'M'}${s.mapX} ${s.mapY}`).join(' ');
+  const d3 = S.karte3d;
+
+  const gehege = GEO.GEHEGE
+    .map((g) => `<path d="${pfadAus(g.punkte)}" fill="${BEREICHE[g.bereich].farbe}" opacity="0.14" stroke="${BEREICHE[g.bereich].farbe}" stroke-width="0.3" stroke-opacity="0.35"/>`)
+    .join('');
+
+  const wasser = GEO.WASSER
+    .map((w) => `<path d="${pfadAus(w.punkte)}" fill="#a9cbe3" stroke="#8db6d4" stroke-width="0.3"/>`)
+    .join('');
+
+  const wege = GEO.WEGE
+    .map((w) => `<path d="${pfadAus(w, 0, false)}" fill="none" stroke="#d8cfb9" stroke-width="${d3 ? 1.6 : 1.8}" stroke-linecap="round" stroke-linejoin="round"/>`)
+    .join('');
+
   const routePfad = tour
-    ? tour.stationen.map((s, i) => {
+    ? pfadAus(tour.stationen.map((s) => {
         const st = stationVon(s.id);
-        return `${i ? 'L' : 'M'}${st.mapX} ${st.mapY}`;
-      }).join(' ')
+        return [st.mapX, st.mapY];
+      }), 0, false)
+    : '';
+
+  /* Gebaeude und Baeume von hinten nach vorn zeichnen (Tiefe = x+y). */
+  const objekte = [
+    ...GEO.GEBAEUDE.map((g) => ({ t: tiefe(g.punkte), html: gebaeudeSvg(g) })),
+    ...GEO.BAEUME.map((b) => ({ t: b[0] + b[1], html: baumSvg(b) })),
+  ]
+    .sort((a, b) => a.t - b.t)
+    .map((o) => o.html)
+    .join('');
+
+  const labels = !d3
+    ? GEO.FLAECHEN_LABELS
+        .map((l) => `<text class="flaechen-label" x="${l.x}" y="${l.y}">${esc(l.text)}</text>`)
+        .join('')
     : '';
 
   const marker = stationen
     .map((st, i) => {
       const farbe = BEREICHE[st.bereich]?.farbe || '#666';
       const aktiv = aktiveStation === st.id;
-      const r = aktiv ? 4.2 : 3.2;
+      const r = aktiv ? (d3 ? 3.8 : 3.4) : (d3 ? 2.7 : 2.4);
       const beschriftung = tour ? String(i + 1) : '';
+      const fuss = proj(st.mapX, st.mapY);
+      const kopf = d3 ? { X: fuss.X, Y: fuss.Y - 5.5 } : fuss;
+      const nadel = d3
+        ? `<line x1="${rund(fuss.X)}" y1="${rund(fuss.Y)}" x2="${rund(kopf.X)}" y2="${rund(kopf.Y)}" stroke="${farbe}" stroke-width="0.8"/>
+           <ellipse cx="${rund(fuss.X)}" cy="${rund(fuss.Y)}" rx="1.6" ry="0.8" fill="rgba(0,0,0,0.25)"/>`
+        : '';
       return `
-        <g class="marker" data-station="${st.id}">
-          ${aktiv ? `<circle cx="${st.mapX}" cy="${st.mapY}" r="${r + 2}" fill="${farbe}" opacity="0.25"/>` : ''}
+        <g class="marker" data-station="${st.id}" data-t="${rund(st.mapX + st.mapY)}">
+          ${nadel}
+          ${aktiv ? `<circle cx="${rund(kopf.X)}" cy="${rund(kopf.Y)}" r="${r + 2}" fill="${farbe}" opacity="0.25"/>` : ''}
           <!-- unsichtbare, grosszuegige Tippflaeche fuer Finger -->
-          <circle cx="${st.mapX}" cy="${st.mapY}" r="6" fill="transparent"/>
-          <circle class="marker-kreis" cx="${st.mapX}" cy="${st.mapY}" r="${r}" fill="${farbe}" stroke="#fff" stroke-width="0.7"/>
-          ${beschriftung ? `<text class="marker-text" x="${st.mapX}" y="${st.mapY + 1.2}">${beschriftung}</text>` : ''}
-          <text class="marker-label" x="${st.mapX}" y="${st.mapY + r + 3}">${esc(st.name)}</text>
+          <circle cx="${rund(kopf.X)}" cy="${rund(kopf.Y)}" r="6" fill="transparent"/>
+          <circle class="marker-kreis" cx="${rund(kopf.X)}" cy="${rund(kopf.Y)}" r="${r}" fill="${farbe}" stroke="#fff" stroke-width="0.7"/>
+          ${beschriftung ? `<text class="marker-text" x="${rund(kopf.X)}" y="${rund(kopf.Y + 1)}">${beschriftung}</text>` : ''}
+          <text class="marker-label" x="${rund(kopf.X)}" y="${rund(kopf.Y + r + 3)}">${esc(st.name)}</text>
         </g>`;
     })
     .join('');
 
-  const ich = position
-    ? `<g><circle class="ich-punkt" cx="${position.x}" cy="${position.y}" r="2.4"/><circle cx="${position.x}" cy="${position.y}" r="5" fill="#2f6f9f" opacity="0.2"/></g>`
+  const ichP = position ? proj(position.x, position.y) : null;
+  const ich = ichP
+    ? `<g><circle class="ich-punkt" cx="${rund(ichP.X)}" cy="${rund(ichP.Y)}" r="2.4"/><circle cx="${rund(ichP.X)}" cy="${rund(ichP.Y)}" r="5" fill="#2f6f9f" opacity="0.2"/></g>`
     : '';
 
   return `
   <svg viewBox="${kartenBlick.x} ${kartenBlick.y} ${kartenBlick.w} ${kartenBlick.h}" role="img"
-       aria-label="Schematische Uebersichtskarte des Tierparks">
-    <rect x="-20" y="-20" width="140" height="140" fill="#e9efe4"/>
-    <ellipse cx="30" cy="30" rx="26" ry="20" fill="#dcE7d6"/>
-    <ellipse cx="72" cy="55" rx="24" ry="22" fill="#dce7d6"/>
-    <path d="M36 78 Q46 70 54 78 Q58 86 46 88 Q34 86 36 78Z" fill="#bcd6e8"/>
-    <path d="M54 50 Q62 46 66 54 Q64 60 56 58 Q52 54 54 50Z" fill="#bcd6e8"/>
-    <path d="${wegPfad}" fill="none" stroke="#cfc7b4" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+       class="${d3 ? 'svg3d' : ''}"
+       aria-label="Schematische ${d3 ? '3D-' : ''}Uebersichtskarte des Tierparks">
+    <rect x="-160" y="-60" width="420" height="280" fill="${d3 ? '#dde7db' : '#e9efe4'}"/>
+    <path d="${pfadAus(GEO.GRENZE)}" fill="#d3e0c8" stroke="#b9c9ab" stroke-width="0.6"/>
+    ${gehege}
+    ${wasser}
+    ${wege}
     ${routePfad ? `<path class="route-linie" d="${routePfad}"/>` : ''}
+    ${labels}
+    ${objekte}
     ${marker}
     ${ich}
   </svg>`;
@@ -342,6 +434,7 @@ function kartenWerkzeug(mitZoom = true) {
       <button class="btn btn--zweit btn--klein" data-zoom="rein" aria-label="Karte vergroessern">+</button>
       <button class="btn btn--zweit btn--klein" data-zoom="raus" aria-label="Karte verkleinern">−</button>
       <button class="btn btn--zweit btn--klein" data-zoom="reset">Ansicht zuruecksetzen</button>` : ''}
+    <button class="btn btn--zweit btn--klein" data-dim>${S.karte3d ? '🗺 2D-Ansicht' : '⛰ 3D-Ansicht'}</button>
     <button class="btn btn--zweit btn--klein" data-ortung>📍 Wo bin ich?</button>
   </div>`;
 }
@@ -351,8 +444,8 @@ function kartenInteraktion(box) {
   const svg = $('svg', box);
   if (!svg) return;
 
-  const ZOOM_MIN = 18; // kleinste viewBox-Breite = maximale Vergroesserung
-  const ZOOM_MAX = 130;
+  const ZOOM_MIN = 15; // kleinste viewBox-Breite = maximale Vergroesserung
+  const ZOOM_MAX = 240;
 
   /* Aktive Finger/Zeiger. Ein Finger = verschieben, zwei Finger = Pinch-Zoom. */
   const zeiger = new Map();
@@ -424,7 +517,7 @@ function kartenInteraktion(box) {
       const w = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, geste.blick.w * faktor));
       const fix = kartenPunkt(geste.mitte.x, geste.mitte.y, geste.blick, geste.rect);
       kartenBlick.w = w;
-      kartenBlick.h = w;
+      kartenBlick.h = w * (geste.blick.h / geste.blick.w);
       kartenBlick.x = fix.x - ((m.x - geste.rect.left) / geste.rect.width) * w;
       kartenBlick.y = fix.y - ((m.y - geste.rect.top) / geste.rect.height) * w;
     } else {
@@ -449,11 +542,12 @@ function kartenInteraktion(box) {
     const rect = svg.getBoundingClientRect();
     const faktor = e.deltaY > 0 ? 1.15 : 1 / 1.15;
     const w = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, kartenBlick.w * faktor));
+    const h = w * (kartenBlick.h / kartenBlick.w);
     const fix = kartenPunkt(e.clientX, e.clientY, kartenBlick, rect);
     kartenBlick.x = fix.x - ((e.clientX - rect.left) / rect.width) * w;
-    kartenBlick.y = fix.y - ((e.clientY - rect.top) / rect.height) * w;
+    kartenBlick.y = fix.y - ((e.clientY - rect.top) / rect.height) * h;
     kartenBlick.w = w;
-    kartenBlick.h = w;
+    kartenBlick.h = h;
     anwenden();
   }, { passive: false });
 
@@ -467,11 +561,12 @@ function kartenInteraktion(box) {
 function zoomen(richtung) {
   const mitte = { x: kartenBlick.x + kartenBlick.w / 2, y: kartenBlick.y + kartenBlick.h / 2 };
   if (richtung === 'reset') {
-    kartenBlick = { x: 0, y: 0, w: 100, h: 100 };
+    kartenBlick = blickStart();
   } else {
     const f = richtung === 'rein' ? 0.7 : 1 / 0.7;
-    const neu = Math.min(130, Math.max(18, kartenBlick.w * f));
-    kartenBlick = { w: neu, h: neu, x: mitte.x - neu / 2, y: mitte.y - neu / 2 };
+    const neu = Math.min(240, Math.max(15, kartenBlick.w * f));
+    const h = neu * (kartenBlick.h / kartenBlick.w);
+    kartenBlick = { w: neu, h, x: mitte.x - neu / 2, y: mitte.y - h / 2 };
   }
   const svg = $('.kartenbox svg');
   if (svg) svg.setAttribute('viewBox', `${kartenBlick.x} ${kartenBlick.y} ${kartenBlick.w} ${kartenBlick.h}`);
@@ -1186,6 +1281,13 @@ document.addEventListener('click', (e) => {
     return;
   }
 
+  if (ziel('[data-dim]')) {
+    setze({ karte3d: !S.karte3d });
+    kartenBlick = blickStart();
+    zeichne();
+    return;
+  }
+
   const zoom = ziel('[data-zoom]');
   if (zoom) { zoomen(zoom.dataset.zoom); return; }
 
@@ -1206,8 +1308,9 @@ document.addEventListener('click', (e) => {
         const x = ((mir.lon - PARK_BOUNDS.west) / (PARK_BOUNDS.ost - PARK_BOUNDS.west)) * 100;
         const y = ((PARK_BOUNDS.nord - mir.lat) / (PARK_BOUNDS.nord - PARK_BOUNDS.sued)) * 100;
         if (x > -10 && x < 110 && y > -10 && y < 110) {
+          const p = proj(x, y);
           svg.insertAdjacentHTML('beforeend',
-            `<circle class="ich-punkt" cx="${x}" cy="${y}" r="2.4"/>`);
+            `<circle class="ich-punkt" cx="${p.X}" cy="${p.Y}" r="2.4"/>`);
         }
       }
     });

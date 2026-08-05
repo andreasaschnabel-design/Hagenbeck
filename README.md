@@ -11,10 +11,16 @@ drei Altersstufen.
   Raubtiere, Regentag, Blitzbesuch (1 Std.), barrierearme Runde. Jede Tour
   fuehrt Station fuer Station durch den Park, mit Fortschrittsanzeige und
   "Gesehen"-Haken.
-- **Karte mit Routenplan** - schematische Parkkarte mit nummerierten
-  Stationen und eingezeichnetem Routenverlauf; zoombar und verschiebbar.
-  "Wo bin ich?" zeigt per GPS die naechstgelegene Station. Vor Ort lassen
-  sich die Stationspositionen kalibrieren, damit die Ortung genauer wird.
+- **Karte mit Routenplan** - detaillierte, an der realen Anordnung des
+  Parks orientierte Karte mit Wegen, Teichen, Gehegen und Gebaeuden,
+  nummerierten Stationen und eingezeichnetem Routenverlauf; per
+  Zwei-Finger-Geste zoombar und verschiebbar. Umschaltbare **3D-Ansicht**
+  (isometrische Perspektive mit Gebaeuden und Baeumen). "Wo bin ich?"
+  zeigt per GPS die naechstgelegene Station; vor Ort lassen sich die
+  Stationspositionen kalibrieren, damit die Ortung genauer wird.
+  Der offizielle Wegeplan des Tierparks ist urheberrechtlich geschuetzt
+  und wird nicht uebernommen - die Karte ist eine eigene, schematische
+  Nachzeichnung.
 - **Tierlexikon** - 22 Tierartikel mit Steckbrief, Beobachtungstipps und
   "Wusstest du schon"-Fakten, durchsuchbar und nach Parkbereich filterbar.
 - **Vorlesen** - alle Texte lassen sich ueber die Sprachausgabe des Geraets

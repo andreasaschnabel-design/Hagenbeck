@@ -3,7 +3,7 @@
  * danach zuerst aus dem Cache bedienen (die Inhalte sind statisch).
  * Bei jeder Inhaltsaenderung VERSION hochzaehlen. */
 
-const VERSION = 'v2';
+const VERSION = 'v3';
 const CACHE = `tierpark-begleiter-${VERSION}`;
 
 const DATEIEN = [
@@ -14,6 +14,7 @@ const DATEIEN = [
   './app/app.js',
   './app/data.js',
   './app/data-kinder.js',
+  './app/mapgeo.js',
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/icon-512-maskable.png',
