@@ -1415,6 +1415,7 @@ $('.nav').innerHTML = NAV.map((n) => `
 /* Erststart: Altersstufe abfragen */
 if (S.erstbesuch && !location.hash) location.hash = '#/start';
 zeichne();
+try { sessionStorage.removeItem('reparaturversuch'); } catch { /* egal */ }
 
 /* Service Worker fuer Offline-Betrieb */
 if ('serviceWorker' in navigator) {

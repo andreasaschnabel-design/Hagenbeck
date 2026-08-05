@@ -32,5 +32,41 @@
   </noscript>
 
   <script type="module" src="./app/app.js"></script>
+  <script>
+    /* Selbstreparatur: Startet die App nicht (leerer Inhalt nach 3,5 s),
+     * liegt meist ein unvollstaendiger Offline-Cache vor. Dann einmal
+     * Cache und Service Worker verwerfen und neu laden; klappt auch das
+     * nicht, Hinweis mit Reparatur-Knopf anzeigen. */
+    setTimeout(function () {
+      var inhalt = document.getElementById('inhalt');
+      if (!inhalt || inhalt.childElementCount > 0) return;
+      var aufraeumen = function () {
+        var schritte = [];
+        if ('caches' in window) {
+          schritte.push(caches.keys().then(function (ks) {
+            return Promise.all(ks.map(function (k) { return caches.delete(k); }));
+          }));
+        }
+        if (navigator.serviceWorker) {
+          schritte.push(navigator.serviceWorker.getRegistrations().then(function (rs) {
+            return Promise.all(rs.map(function (r) { return r.unregister(); }));
+          }));
+        }
+        return Promise.all(schritte);
+      };
+      if (!sessionStorage.getItem('reparaturversuch')) {
+        sessionStorage.setItem('reparaturversuch', '1');
+        aufraeumen().then(function () { location.reload(); });
+      } else {
+        inhalt.innerHTML = '<div style="padding:32px 16px;text-align:center">' +
+          '<p>Die App konnte nicht vollstaendig geladen werden.</p>' +
+          '<button id="reparieren" style="padding:14px 20px;border:0;border-radius:12px;background:#1f6f4a;color:#fff;font-size:1rem">App reparieren und neu laden</button></div>';
+        document.getElementById('reparieren').onclick = function () {
+          sessionStorage.removeItem('reparaturversuch');
+          aufraeumen().then(function () { location.reload(); });
+        };
+      }
+    }, 3500);
+  </script>
 </body>
 </html>

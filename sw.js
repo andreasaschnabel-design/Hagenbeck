@@ -3,7 +3,7 @@
  * danach zuerst aus dem Cache bedienen (die Inhalte sind statisch).
  * Bei jeder Inhaltsaenderung VERSION hochzaehlen. */
 
-const VERSION = 'v5';
+const VERSION = 'v6';
 const CACHE = `tierpark-begleiter-${VERSION}`;
 
 const DATEIEN = [
@@ -34,6 +34,11 @@ self.addEventListener('activate', (e) => {
   );
 });
 
+/* WICHTIG: kein Datei-fuer-Datei-Auffrischen im Hintergrund. Sonst mischen
+ * sich alte und neue Modul-Dateien und die App startet mit einem
+ * Importfehler (leere Seite). Updates kommen ausschliesslich ueber eine
+ * neue VERSION: install laedt alles frisch, activate loescht den alten
+ * Cache - dadurch ist ein Update immer vollstaendig oder gar nicht. */
 self.addEventListener('fetch', (e) => {
   if (e.request.method !== 'GET') return;
   const url = new URL(e.request.url);
@@ -41,15 +46,7 @@ self.addEventListener('fetch', (e) => {
 
   e.respondWith(
     caches.match(e.request).then((treffer) => {
-      if (treffer) {
-        /* Im Hintergrund auffrischen, damit Updates ankommen. */
-        fetch(e.request)
-          .then((antwort) => {
-            if (antwort && antwort.ok) caches.open(CACHE).then((c) => c.put(e.request, antwort));
-          })
-          .catch(() => {});
-        return treffer;
-      }
+      if (treffer) return treffer;
       return fetch(e.request)
         .then((antwort) => {
           if (antwort && antwort.ok) {
