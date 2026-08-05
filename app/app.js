@@ -378,7 +378,21 @@ function baumSvg([x, y, s]) {
   </g>`;
 }
 
+let kartenKontext = {};
+
+/* Karte innerhalb der Box neu zeichnen (gleicher Kontext, gleicher Ausschnitt).
+ * Wird von der Drehgeste pro Animation-Frame aufgerufen. */
+function karteNeuZeichnen(box) {
+  const kompass = box.querySelector('.kompass');
+  if (kompass) kompass.remove();
+  const svg = box.querySelector('svg');
+  if (!svg) return;
+  svg.insertAdjacentHTML('beforebegin', kartenSvg(kartenKontext));
+  svg.remove();
+}
+
 function kartenSvg({ tour = null, aktiveStation = null, position = null } = {}) {
+  kartenKontext = { tour, aktiveStation, position };
   const stationen = tour ? tour.stationen.map((s) => stationVon(s.id)) : STATIONEN;
   const d3 = S.karte3d;
 
@@ -490,23 +504,30 @@ function kartenWerkzeug(mitZoom = true) {
 
 /* Karteninteraktion: Ziehen und Zoomen ueber das viewBox-Fenster. */
 function kartenInteraktion(box) {
-  const svg = $('svg', box);
-  if (!svg) return;
+  if (!$('svg', box)) return;
+  const svgEl = () => $('svg', box);
 
   const ZOOM_MIN = 15; // kleinste viewBox-Breite = maximale Vergroesserung
   const ZOOM_MAX = 240;
 
-  /* Aktive Finger/Zeiger. Ein Finger = verschieben, zwei Finger = Pinch-Zoom. */
+  /* Aktive Finger/Zeiger. Ein Finger = verschieben (Maus) bzw. Seite
+   * scrollen (Touch), zwei Finger = Pinch-Zoom und in 3D auch Drehen.
+   * Alle Listener haengen an der Box, nicht am SVG - das SVG wird
+   * waehrend der Drehgeste pro Frame ersetzt. */
   const zeiger = new Map();
-  let geste = null; // Ausgangslage beim Start bzw. Wechsel der Fingerzahl
+  let geste = null;
   let bewegt = false;
+  let zeichnenGeplant = false;
 
-  const anwenden = () =>
-    svg.setAttribute('viewBox', `${kartenBlick.x} ${kartenBlick.y} ${kartenBlick.w} ${kartenBlick.h}`);
+  const anwenden = () => {
+    const svg = svgEl();
+    if (svg) svg.setAttribute('viewBox', `${kartenBlick.x} ${kartenBlick.y} ${kartenBlick.w} ${kartenBlick.h}`);
+  };
 
   const punkte = () => [...zeiger.values()];
   const mitte = (p) => ({ x: (p[0].x + (p[1] || p[0]).x) / 2, y: (p[0].y + (p[1] || p[0]).y) / 2 });
   const spann = (p) => (p.length > 1 ? Math.hypot(p[0].x - p[1].x, p[0].y - p[1].y) : 0);
+  const winkel = (p) => (p.length > 1 ? (Math.atan2(p[1].y - p[0].y, p[1].x - p[0].x) * 180) / Math.PI : 0);
 
   /* Bildschirmpunkt -> Kartenkoordinate bei gegebener Ausgangslage */
   const kartenPunkt = (px, py, blick, rect) => ({
@@ -517,14 +538,22 @@ function kartenInteraktion(box) {
   const gesteNeu = () => {
     const p = punkte();
     geste = p.length
-      ? { blick: { ...kartenBlick }, mitte: mitte(p), spann: spann(p), rect: svg.getBoundingClientRect() }
+      ? {
+          blick: { ...kartenBlick },
+          mitte: mitte(p),
+          spann: spann(p),
+          winkel: winkel(p),
+          drehStart: S.karteDrehung,
+          dreht: false,
+          rect: svgEl().getBoundingClientRect(),
+        }
       : null;
   };
 
   /* Hinweis "mit zwei Fingern", wenn jemand mit einem Finger schieben will. */
   const tipp = document.createElement('div');
   tipp.className = 'karten-tipp';
-  tipp.textContent = 'Karte mit zwei Fingern bewegen und zoomen';
+  tipp.textContent = S.karte3d ? 'Zwei Finger: bewegen, zoomen und drehen' : 'Karte mit zwei Fingern bewegen und zoomen';
   box.appendChild(tipp);
   let tippTimer = null;
   const zeigeTipp = () => {
@@ -533,13 +562,14 @@ function kartenInteraktion(box) {
     tippTimer = setTimeout(() => tipp.classList.remove('sichtbar'), 1400);
   };
 
-  svg.addEventListener('pointerdown', (e) => {
+  box.addEventListener('pointerdown', (e) => {
+    if (!e.target.closest('svg')) return; // Werkzeugknoepfe sind keine Kartengeste
     zeiger.set(e.pointerId, { x: e.clientX, y: e.clientY });
     if (zeiger.size === 1) bewegt = false;
     gesteNeu();
   });
 
-  svg.addEventListener('pointermove', (e) => {
+  box.addEventListener('pointermove', (e) => {
     if (!zeiger.has(e.pointerId) || !geste) return;
     zeiger.set(e.pointerId, { x: e.clientX, y: e.clientY });
     const p = punkte();
@@ -555,8 +585,8 @@ function kartenInteraktion(box) {
     if (!bewegt && (zeiger.size > 1 || Math.hypot(m.x - geste.mitte.x, m.y - geste.mitte.y) > 6)) {
       bewegt = true;
       /* Capture erst ab hier - beim pointerdown wuerde sie das Klick-Ziel
-       * auf das SVG umleiten und Marker-Tipps schlucken. */
-      try { p.length && zeiger.forEach((_, id) => svg.setPointerCapture(id)); } catch { /* synthetische Events */ }
+       * umleiten und Marker-Tipps schlucken. */
+      try { p.length && zeiger.forEach((_, id) => box.setPointerCapture(id)); } catch { /* synthetische Events */ }
     }
     if (!bewegt) return;
 
@@ -568,7 +598,27 @@ function kartenInteraktion(box) {
       kartenBlick.w = w;
       kartenBlick.h = w * (geste.blick.h / geste.blick.w);
       kartenBlick.x = fix.x - ((m.x - geste.rect.left) / geste.rect.width) * w;
-      kartenBlick.y = fix.y - ((m.y - geste.rect.top) / geste.rect.height) * w;
+      kartenBlick.y = fix.y - ((m.y - geste.rect.top) / geste.rect.height) * kartenBlick.h;
+
+      /* Twist: In 3D dreht der Winkel zwischen den Fingern die Karte.
+       * Erst ab ~10 Grad, damit reines Zoomen nicht wackelt. */
+      if (S.karte3d) {
+        let delta = winkel(p) - geste.winkel;
+        if (delta > 180) delta -= 360;
+        if (delta < -180) delta += 360;
+        if (!geste.dreht && Math.abs(delta) > 10) geste.dreht = true;
+        if (geste.dreht) {
+          S.karteDrehung = (((geste.drehStart + delta) % 360) + 360) % 360;
+          if (!zeichnenGeplant) {
+            zeichnenGeplant = true;
+            requestAnimationFrame(() => {
+              zeichnenGeplant = false;
+              karteNeuZeichnen(box);
+            });
+          }
+          return; // viewBox setzt das Neuzeichnen selbst
+        }
+      }
     } else {
       const einheit = geste.blick.w / (geste.rect.width || 1);
       kartenBlick.x = geste.blick.x - (m.x - geste.mitte.x) * einheit;
@@ -578,17 +628,23 @@ function kartenInteraktion(box) {
   });
 
   const ende = (e) => {
+    if (zeiger.has(e.pointerId) && geste && geste.dreht) {
+      /* Drehwinkel dauerhaft speichern (S wurde waehrend der Geste nur
+       * im Speicher veraendert). */
+      setze({ karteDrehung: Math.round(S.karteDrehung) });
+    }
     zeiger.delete(e.pointerId);
     /* Beim Uebergang zwei Finger -> ein Finger neu verankern, sonst springt die Karte. */
     gesteNeu();
   };
-  svg.addEventListener('pointerup', ende);
-  svg.addEventListener('pointercancel', ende);
+  box.addEventListener('pointerup', ende);
+  box.addEventListener('pointercancel', ende);
 
   /* Mausrad am Desktop: zoomt auf die Position des Zeigers. */
-  svg.addEventListener('wheel', (e) => {
+  box.addEventListener('wheel', (e) => {
+    if (!e.target.closest('svg')) return;
     e.preventDefault();
-    const rect = svg.getBoundingClientRect();
+    const rect = svgEl().getBoundingClientRect();
     const faktor = e.deltaY > 0 ? 1.15 : 1 / 1.15;
     const w = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, kartenBlick.w * faktor));
     const h = w * (kartenBlick.h / kartenBlick.w);
@@ -600,8 +656,8 @@ function kartenInteraktion(box) {
     anwenden();
   }, { passive: false });
 
-  svg.addEventListener('click', (e) => {
-    if (bewegt) return; // war Ziehen oder Pinchen, kein Antippen
+  box.addEventListener('click', (e) => {
+    if (bewegt) return; // war Ziehen, Pinchen oder Drehen, kein Antippen
     const gruppe = e.target.closest('[data-station]');
     if (gruppe) zeigeStationsBlatt(gruppe.dataset.station);
   });
