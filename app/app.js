@@ -350,34 +350,115 @@ function kartenWerkzeug(mitZoom = true) {
 function kartenInteraktion(box) {
   const svg = $('svg', box);
   if (!svg) return;
-  let ziehen = null;
+
+  const ZOOM_MIN = 18; // kleinste viewBox-Breite = maximale Vergroesserung
+  const ZOOM_MAX = 130;
+
+  /* Aktive Finger/Zeiger. Ein Finger = verschieben, zwei Finger = Pinch-Zoom. */
+  const zeiger = new Map();
+  let geste = null; // Ausgangslage beim Start bzw. Wechsel der Fingerzahl
   let bewegt = false;
 
-  svg.addEventListener('pointerdown', (e) => {
-    ziehen = { x: e.clientX, y: e.clientY, start: { ...kartenBlick } };
-    bewegt = false;
+  const anwenden = () =>
+    svg.setAttribute('viewBox', `${kartenBlick.x} ${kartenBlick.y} ${kartenBlick.w} ${kartenBlick.h}`);
+
+  const punkte = () => [...zeiger.values()];
+  const mitte = (p) => ({ x: (p[0].x + (p[1] || p[0]).x) / 2, y: (p[0].y + (p[1] || p[0]).y) / 2 });
+  const spann = (p) => (p.length > 1 ? Math.hypot(p[0].x - p[1].x, p[0].y - p[1].y) : 0);
+
+  /* Bildschirmpunkt -> Kartenkoordinate bei gegebener Ausgangslage */
+  const kartenPunkt = (px, py, blick, rect) => ({
+    x: blick.x + ((px - rect.left) / rect.width) * blick.w,
+    y: blick.y + ((py - rect.top) / rect.height) * blick.h,
   });
+
+  const gesteNeu = () => {
+    const p = punkte();
+    geste = p.length
+      ? { blick: { ...kartenBlick }, mitte: mitte(p), spann: spann(p), rect: svg.getBoundingClientRect() }
+      : null;
+  };
+
+  /* Hinweis "mit zwei Fingern", wenn jemand mit einem Finger schieben will. */
+  const tipp = document.createElement('div');
+  tipp.className = 'karten-tipp';
+  tipp.textContent = 'Karte mit zwei Fingern bewegen und zoomen';
+  box.appendChild(tipp);
+  let tippTimer = null;
+  const zeigeTipp = () => {
+    tipp.classList.add('sichtbar');
+    clearTimeout(tippTimer);
+    tippTimer = setTimeout(() => tipp.classList.remove('sichtbar'), 1400);
+  };
+
+  svg.addEventListener('pointerdown', (e) => {
+    zeiger.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (zeiger.size === 1) bewegt = false;
+    gesteNeu();
+  });
+
   svg.addEventListener('pointermove', (e) => {
-    if (!ziehen) return;
-    if (!bewegt && Math.abs(e.clientX - ziehen.x) + Math.abs(e.clientY - ziehen.y) > 6) {
+    if (!zeiger.has(e.pointerId) || !geste) return;
+    zeiger.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    const p = punkte();
+    const m = mitte(p);
+
+    /* Ein Finger auf dem Touchscreen scrollt die Seite, nicht die Karte -
+     * sonst kommt man an der Karte beim Scrollen nicht vorbei. */
+    if (e.pointerType === 'touch' && zeiger.size === 1) {
+      if (Math.hypot(m.x - geste.mitte.x, m.y - geste.mitte.y) > 10) zeigeTipp();
+      return;
+    }
+
+    if (!bewegt && (zeiger.size > 1 || Math.hypot(m.x - geste.mitte.x, m.y - geste.mitte.y) > 6)) {
       bewegt = true;
       /* Capture erst ab hier - beim pointerdown wuerde sie das Klick-Ziel
        * auf das SVG umleiten und Marker-Tipps schlucken. */
-      svg.setPointerCapture(e.pointerId);
+      try { p.length && zeiger.forEach((_, id) => svg.setPointerCapture(id)); } catch { /* synthetische Events */ }
     }
     if (!bewegt) return;
-    const breite = svg.clientWidth || 1;
-    const faktor = kartenBlick.w / breite;
-    kartenBlick.x = ziehen.start.x - (e.clientX - ziehen.x) * faktor;
-    kartenBlick.y = ziehen.start.y - (e.clientY - ziehen.y) * faktor;
-    svg.setAttribute('viewBox', `${kartenBlick.x} ${kartenBlick.y} ${kartenBlick.w} ${kartenBlick.h}`);
+
+    if (p.length >= 2 && geste.spann > 0) {
+      /* Pinch: Faktor aus dem Fingerabstand, Fixpunkt ist die Mitte der Finger. */
+      const faktor = geste.spann / (spann(p) || geste.spann);
+      const w = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, geste.blick.w * faktor));
+      const fix = kartenPunkt(geste.mitte.x, geste.mitte.y, geste.blick, geste.rect);
+      kartenBlick.w = w;
+      kartenBlick.h = w;
+      kartenBlick.x = fix.x - ((m.x - geste.rect.left) / geste.rect.width) * w;
+      kartenBlick.y = fix.y - ((m.y - geste.rect.top) / geste.rect.height) * w;
+    } else {
+      const einheit = geste.blick.w / (geste.rect.width || 1);
+      kartenBlick.x = geste.blick.x - (m.x - geste.mitte.x) * einheit;
+      kartenBlick.y = geste.blick.y - (m.y - geste.mitte.y) * einheit;
+    }
+    anwenden();
   });
-  const ende = () => { ziehen = null; };
+
+  const ende = (e) => {
+    zeiger.delete(e.pointerId);
+    /* Beim Uebergang zwei Finger -> ein Finger neu verankern, sonst springt die Karte. */
+    gesteNeu();
+  };
   svg.addEventListener('pointerup', ende);
   svg.addEventListener('pointercancel', ende);
 
+  /* Mausrad am Desktop: zoomt auf die Position des Zeigers. */
+  svg.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    const rect = svg.getBoundingClientRect();
+    const faktor = e.deltaY > 0 ? 1.15 : 1 / 1.15;
+    const w = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, kartenBlick.w * faktor));
+    const fix = kartenPunkt(e.clientX, e.clientY, kartenBlick, rect);
+    kartenBlick.x = fix.x - ((e.clientX - rect.left) / rect.width) * w;
+    kartenBlick.y = fix.y - ((e.clientY - rect.top) / rect.height) * w;
+    kartenBlick.w = w;
+    kartenBlick.h = w;
+    anwenden();
+  }, { passive: false });
+
   svg.addEventListener('click', (e) => {
-    if (bewegt) return; // war ein Zieh-Vorgang, kein Antippen
+    if (bewegt) return; // war Ziehen oder Pinchen, kein Antippen
     const gruppe = e.target.closest('[data-station]');
     if (gruppe) zeigeStationsBlatt(gruppe.dataset.station);
   });
@@ -389,7 +470,7 @@ function zoomen(richtung) {
     kartenBlick = { x: 0, y: 0, w: 100, h: 100 };
   } else {
     const f = richtung === 'rein' ? 0.7 : 1 / 0.7;
-    const neu = Math.min(120, Math.max(25, kartenBlick.w * f));
+    const neu = Math.min(130, Math.max(18, kartenBlick.w * f));
     kartenBlick = { w: neu, h: neu, x: mitte.x - neu / 2, y: mitte.y - neu / 2 };
   }
   const svg = $('.kartenbox svg');

@@ -270,8 +270,26 @@ main {
   border-radius: var(--radius);
   box-shadow: var(--schatten);
   overflow: hidden;
-  touch-action: none;
+  /* Ein Finger darf die Seite scrollen; die Karte reagiert erst ab zwei
+   * Fingern (bzw. per Maus). pan-y laesst vertikales Scrollen durch. */
+  touch-action: pan-y;
 }
+.karten-tipp {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(20, 30, 25, 0.5);
+  color: #fff;
+  font-weight: 650;
+  text-align: center;
+  padding: 24px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s;
+  z-index: 5;
+}
+.karten-tipp.sichtbar { opacity: 1; }
 .kartenbox svg { display: block; width: 100%; height: auto; }
 .marker-kreis { cursor: pointer; }
 .marker-text { font-size: 3.2px; font-weight: 700; fill: #fff; pointer-events: none; text-anchor: middle; }

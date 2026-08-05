@@ -3,7 +3,7 @@
  * danach zuerst aus dem Cache bedienen (die Inhalte sind statisch).
  * Bei jeder Inhaltsaenderung VERSION hochzaehlen. */
 
-const VERSION = 'v1';
+const VERSION = 'v2';
 const CACHE = `tierpark-begleiter-${VERSION}`;
 
 const DATEIEN = [
