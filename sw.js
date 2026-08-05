@@ -1,5 +1,5 @@
 /* Offline-Cache fuer klassische App und Erlebnis-V2. */
-const VERSION = 'v15-mobile-navigation';
+const VERSION = 'v16-navigation-metrics';
 const CACHE = `tierpark-begleiter-${VERSION}`;
 const DATEIEN = [
   './',
