@@ -44,6 +44,11 @@ function injectStyles() {
       overflow: visible;
       will-change: transform;
     }
+    .marker text {
+      transform-box: fill-box;
+      transform-origin: center;
+      transition: transform .26s cubic-bezier(.2,.75,.25,1);
+    }
     .rotation-button {
       position: relative;
       overflow: visible;
@@ -140,6 +145,10 @@ function applyRotation() {
   requestAnimationFrame(() => {
     const svg = document.querySelector('.map-stage > svg');
     if (svg) svg.style.transform = `rotate(${rotation}deg)`;
+
+    document.querySelectorAll('.marker text').forEach(label => {
+      label.style.transform = `rotate(${-rotation}deg)`;
+    });
 
     const arrow = document.querySelector('.north-compass__arrow');
     if (arrow) arrow.style.transform = `rotate(${rotation}deg)`;
