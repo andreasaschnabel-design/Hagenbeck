@@ -1,0 +1,381 @@
+/* Tierpark-Begleiter - Styles
+ * Mobile first. Grosse Tippflaechen, hoher Kontrast, lesbar bei Sonne. */
+
+:root {
+  --gruen: #1f6f4a;
+  --gruen-dunkel: #14512f;
+  --gruen-hell: #e6f2ea;
+  --sand: #f7f4ee;
+  --text: #1c2320;
+  --text-schwach: #5a635e;
+  --linie: #dcd8ce;
+  --karte: #ffffff;
+  --akzent: #c2622a;
+  --blau: #2f6f9f;
+  --schatten: 0 1px 3px rgba(20, 30, 25, 0.12), 0 6px 18px rgba(20, 30, 25, 0.06);
+  --radius: 14px;
+  --kopf-hoehe: 56px;
+  --nav-hoehe: 62px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --gruen: #4fae7f;
+    --gruen-dunkel: #2c6b4c;
+    --gruen-hell: #172a20;
+    --sand: #121714;
+    --text: #e8ede9;
+    --text-schwach: #9aa8a0;
+    --linie: #2a3630;
+    --karte: #1a221e;
+    --akzent: #e08a4e;
+    --blau: #6fb0dd;
+    --schatten: 0 1px 3px rgba(0, 0, 0, 0.4);
+  }
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: var(--sand);
+  color: var(--text);
+  line-height: 1.55;
+  overscroll-behavior-y: contain;
+}
+
+h1, h2, h3 { line-height: 1.25; margin: 0 0 8px; }
+h1 { font-size: 1.45rem; }
+h2 { font-size: 1.15rem; }
+h3 { font-size: 1rem; }
+p { margin: 0 0 12px; }
+
+button { font: inherit; color: inherit; }
+
+/* ---------- Kopfzeile ---------- */
+.kopf {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  height: var(--kopf-hoehe);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  background: var(--gruen);
+  color: #fff;
+  box-shadow: var(--schatten);
+  padding-top: env(safe-area-inset-top);
+  height: calc(var(--kopf-hoehe) + env(safe-area-inset-top));
+}
+.kopf__titel {
+  font-size: 1.05rem;
+  font-weight: 650;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.kopf button {
+  background: rgba(255, 255, 255, 0.16);
+  border: 0;
+  color: #fff;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+.kopf button:active { background: rgba(255, 255, 255, 0.3); }
+
+/* ---------- Inhalt ---------- */
+main {
+  padding: 14px 12px calc(var(--nav-hoehe) + 28px + env(safe-area-inset-bottom));
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+.karte {
+  background: var(--karte);
+  border-radius: var(--radius);
+  box-shadow: var(--schatten);
+  padding: 14px;
+  margin-bottom: 12px;
+}
+
+.hinweis {
+  background: var(--gruen-hell);
+  border-left: 4px solid var(--gruen);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 0.9rem;
+  color: var(--text-schwach);
+  margin-bottom: 12px;
+}
+.hinweis strong { color: var(--text); }
+
+.schwach { color: var(--text-schwach); font-size: 0.88rem; }
+
+/* ---------- Tourliste ---------- */
+.tour-karte {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: var(--karte);
+  border: 1px solid var(--linie);
+  border-radius: var(--radius);
+  box-shadow: var(--schatten);
+  padding: 14px;
+  margin-bottom: 12px;
+  cursor: pointer;
+}
+.tour-karte:active { transform: scale(0.995); }
+.tour-karte__kopf { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.tour-karte__emoji { font-size: 1.6rem; }
+.tour-karte__titel { font-weight: 650; font-size: 1.05rem; }
+.tour-karte__meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--gruen-hell);
+  color: var(--gruen-dunkel);
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+@media (prefers-color-scheme: dark) { .chip { color: var(--gruen); } }
+.chip--warn { background: #fbe9d8; color: #8a4a17; }
+@media (prefers-color-scheme: dark) { .chip--warn { background: #3a2a1a; color: var(--akzent); } }
+
+/* ---------- Buttons ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 0;
+  border-radius: 12px;
+  padding: 13px 16px;
+  font-weight: 650;
+  cursor: pointer;
+  background: var(--gruen);
+  color: #fff;
+  min-height: 48px;
+}
+.btn:active { filter: brightness(0.92); }
+.btn--breit { width: 100%; }
+.btn--zweit { background: var(--karte); color: var(--text); border: 1px solid var(--linie); }
+.btn--klein { padding: 8px 12px; min-height: 40px; font-size: 0.9rem; }
+.btn[disabled] { opacity: 0.45; cursor: default; }
+
+.knopfreihe { display: flex; gap: 8px; }
+.knopfreihe > * { flex: 1; }
+
+/* ---------- Tourfuehrung ---------- */
+.fortschritt {
+  height: 6px;
+  background: var(--linie);
+  border-radius: 999px;
+  overflow: hidden;
+  margin: 4px 0 14px;
+}
+.fortschritt__balken { height: 100%; background: var(--gruen); transition: width 0.3s; }
+
+.station-kopf { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 4px; }
+.station-nr {
+  flex: 0 0 auto;
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  background: var(--gruen);
+  color: #fff;
+  display: grid; place-items: center;
+  font-weight: 700;
+}
+
+.tier-liste { display: grid; gap: 8px; margin-top: 12px; }
+.tier-zeile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  text-align: left;
+  background: var(--karte);
+  border: 1px solid var(--linie);
+  border-radius: 12px;
+  padding: 12px;
+  cursor: pointer;
+  min-height: 52px;
+}
+.tier-zeile__punkt { width: 10px; height: 10px; border-radius: 50%; flex: 0 0 auto; }
+.tier-zeile__name { font-weight: 600; }
+.tier-zeile__pfeil { margin-left: auto; color: var(--text-schwach); }
+
+.steckbrief { display: grid; gap: 0; margin: 12px 0; border-top: 1px solid var(--linie); }
+.steckbrief div {
+  display: grid;
+  grid-template-columns: 38% 1fr;
+  gap: 10px;
+  padding: 9px 2px;
+  border-bottom: 1px solid var(--linie);
+  font-size: 0.94rem;
+}
+.steckbrief dt, .steckbrief span:first-child { color: var(--text-schwach); }
+
+.wusstest { margin: 0; padding-left: 20px; }
+.wusstest li { margin-bottom: 8px; }
+
+/* ---------- Vorleser ---------- */
+.vorleser {
+  position: sticky;
+  bottom: calc(var(--nav-hoehe) + env(safe-area-inset-bottom));
+  z-index: 20;
+  background: var(--karte);
+  border: 1px solid var(--linie);
+  border-radius: 14px;
+  box-shadow: var(--schatten);
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+}
+.vorleser__status { flex: 1; font-size: 0.85rem; color: var(--text-schwach); min-width: 0; }
+.vorleser__rund {
+  width: 46px; height: 46px;
+  border-radius: 50%;
+  border: 0;
+  background: var(--gruen);
+  color: #fff;
+  font-size: 1.1rem;
+  display: grid; place-items: center;
+  cursor: pointer;
+  flex: 0 0 auto;
+}
+.vorleser__rund--zweit { background: var(--linie); color: var(--text); }
+
+/* ---------- Karte (SVG) ---------- */
+.kartenbox {
+  position: relative;
+  background: var(--karte);
+  border-radius: var(--radius);
+  box-shadow: var(--schatten);
+  overflow: hidden;
+  touch-action: none;
+}
+.kartenbox svg { display: block; width: 100%; height: auto; }
+.marker-kreis { cursor: pointer; }
+.marker-text { font-size: 3.2px; font-weight: 700; fill: #fff; pointer-events: none; text-anchor: middle; }
+.marker-label {
+  font-size: 2.4px;
+  fill: var(--text);
+  text-anchor: middle;
+  paint-order: stroke;
+  stroke: var(--karte);
+  stroke-width: 0.9px;
+  pointer-events: none;
+}
+.route-linie { fill: none; stroke: var(--akzent); stroke-width: 0.9; stroke-dasharray: 2.4 1.8; stroke-linecap: round; }
+.ich-punkt { fill: #2f6f9f; stroke: #fff; stroke-width: 0.8; }
+
+.karten-werkzeug {
+  display: flex; gap: 8px; padding: 10px; border-top: 1px solid var(--linie);
+  flex-wrap: wrap;
+}
+
+/* ---------- Suche & Filter ---------- */
+.suche {
+  width: 100%;
+  padding: 13px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--linie);
+  background: var(--karte);
+  color: var(--text);
+  font-size: 1rem;
+  margin-bottom: 10px;
+}
+.filterzeile { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 6px; }
+.filterzeile::-webkit-scrollbar { display: none; }
+.filter-chip {
+  border: 1px solid var(--linie);
+  background: var(--karte);
+  color: var(--text);
+  border-radius: 999px;
+  padding: 8px 14px;
+  white-space: nowrap;
+  cursor: pointer;
+  font-size: 0.88rem;
+  min-height: 40px;
+}
+.filter-chip[aria-pressed='true'] { background: var(--gruen); color: #fff; border-color: var(--gruen); }
+
+/* ---------- Untere Navigation ---------- */
+.nav {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  z-index: 40;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  background: var(--karte);
+  border-top: 1px solid var(--linie);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.nav a {
+  display: grid;
+  place-items: center;
+  gap: 2px;
+  padding: 8px 2px;
+  text-decoration: none;
+  color: var(--text-schwach);
+  font-size: 0.68rem;
+  min-height: var(--nav-hoehe);
+  align-content: center;
+}
+.nav a[aria-current='page'] { color: var(--gruen); font-weight: 650; }
+.nav svg { width: 22px; height: 22px; }
+
+/* ---------- Sonstiges ---------- */
+.erledigt { opacity: 0.55; }
+.abstand { height: 8px; }
+.zeile-zwischen { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+
+.schalter { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--linie); }
+.schalter:last-child { border-bottom: 0; }
+input[type='range'] { width: 130px; }
+select, input[type='time'], input[type='text'] {
+  font: inherit;
+  padding: 9px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--linie);
+  background: var(--sand);
+  color: var(--text);
+  max-width: 60%;
+}
+
+.leer { text-align: center; color: var(--text-schwach); padding: 32px 12px; }
+
+/* ---------- Altersstufen ---------- */
+/* Je juenger, desto groesser Schrift und Tippflaechen. */
+body[data-alterstufe='kind'] { font-size: 1.06rem; }
+body[data-alterstufe='kind'] h1 { font-size: 1.6rem; }
+
+body[data-alterstufe='mini'] { font-size: 1.18rem; line-height: 1.6; }
+body[data-alterstufe='mini'] h1 { font-size: 1.8rem; }
+body[data-alterstufe='mini'] h2 { font-size: 1.3rem; }
+body[data-alterstufe='mini'] .tier-zeile { min-height: 64px; padding: 15px; }
+body[data-alterstufe='mini'] .btn { min-height: 56px; font-size: 1.05rem; }
+body[data-alterstufe='mini'] .schwach { font-size: 1rem; }
+body[data-alterstufe='mini'] .tour-karte__emoji { font-size: 2rem; }
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}

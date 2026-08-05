@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Tierpark-Begleiter</title>
+  <meta name="description" content="Gefuehrte Rundwege durch den Tierpark mit Karte, Tierlexikon und Vorlesefunktion - offline nutzbar.">
+  <meta name="theme-color" content="#1f6f4a">
+  <meta name="color-scheme" content="light dark">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Tierpark">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icons/icon-192.png">
+  <link rel="apple-touch-icon" href="./icons/icon-192.png">
+  <link rel="stylesheet" href="./app/styles.css">
+</head>
+<body>
+  <header class="kopf">
+    <button id="zurueck" hidden aria-label="Zurueck">‹</button>
+    <div class="kopf__titel">Tierpark-Begleiter</div>
+    <a href="#/einstellungen" aria-label="Einstellungen" style="text-decoration:none">
+      <span style="display:grid;place-items:center;width:40px;height:40px;border-radius:10px;background:rgba(255,255,255,.16)">⚙</span>
+    </a>
+  </header>
+
+  <main id="inhalt"></main>
+
+  <nav class="nav" aria-label="Hauptnavigation"></nav>
+
+  <noscript>
+    <p style="padding:20px">Diese App braucht JavaScript. Bitte im Browser aktivieren.</p>
+  </noscript>
+
+  <script type="module" src="./app/app.js"></script>
+</body>
+</html>
