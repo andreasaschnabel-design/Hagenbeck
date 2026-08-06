@@ -1,196 +1,233 @@
-const MIN_SCALE = 0.62;
-const MAX_SCALE = 3.2;
-const STORAGE_KEY = 'hagenbeck-v24';
-const ZOOM_FACTOR = 1.22;
+const MIN_SCALE = 0.82;
+const MAX_SCALE = 4;
+const STORAGE_KEY = 'hagenbeck-v24-map-camera';
+const ZOOM_FACTOR = 1.28;
 
+let camera = loadCamera();
 let frame = 0;
+let viewport = null;
+let stage = null;
+let pointers = new Map();
 let gesture = null;
-let state = { x: 0, y: 0, scale: 1 };
+let moved = false;
+let lastTap = 0;
 
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
 }
 
-function readStoredState() {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); }
-  catch { return {}; }
-}
-
-function persistState() {
+function loadCamera() {
   try {
-    const stored = readStoredState();
-    stored.x = state.x;
-    stored.y = state.y;
-    stored.scale = state.scale;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(stored));
-  } catch {}
+    const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+    return {
+      x: Number.isFinite(Number(stored.x)) ? Number(stored.x) : 0,
+      y: Number.isFinite(Number(stored.y)) ? Number(stored.y) : 0,
+      scale: Number.isFinite(Number(stored.scale)) ? clamp(Number(stored.scale), MIN_SCALE, MAX_SCALE) : 1
+    };
+  } catch {
+    return { x: 0, y: 0, scale: 1 };
+  }
 }
 
-function readStage(stage) {
-  const transform = stage.style.transform || getComputedStyle(stage).transform || '';
-  const direct = transform.match(/translate(?:3d)?\((-?[\d.]+)px,\s*(-?[\d.]+)px(?:,\s*0(?:px)?)?\)\s*scale\(([\d.]+)\)/);
-  if (direct) {
-    state = { x: Number(direct[1]), y: Number(direct[2]), scale: Number(direct[3]) };
-    return;
-  }
+function saveCamera() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(camera)); } catch {}
+}
 
-  const stored = readStoredState();
-  state = {
-    x: Number.isFinite(Number(stored.x)) ? Number(stored.x) : 0,
-    y: Number.isFinite(Number(stored.y)) ? Number(stored.y) : 0,
-    scale: Number.isFinite(Number(stored.scale)) ? clamp(Number(stored.scale), MIN_SCALE, MAX_SCALE) : 1
+function cameraLimits() {
+  if (!viewport) return { x: 0, y: 0 };
+  const rect = viewport.getBoundingClientRect();
+  const extra = Math.max(0, camera.scale - 1);
+  return {
+    x: rect.width * (0.34 + extra * 0.48),
+    y: rect.height * (0.34 + extra * 0.48)
   };
 }
 
-function draw(stage, persist = true) {
+function constrain() {
+  const limits = cameraLimits();
+  camera.x = clamp(camera.x, -limits.x, limits.x);
+  camera.y = clamp(camera.y, -limits.y, limits.y);
+  camera.scale = clamp(camera.scale, MIN_SCALE, MAX_SCALE);
+}
+
+function draw({ animate = false, persist = true } = {}) {
+  if (!stage) return;
+  constrain();
   cancelAnimationFrame(frame);
   frame = requestAnimationFrame(() => {
-    stage.style.transition = 'none';
-    stage.style.transform = `translate3d(${state.x}px, ${state.y}px, 0) scale(${state.scale})`;
-    if (persist) persistState();
-    window.dispatchEvent(new CustomEvent('hagenbeck:map-transform', { detail: { ...state } }));
+    stage.style.transition = animate ? 'transform .22s cubic-bezier(.2,.8,.2,1)' : 'none';
+    stage.style.transform = `translate3d(${camera.x}px,${camera.y}px,0) scale(${camera.scale})`;
+    if (persist) saveCamera();
+    window.dispatchEvent(new CustomEvent('hagenbeck:map-transform', { detail: { ...camera } }));
   });
+}
+
+function pointFromEvent(event) {
+  const rect = viewport.getBoundingClientRect();
+  return { x: event.clientX - rect.left, y: event.clientY - rect.top };
 }
 
 function distance(a, b) {
-  return Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
+  return Math.hypot(a.x - b.x, a.y - b.y);
 }
 
-function midpoint(a, b, rect) {
-  return {
-    x: (a.clientX + b.clientX) / 2 - rect.left,
-    y: (a.clientY + b.clientY) / 2 - rect.top
-  };
+function midpoint(a, b) {
+  return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
 }
 
-function viewportCenter(viewport) {
-  const rect = viewport.getBoundingClientRect();
-  return { x: rect.width / 2, y: rect.height / 2 };
-}
-
-function zoomAround(stage, nextScale, point) {
-  const previousScale = state.scale;
+function zoomAt(nextScale, focus, animate = false) {
+  const previous = camera.scale;
   nextScale = clamp(nextScale, MIN_SCALE, MAX_SCALE);
-  if (Math.abs(nextScale - previousScale) < 0.001) return;
-
-  const ratio = nextScale / previousScale;
-  state.x = point.x - (point.x - state.x) * ratio;
-  state.y = point.y - (point.y - state.y) * ratio;
-  state.scale = nextScale;
-  draw(stage);
+  if (Math.abs(nextScale - previous) < .001) return;
+  const rect = viewport.getBoundingClientRect();
+  const center = { x: rect.width / 2, y: rect.height / 2 };
+  const ratio = nextScale / previous;
+  camera.x = focus.x - center.x - (focus.x - center.x - camera.x) * ratio;
+  camera.y = focus.y - center.y - (focus.y - center.y - camera.y) * ratio;
+  camera.scale = nextScale;
+  draw({ animate });
 }
 
-function resetMap(stage) {
-  state = { x: 0, y: 0, scale: 1 };
-  draw(stage);
+function resetCamera() {
+  camera = { x: 0, y: 0, scale: 1 };
+  draw({ animate: true });
 }
 
-function attach() {
-  const viewport = document.querySelector('#viewport.map');
-  const stage = document.querySelector('#mapStage');
-  if (!viewport || !stage || viewport.dataset.smoothGestures === 'true') return;
-
-  viewport.dataset.smoothGestures = 'true';
-  readStage(stage);
-  stage.style.willChange = 'transform';
-  stage.style.backfaceVisibility = 'hidden';
-
-  viewport.addEventListener('wheel', event => {
-    event.preventDefault();
-    event.stopImmediatePropagation();
-    const rect = viewport.getBoundingClientRect();
-    const point = { x: event.clientX - rect.left, y: event.clientY - rect.top };
-    const factor = Math.exp(-event.deltaY * 0.0014);
-    zoomAround(stage, state.scale * factor, point);
-  }, { passive: false, capture: true });
-
-  viewport.addEventListener('touchstart', event => {
-    if (event.touches.length !== 2) return;
-    event.preventDefault();
-    event.stopImmediatePropagation();
-    readStage(stage);
-    const rect = viewport.getBoundingClientRect();
+function startGesture() {
+  const values = [...pointers.values()];
+  moved = false;
+  if (values.length === 1) {
+    gesture = { type: 'pan', start: values[0], x: camera.x, y: camera.y };
+  } else if (values.length >= 2) {
+    const a = values[0], b = values[1];
     gesture = {
-      distance: distance(event.touches[0], event.touches[1]),
-      scale: state.scale,
-      midpoint: midpoint(event.touches[0], event.touches[1], rect),
-      x: state.x,
-      y: state.y
+      type: 'pinch',
+      distance: Math.max(1, distance(a, b)),
+      midpoint: midpoint(a, b),
+      scale: camera.scale,
+      x: camera.x,
+      y: camera.y
     };
-  }, { passive: false, capture: true });
-
-  viewport.addEventListener('touchmove', event => {
-    if (!gesture || event.touches.length !== 2) return;
-    event.preventDefault();
-    event.stopImmediatePropagation();
-    const rect = viewport.getBoundingClientRect();
-    const currentMidpoint = midpoint(event.touches[0], event.touches[1], rect);
-    const nextScale = clamp(
-      gesture.scale * distance(event.touches[0], event.touches[1]) / gesture.distance,
-      MIN_SCALE,
-      MAX_SCALE
-    );
-    const ratio = nextScale / gesture.scale;
-    state.x = currentMidpoint.x - (gesture.midpoint.x - gesture.x) * ratio;
-    state.y = currentMidpoint.y - (gesture.midpoint.y - gesture.y) * ratio;
-    state.scale = nextScale;
-    draw(stage);
-  }, { passive: false, capture: true });
-
-  const finish = event => {
-    if (!gesture) return;
-    if (event) {
-      event.preventDefault();
-      event.stopImmediatePropagation();
-    }
-    gesture = null;
-  };
-
-  viewport.addEventListener('touchend', finish, { passive: false, capture: true });
-  viewport.addEventListener('touchcancel', finish, { passive: false, capture: true });
-
-  ['gesturestart', 'gesturechange', 'gestureend'].forEach(type => {
-    viewport.addEventListener(type, event => event.preventDefault(), { passive: false });
-  });
+  }
 }
 
-function handleToolClick(event) {
-  const button = event.target.closest('.map .tools [data-action]');
-  if (!button) return;
+function onPointerDown(event) {
+  if (event.target.closest('.filters,.tools,.map-status,.bottom-nav,.sheet')) return;
+  viewport.setPointerCapture?.(event.pointerId);
+  pointers.set(event.pointerId, pointFromEvent(event));
+  startGesture();
+}
 
-  const action = button.dataset.action;
-  if (!['zoom-in', 'zoom-out', 'reset-map'].includes(action)) return;
-
-  const viewport = document.querySelector('#viewport.map');
-  const stage = document.querySelector('#mapStage');
-  if (!viewport || !stage) return;
-
+function onPointerMove(event) {
+  if (!pointers.has(event.pointerId) || !gesture) return;
   event.preventDefault();
-  event.stopPropagation();
-  event.stopImmediatePropagation();
+  pointers.set(event.pointerId, pointFromEvent(event));
+  const values = [...pointers.values()];
 
-  readStage(stage);
-  if (action === 'reset-map') {
-    resetMap(stage);
+  if (values.length >= 2) {
+    if (gesture.type !== 'pinch') startGesture();
+    const a = values[0], b = values[1];
+    const currentMid = midpoint(a, b);
+    const nextScale = clamp(gesture.scale * distance(a, b) / gesture.distance, MIN_SCALE, MAX_SCALE);
+    const ratio = nextScale / gesture.scale;
+    camera.scale = nextScale;
+    camera.x = currentMid.x - gesture.midpoint.x + gesture.x * ratio;
+    camera.y = currentMid.y - gesture.midpoint.y + gesture.y * ratio;
+    moved = true;
+    draw({ persist: false });
     return;
   }
 
-  const factor = action === 'zoom-in' ? ZOOM_FACTOR : 1 / ZOOM_FACTOR;
-  zoomAround(stage, state.scale * factor, viewportCenter(viewport));
+  const current = values[0];
+  if (gesture.type !== 'pan') startGesture();
+  const dx = current.x - gesture.start.x;
+  const dy = current.y - gesture.start.y;
+  if (Math.hypot(dx, dy) > 4) moved = true;
+  camera.x = gesture.x + dx;
+  camera.y = gesture.y + dy;
+  draw({ persist: false });
 }
 
-document.addEventListener('click', handleToolClick, true);
+function onPointerUp(event) {
+  if (!pointers.has(event.pointerId)) return;
+  pointers.delete(event.pointerId);
+  try { viewport.releasePointerCapture?.(event.pointerId); } catch {}
+  if (pointers.size) startGesture();
+  else {
+    gesture = null;
+    constrain();
+    draw({ animate: true });
+  }
+}
+
+function onClickCapture(event) {
+  if (!moved) return;
+  event.preventDefault();
+  event.stopImmediatePropagation();
+  moved = false;
+}
+
+function onDoubleTap(event) {
+  if (event.target.closest('.filters,.tools,.map-status,.bottom-nav,.sheet')) return;
+  const now = Date.now();
+  if (now - lastTap < 320) {
+    event.preventDefault();
+    zoomAt(camera.scale * 1.65, pointFromEvent(event), true);
+    lastTap = 0;
+  } else lastTap = now;
+}
+
+function handleTool(event) {
+  const button = event.target.closest('.map .tools [data-action]');
+  if (!button) return;
+  const action = button.dataset.action;
+  if (!['zoom-in','zoom-out','reset-map'].includes(action)) return;
+  event.preventDefault();
+  event.stopImmediatePropagation();
+  const rect = viewport.getBoundingClientRect();
+  const center = { x: rect.width / 2, y: rect.height / 2 };
+  if (action === 'reset-map') resetCamera();
+  else zoomAt(camera.scale * (action === 'zoom-in' ? ZOOM_FACTOR : 1 / ZOOM_FACTOR), center, true);
+}
+
+function attach() {
+  const nextViewport = document.querySelector('#viewport.map');
+  const nextStage = document.querySelector('#mapStage');
+  if (!nextViewport || !nextStage || nextViewport.dataset.mapEngine === 'google-like') return;
+  viewport = nextViewport;
+  stage = nextStage;
+  viewport.dataset.mapEngine = 'google-like';
+  stage.style.willChange = 'transform';
+  stage.style.transformOrigin = '50% 50%';
+
+  viewport.addEventListener('pointerdown', onPointerDown, { passive: true });
+  viewport.addEventListener('pointermove', onPointerMove, { passive: false });
+  viewport.addEventListener('pointerup', onPointerUp, { passive: true });
+  viewport.addEventListener('pointercancel', onPointerUp, { passive: true });
+  viewport.addEventListener('click', onClickCapture, true);
+  viewport.addEventListener('pointerup', onDoubleTap, { passive: false });
+  viewport.addEventListener('wheel', event => {
+    if (event.target.closest('.filters,.tools,.map-status,.bottom-nav,.sheet')) return;
+    event.preventDefault();
+    const factor = Math.exp(-event.deltaY * .0015);
+    zoomAt(camera.scale * factor, pointFromEvent(event));
+  }, { passive: false });
+  draw({ persist: false });
+}
+
+document.addEventListener('click', handleTool, true);
+window.addEventListener('resize', () => draw({ animate: true, persist: false }));
 
 const style = document.createElement('style');
 style.textContent = `
-  #viewport.map { touch-action: none; overscroll-behavior: contain; }
-  #viewport.map .map-stage {
-    transition: none !important;
-    transform-origin: 0 0;
-  }
+  #viewport.map { touch-action:none; overscroll-behavior:contain; user-select:none; }
+  #viewport.map .map-stage { inset:0; transform-origin:50% 50%!important; transition:none; }
+  #viewport.map .map-stage>svg { width:100%; height:100%; }
+  #viewport.map[data-map-engine="google-like"] { cursor:grab; }
+  #viewport.map[data-map-engine="google-like"]:active { cursor:grabbing; }
 `;
 document.head.appendChild(style);
 
 const observer = new MutationObserver(attach);
-observer.observe(document.documentElement, { childList: true, subtree: true });
+observer.observe(document.documentElement, { childList:true, subtree:true });
 attach();
