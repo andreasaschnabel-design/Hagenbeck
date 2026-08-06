@@ -1,4 +1,4 @@
-const MIN_SCALE = 0.82;
+const MIN_SCALE = 1;
 const MAX_SCALE = 4;
 const STORAGE_KEY = 'hagenbeck-v24-map-camera';
 const ZOOM_FACTOR = 1.28;
@@ -36,18 +36,19 @@ function saveCamera() {
 function cameraLimits() {
   if (!viewport) return { x: 0, y: 0 };
   const rect = viewport.getBoundingClientRect();
-  const extra = Math.max(0, camera.scale - 1);
   return {
-    x: rect.width * (0.34 + extra * 0.48),
-    y: rect.height * (0.34 + extra * 0.48)
+    x: Math.max(0, rect.width * (camera.scale - 1) / 2),
+    y: Math.max(0, rect.height * (camera.scale - 1) / 2)
   };
 }
 
 function constrain() {
+  camera.scale = clamp(camera.scale, MIN_SCALE, MAX_SCALE);
   const limits = cameraLimits();
   camera.x = clamp(camera.x, -limits.x, limits.x);
   camera.y = clamp(camera.y, -limits.y, limits.y);
-  camera.scale = clamp(camera.scale, MIN_SCALE, MAX_SCALE);
+  if (Math.abs(camera.x) < .5) camera.x = 0;
+  if (Math.abs(camera.y) < .5) camera.y = 0;
 }
 
 function draw({ animate = false, persist = true } = {}) {
@@ -55,7 +56,7 @@ function draw({ animate = false, persist = true } = {}) {
   constrain();
   cancelAnimationFrame(frame);
   frame = requestAnimationFrame(() => {
-    stage.style.transition = animate ? 'transform .22s cubic-bezier(.2,.8,.2,1)' : 'none';
+    stage.style.transition = animate ? 'transform .24s cubic-bezier(.2,.8,.2,1)' : 'none';
     stage.style.transform = `translate3d(${camera.x}px,${camera.y}px,0) scale(${camera.scale})`;
     if (persist) saveCamera();
     window.dispatchEvent(new CustomEvent('hagenbeck:map-transform', { detail: { ...camera } }));
@@ -111,8 +112,12 @@ function startGesture() {
   }
 }
 
+function isUiTarget(target) {
+  return Boolean(target.closest('.filters,.tools,.map-status,.bottom-nav,.sheet,.animal-modal'));
+}
+
 function onPointerDown(event) {
-  if (event.target.closest('.filters,.tools,.map-status,.bottom-nav,.sheet')) return;
+  if (isUiTarget(event.target)) return;
   viewport.setPointerCapture?.(event.pointerId);
   pointers.set(event.pointerId, pointFromEvent(event));
   startGesture();
@@ -155,7 +160,6 @@ function onPointerUp(event) {
   if (pointers.size) startGesture();
   else {
     gesture = null;
-    constrain();
     draw({ animate: true });
   }
 }
@@ -168,7 +172,7 @@ function onClickCapture(event) {
 }
 
 function onDoubleTap(event) {
-  if (event.target.closest('.filters,.tools,.map-status,.bottom-nav,.sheet')) return;
+  if (isUiTarget(event.target)) return;
   const now = Date.now();
   if (now - lastTap < 320) {
     event.preventDefault();
@@ -193,10 +197,10 @@ function handleTool(event) {
 function attach() {
   const nextViewport = document.querySelector('#viewport.map');
   const nextStage = document.querySelector('#mapStage');
-  if (!nextViewport || !nextStage || nextViewport.dataset.mapEngine === 'google-like') return;
+  if (!nextViewport || !nextStage || nextViewport.dataset.mapEngine === 'google-like-v2') return;
   viewport = nextViewport;
   stage = nextStage;
-  viewport.dataset.mapEngine = 'google-like';
+  viewport.dataset.mapEngine = 'google-like-v2';
   stage.style.willChange = 'transform';
   stage.style.transformOrigin = '50% 50%';
 
@@ -207,24 +211,26 @@ function attach() {
   viewport.addEventListener('click', onClickCapture, true);
   viewport.addEventListener('pointerup', onDoubleTap, { passive: false });
   viewport.addEventListener('wheel', event => {
-    if (event.target.closest('.filters,.tools,.map-status,.bottom-nav,.sheet')) return;
+    if (isUiTarget(event.target)) return;
     event.preventDefault();
-    const factor = Math.exp(-event.deltaY * .0015);
-    zoomAt(camera.scale * factor, pointFromEvent(event));
+    zoomAt(camera.scale * Math.exp(-event.deltaY * .0015), pointFromEvent(event));
   }, { passive: false });
-  draw({ persist: false });
+
+  draw({ animate: true });
 }
 
 document.addEventListener('click', handleTool, true);
 window.addEventListener('resize', () => draw({ animate: true, persist: false }));
+window.addEventListener('orientationchange', () => setTimeout(() => draw({ animate: true, persist: false }), 150));
+window.addEventListener('hagenbeck:map-rotation', () => draw({ animate: true, persist: false }));
 
 const style = document.createElement('style');
 style.textContent = `
-  #viewport.map { touch-action:none; overscroll-behavior:contain; user-select:none; }
+  #viewport.map { touch-action:none; overscroll-behavior:contain; user-select:none; overflow:hidden!important; }
   #viewport.map .map-stage { inset:0; transform-origin:50% 50%!important; transition:none; }
   #viewport.map .map-stage>svg { width:100%; height:100%; }
-  #viewport.map[data-map-engine="google-like"] { cursor:grab; }
-  #viewport.map[data-map-engine="google-like"]:active { cursor:grabbing; }
+  #viewport.map[data-map-engine="google-like-v2"] { cursor:grab; }
+  #viewport.map[data-map-engine="google-like-v2"]:active { cursor:grabbing; }
 `;
 document.head.appendChild(style);
 
