@@ -1,254 +1,254 @@
 import { STATIONEN } from '../app/data.js';
 
-const LABEL_LAYER_CLASS = 'map-label-layer';
-let frame = null;
-let observer = null;
+const LAYER_ID = 'map-label-overlay';
+const names = new Map(STATIONEN.map(station => [station.id, station.name]));
+let frame = 0;
+let appObserver = null;
 
-function stationName(id) {
-  return STATIONEN.find(station => station.id === id)?.name || id || 'Station';
+function box(left, top, width, height) {
+  return { left, top, right: left + width, bottom: top + height, width, height };
 }
 
-function overlapArea(a, b) {
+function overlap(a, b) {
   const width = Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left));
   const height = Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top));
   return width * height;
 }
 
-function rect(left, top, width, height) {
-  return { left, top, right: left + width, bottom: top + height, width, height };
+function expand(value, amount) {
+  return box(value.left - amount, value.top - amount, value.width + amount * 2, value.height + amount * 2);
 }
 
-function expand(box, amount) {
-  return rect(box.left - amount, box.top - amount, box.width + amount * 2, box.height + amount * 2);
-}
-
-function ensureLayer(map) {
-  let layer = map.querySelector(`.${LABEL_LAYER_CLASS}`);
+function ensureLayer() {
+  let layer = document.getElementById(LAYER_ID);
   if (!layer) {
     layer = document.createElement('div');
-    layer.className = LABEL_LAYER_CLASS;
+    layer.id = LAYER_ID;
     layer.setAttribute('aria-hidden', 'true');
-    map.appendChild(layer);
+    document.body.appendChild(layer);
   }
   return layer;
 }
 
-function visibleMarkers(mapRect) {
-  return [...document.querySelectorAll('.map-stage .marker')]
+function markerItems(mapRect) {
+  return [...document.querySelectorAll('main.map .map-stage .marker[data-station]')]
     .map(marker => {
-      const bounds = marker.getBoundingClientRect();
-      const id = marker.dataset.station;
+      const rect = marker.getBoundingClientRect();
       return {
-        marker,
-        id,
-        name: stationName(id),
-        bounds: rect(bounds.left - mapRect.left, bounds.top - mapRect.top, bounds.width, bounds.height)
+        id: marker.dataset.station,
+        name: names.get(marker.dataset.station) || marker.dataset.station || 'Station',
+        rect,
+        centerX: rect.left + rect.width / 2,
+        centerY: rect.top + rect.height / 2
       };
     })
-    .filter(item => item.bounds.right > 0 && item.bounds.left < mapRect.width && item.bounds.bottom > 0 && item.bounds.top < mapRect.height);
+    .filter(item =>
+      item.rect.width > 0 &&
+      item.rect.height > 0 &&
+      item.centerX >= mapRect.left &&
+      item.centerX <= mapRect.right &&
+      item.centerY >= mapRect.top &&
+      item.centerY <= mapRect.bottom
+    );
 }
 
-function controlObstacles(map, mapRect) {
+function obstacles(map) {
   return [...map.querySelectorAll('.filters, .tools, .map-status')]
     .map(element => element.getBoundingClientRect())
-    .filter(bounds => bounds.width && bounds.height)
-    .map(bounds => rect(bounds.left - mapRect.left, bounds.top - mapRect.top, bounds.width, bounds.height));
+    .filter(rect => rect.width > 0 && rect.height > 0)
+    .map(rect => box(rect.left, rect.top, rect.width, rect.height));
 }
 
-function candidatesFor(marker, width, height) {
-  const gap = 12;
-  const cx = marker.bounds.left + marker.bounds.width / 2;
-  const cy = marker.bounds.top + marker.bounds.height / 2;
-  const radiusX = marker.bounds.width / 2;
-  const radiusY = marker.bounds.height / 2;
-
+function candidates(marker, width, height) {
+  const gap = 16;
+  const radiusX = marker.rect.width / 2;
+  const radiusY = marker.rect.height / 2;
+  const x = marker.centerX;
+  const y = marker.centerY;
   return [
-    { side: 'right', left: cx + radiusX + gap, top: cy - height / 2 },
-    { side: 'left', left: cx - radiusX - gap - width, top: cy - height / 2 },
-    { side: 'top', left: cx - width / 2, top: cy - radiusY - gap - height },
-    { side: 'bottom', left: cx - width / 2, top: cy + radiusY + gap },
-    { side: 'top-right', left: cx + radiusX + 8, top: cy - radiusY - height - 8 },
-    { side: 'top-left', left: cx - radiusX - width - 8, top: cy - radiusY - height - 8 },
-    { side: 'bottom-right', left: cx + radiusX + 8, top: cy + radiusY + 8 },
-    { side: 'bottom-left', left: cx - radiusX - width - 8, top: cy + radiusY + 8 }
+    { side: 'right', left: x + radiusX + gap, top: y - height / 2 },
+    { side: 'left', left: x - radiusX - gap - width, top: y - height / 2 },
+    { side: 'top', left: x - width / 2, top: y - radiusY - gap - height },
+    { side: 'bottom', left: x - width / 2, top: y + radiusY + gap },
+    { side: 'top-right', left: x + radiusX + 10, top: y - radiusY - height - 10 },
+    { side: 'top-left', left: x - radiusX - width - 10, top: y - radiusY - height - 10 },
+    { side: 'bottom-right', left: x + radiusX + 10, top: y + radiusY + 10 },
+    { side: 'bottom-left', left: x - radiusX - width - 10, top: y + radiusY + 10 }
   ];
 }
 
-function scoreCandidate(candidate, size, mapRect, used, obstacles, markers, ownMarker) {
-  const box = rect(candidate.left, candidate.top, size.width, size.height);
-  let score = 0;
+function score(candidate, width, height, mapRect, used, fixedObstacles, allMarkers, ownMarker) {
+  const value = box(candidate.left, candidate.top, width, height);
+  let result = 0;
   const margin = 8;
 
-  if (box.left < margin) score += (margin - box.left) * 800;
-  if (box.top < margin) score += (margin - box.top) * 800;
-  if (box.right > mapRect.width - margin) score += (box.right - (mapRect.width - margin)) * 800;
-  if (box.bottom > mapRect.height - margin) score += (box.bottom - (mapRect.height - margin)) * 800;
+  if (value.left < mapRect.left + margin) result += (mapRect.left + margin - value.left) * 1000;
+  if (value.top < mapRect.top + margin) result += (mapRect.top + margin - value.top) * 1000;
+  if (value.right > mapRect.right - margin) result += (value.right - (mapRect.right - margin)) * 1000;
+  if (value.bottom > mapRect.bottom - margin) result += (value.bottom - (mapRect.bottom - margin)) * 1000;
 
-  for (const other of used) score += overlapArea(expand(box, 3), other) * 80;
-  for (const obstacle of obstacles) score += overlapArea(expand(box, 4), obstacle) * 120;
-  for (const marker of markers) {
+  for (const other of used) result += overlap(expand(value, 5), other) * 150;
+  for (const obstacle of fixedObstacles) result += overlap(expand(value, 5), obstacle) * 180;
+  for (const marker of allMarkers) {
     if (marker === ownMarker) continue;
-    score += overlapArea(expand(box, 2), expand(marker.bounds, 4)) * 100;
+    const markerBox = box(marker.rect.left, marker.rect.top, marker.rect.width, marker.rect.height);
+    result += overlap(expand(value, 4), expand(markerBox, 8)) * 220;
   }
 
-  const ownCenterX = ownMarker.bounds.left + ownMarker.bounds.width / 2;
-  const ownCenterY = ownMarker.bounds.top + ownMarker.bounds.height / 2;
-  const labelCenterX = box.left + box.width / 2;
-  const labelCenterY = box.top + box.height / 2;
-  score += Math.hypot(labelCenterX - ownCenterX, labelCenterY - ownCenterY) * 0.2;
-
-  return { ...candidate, box, score };
+  result += Math.hypot(value.left + width / 2 - ownMarker.centerX, value.top + height / 2 - ownMarker.centerY) * 0.15;
+  return { ...candidate, value, result };
 }
 
-function connectorGeometry(marker, labelBox) {
-  const mx = marker.bounds.left + marker.bounds.width / 2;
-  const my = marker.bounds.top + marker.bounds.height / 2;
-  const lx = Math.max(labelBox.left, Math.min(mx, labelBox.right));
-  const ly = Math.max(labelBox.top, Math.min(my, labelBox.bottom));
-  return { mx, my, lx, ly };
+function connector(marker, labelBox) {
+  const endX = Math.max(labelBox.left, Math.min(marker.centerX, labelBox.right));
+  const endY = Math.max(labelBox.top, Math.min(marker.centerY, labelBox.bottom));
+  const dx = endX - marker.centerX;
+  const dy = endY - marker.centerY;
+  return {
+    left: marker.centerX,
+    top: marker.centerY,
+    width: Math.hypot(dx, dy),
+    angle: Math.atan2(dy, dx) * 180 / Math.PI
+  };
 }
 
-function layoutLabels() {
-  frame = null;
+function renderLabels() {
+  frame = 0;
   const map = document.querySelector('main.map');
-  if (!map) return;
+  const layer = ensureLayer();
+  if (!map) {
+    layer.replaceChildren();
+    layer.hidden = true;
+    return;
+  }
 
   const mapRect = map.getBoundingClientRect();
   if (!mapRect.width || !mapRect.height) return;
 
-  const layer = ensureLayer(map);
-  const markers = visibleMarkers(mapRect);
-  const obstacles = controlObstacles(map, mapRect);
+  layer.hidden = false;
+  layer.style.clipPath = `inset(${Math.max(0, mapRect.top)}px ${Math.max(0, innerWidth - mapRect.right)}px ${Math.max(0, innerHeight - mapRect.bottom)}px ${Math.max(0, mapRect.left)}px)`;
+  layer.replaceChildren();
+
+  const markers = markerItems(mapRect);
+  const fixedObstacles = obstacles(map);
   const used = [];
 
-  document.querySelectorAll('.map-stage .marker .label').forEach(label => {
-    label.style.opacity = '0';
-    label.style.pointerEvents = 'none';
-  });
+  for (const marker of markers.sort((a, b) => a.centerY - b.centerY || a.centerX - b.centerX)) {
+    const label = document.createElement('div');
+    label.className = 'map-label-overlay__label';
+    label.textContent = marker.name;
+    layer.appendChild(label);
 
-  layer.innerHTML = '';
+    const natural = label.getBoundingClientRect();
+    const width = Math.min(Math.max(natural.width, 86), innerWidth <= 430 ? 144 : 180);
+    label.style.width = `${width}px`;
+    const height = label.getBoundingClientRect().height;
 
-  markers
-    .sort((a, b) => a.bounds.top - b.bounds.top || a.bounds.left - b.bounds.left)
-    .forEach(marker => {
-      const wrapper = document.createElement('div');
-      wrapper.className = 'smart-map-label';
-      wrapper.dataset.station = marker.id;
-      wrapper.textContent = marker.name;
-      layer.appendChild(wrapper);
+    const best = candidates(marker, width, height)
+      .map(candidate => score(candidate, width, height, mapRect, used, fixedObstacles, markers, marker))
+      .sort((a, b) => a.result - b.result)[0];
 
-      const measured = wrapper.getBoundingClientRect();
-      const size = {
-        width: Math.min(Math.max(measured.width, 72), 176),
-        height: measured.height
-      };
-      wrapper.style.width = `${size.width}px`;
+    label.style.left = `${best.value.left}px`;
+    label.style.top = `${best.value.top}px`;
+    label.dataset.side = best.side;
+    used.push(best.value);
 
-      const best = candidatesFor(marker, size.width, size.height)
-        .map(candidate => scoreCandidate(candidate, size, mapRect, used, obstacles, markers, marker))
-        .sort((a, b) => a.score - b.score)[0];
-
-      wrapper.style.left = `${best.box.left}px`;
-      wrapper.style.top = `${best.box.top}px`;
-      wrapper.dataset.side = best.side;
-      used.push(best.box);
-
-      const line = document.createElement('span');
-      line.className = 'smart-map-label__line';
-      const connector = connectorGeometry(marker, best.box);
-      const dx = connector.lx - connector.mx;
-      const dy = connector.ly - connector.my;
-      const length = Math.hypot(dx, dy);
-      const angle = Math.atan2(dy, dx) * 180 / Math.PI;
-      line.style.left = `${connector.mx}px`;
-      line.style.top = `${connector.my}px`;
-      line.style.width = `${length}px`;
-      line.style.transform = `rotate(${angle}deg)`;
-      layer.insertBefore(line, wrapper);
-    });
-}
-
-function scheduleLayout() {
-  if (frame) cancelAnimationFrame(frame);
-  frame = requestAnimationFrame(layoutLabels);
-}
-
-function start() {
-  scheduleLayout();
-  if (!observer) {
-    observer = new MutationObserver(scheduleLayout);
-    observer.observe(document.documentElement, {
-      childList: true,
-      subtree: true,
-      attributes: true,
-      attributeFilter: ['style', 'transform', 'class']
-    });
+    const lineData = connector(marker, best.value);
+    const line = document.createElement('span');
+    line.className = 'map-label-overlay__line';
+    line.style.left = `${lineData.left}px`;
+    line.style.top = `${lineData.top}px`;
+    line.style.width = `${lineData.width}px`;
+    line.style.transform = `rotate(${lineData.angle}deg)`;
+    layer.insertBefore(line, label);
   }
 }
 
+function schedule() {
+  if (frame) cancelAnimationFrame(frame);
+  frame = requestAnimationFrame(renderLabels);
+}
+
+function startObserver() {
+  const app = document.getElementById('app');
+  if (!app || appObserver) return;
+  appObserver = new MutationObserver(schedule);
+  appObserver.observe(app, { childList: true, subtree: true });
+}
+
 const style = document.createElement('style');
+style.id = 'map-label-overlay-styles';
 style.textContent = `
-  main.map { position: relative; }
-  .map-label-layer {
-    position: absolute;
-    z-index: 6;
+  main.map .map-stage .marker text.label,
+  main.map .map-stage .marker > text.label {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+  }
+  main.map { isolation: isolate; }
+  main.map .map-stage { position: relative; z-index: 1; }
+  main.map .filters,
+  main.map .tools,
+  main.map .map-status { z-index: 90 !important; }
+  #${LAYER_ID} {
+    position: fixed;
+    z-index: 70;
     inset: 0;
     overflow: hidden;
     pointer-events: none;
   }
-  .smart-map-label {
-    position: absolute;
-    display: block;
+  .map-label-overlay__label {
+    position: fixed;
     box-sizing: border-box;
-    min-height: 25px;
-    max-width: 176px;
+    min-height: 26px;
+    max-width: 180px;
     padding: 5px 9px 6px;
-    overflow: hidden;
-    border: 1px solid rgba(255,255,255,.2);
+    border: 1px solid rgba(255,255,255,.24);
     border-radius: 9px;
-    background: rgba(4,15,10,.9);
+    background: rgba(4,15,10,.94);
     color: #fff;
     font-size: 11px;
     font-weight: 900;
     line-height: 1.18;
-    letter-spacing: -.01em;
     text-align: center;
-    text-overflow: ellipsis;
     white-space: normal;
     overflow-wrap: anywhere;
-    box-shadow: 0 5px 16px rgba(0,0,0,.42), 0 0 0 1px rgba(0,0,0,.18);
+    box-shadow: 0 6px 18px rgba(0,0,0,.5);
     backdrop-filter: blur(10px);
-    transform: translateZ(0);
   }
-  .smart-map-label__line {
-    position: absolute;
+  .map-label-overlay__line {
+    position: fixed;
     z-index: -1;
     height: 2px;
     border-radius: 999px;
-    background: rgba(255,255,255,.7);
-    box-shadow: 0 0 0 1px rgba(0,0,0,.38);
+    background: rgba(255,255,255,.78);
+    box-shadow: 0 0 0 1px rgba(0,0,0,.45);
     transform-origin: 0 50%;
   }
   @media (max-width: 430px) {
-    .smart-map-label {
-      max-width: 138px;
-      min-height: 23px;
+    .map-label-overlay__label {
+      max-width: 144px;
+      min-height: 24px;
       padding: 4px 7px 5px;
-      border-radius: 8px;
       font-size: 10px;
     }
   }
 `;
 document.head.appendChild(style);
 
-window.addEventListener('DOMContentLoaded', start);
-window.addEventListener('load', scheduleLayout);
-window.addEventListener('resize', scheduleLayout);
-window.addEventListener('orientationchange', scheduleLayout);
-window.addEventListener('hagenbeck:heading', scheduleLayout);
-document.addEventListener('wheel', scheduleLayout, { passive: true, capture: true });
+window.addEventListener('DOMContentLoaded', () => {
+  startObserver();
+  schedule();
+});
+window.addEventListener('load', schedule);
+window.addEventListener('resize', schedule);
+window.addEventListener('orientationchange', schedule);
+window.addEventListener('hagenbeck:heading', schedule);
+document.addEventListener('wheel', schedule, { passive: true, capture: true });
+document.addEventListener('touchmove', schedule, { passive: true, capture: true });
 document.addEventListener('pointermove', event => {
-  if (event.buttons) scheduleLayout();
+  if (event.buttons) schedule();
 }, { passive: true, capture: true });
-document.addEventListener('touchmove', scheduleLayout, { passive: true, capture: true });
-start();
+
+startObserver();
+schedule();
