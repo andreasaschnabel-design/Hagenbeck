@@ -53,6 +53,13 @@ function saveAutoHeading() {
   } catch {}
 }
 
+function publishRotation() {
+  window.hagenbeckMapRotation = rotation;
+  window.dispatchEvent(new CustomEvent('hagenbeck:map-rotation', {
+    detail: { rotation }
+  }));
+}
+
 function setRotation(value, { manual = true } = {}) {
   if (manual && autoHeading) disableAutoHeading();
   rotation = normalize(value);
@@ -124,6 +131,7 @@ function disableAutoHeading() {
 
 window.hagenbeckEnableAutoHeading = enableAutoHeading;
 window.hagenbeckDisableAutoHeading = disableAutoHeading;
+window.hagenbeckMapRotation = rotation;
 
 function injectStyles() {
   if (document.querySelector('#map-rotation-styles')) return;
@@ -267,6 +275,7 @@ function applyRotation() {
     const compass = document.querySelector('[data-map-rotate="north"]');
     if (compass) compass.setAttribute('aria-label', rotation === 0 ? 'Karte ist nach Norden ausgerichtet' : 'Karte nach Norden ausrichten');
     updateControls();
+    publishRotation();
     applying = false;
   });
 }

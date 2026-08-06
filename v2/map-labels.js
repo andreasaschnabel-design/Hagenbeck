@@ -2,15 +2,32 @@ import { STATIONEN } from '../app/data.js';
 
 const NS = 'http://www.w3.org/2000/svg';
 const LAYER_CLASS = 'station-label-svg-layer';
+const LABEL_KEY = 'hagenbeck-v24-labels-visible';
 let observer = null;
 let scheduled = false;
 
 function labelsEnabled() {
   try {
+    const explicit = localStorage.getItem(LABEL_KEY);
+    if (explicit !== null) return explicit !== 'false';
     const state = JSON.parse(localStorage.getItem('hagenbeck-v24') || '{}');
     return state.labels !== false;
   } catch {
     return true;
+  }
+}
+
+function saveLabelsEnabled(value) {
+  try { localStorage.setItem(LABEL_KEY, String(Boolean(value))); } catch {}
+}
+
+function currentRotation() {
+  if (Number.isFinite(window.hagenbeckMapRotation)) return window.hagenbeckMapRotation;
+  try {
+    const value = Number(localStorage.getItem('hagenbeck-v24-map-rotation'));
+    return Number.isFinite(value) ? value : 0;
+  } catch {
+    return 0;
   }
 }
 
@@ -50,6 +67,10 @@ function svgElement(name, attributes = {}) {
   return element;
 }
 
+function applyCounterRotation(group, station, rotation = currentRotation()) {
+  group.setAttribute('transform', `rotate(${-rotation} ${station.mapX} ${station.mapY})`);
+}
+
 function createLabel(station, index) {
   const geometry = labelGeometry(station, index);
   const group = svgElement('g', {
@@ -57,6 +78,7 @@ function createLabel(station, index) {
     'data-station-label': station.id,
     'pointer-events': 'none'
   });
+  applyCounterRotation(group, station);
 
   const markerX = station.mapX;
   const markerY = station.mapY;
@@ -101,12 +123,29 @@ function createLabel(station, index) {
   return group;
 }
 
+function updateCounterRotation(rotation = currentRotation()) {
+  document.querySelectorAll(`.${LAYER_CLASS} [data-station-label]`).forEach(group => {
+    const station = STATIONEN.find(item => item.id === group.dataset.stationLabel);
+    if (station) applyCounterRotation(group, station, rotation);
+  });
+}
+
+function updateToggleButton() {
+  const button = document.querySelector('[data-action="toggle-labels"]');
+  if (!button) return;
+  const enabled = labelsEnabled();
+  button.classList.toggle('active', enabled);
+  button.setAttribute('aria-pressed', String(enabled));
+  button.setAttribute('aria-label', enabled ? 'Stationsnamen ausblenden' : 'Stationsnamen einblenden');
+}
+
 function renderLabels() {
   scheduled = false;
   const svg = document.querySelector('main.map .map-stage > svg');
   if (!svg) return;
 
   svg.querySelector(`.${LAYER_CLASS}`)?.remove();
+  updateToggleButton();
   if (!labelsEnabled()) return;
 
   const layer = svgElement('g', { class: LAYER_CLASS, 'aria-hidden': 'true' });
@@ -141,6 +180,9 @@ style.textContent = `
   .station-label-svg-layer {
     pointer-events: none;
   }
+  .station-label-svg {
+    transition: transform .18s linear;
+  }
   .station-label-svg__line {
     stroke: rgba(255,255,255,.86);
     stroke-width: .42;
@@ -163,15 +205,29 @@ style.textContent = `
     font-weight: 900;
     letter-spacing: .01em;
   }
+  [data-action="toggle-labels"].active {
+    border-color: rgba(155,211,94,.72) !important;
+    background: rgba(155,211,94,.18) !important;
+    color: #dff7bf !important;
+  }
 `;
 document.head.appendChild(style);
 
 window.addEventListener('DOMContentLoaded', () => { watchApp(); schedule(); });
 window.addEventListener('load', schedule);
 window.addEventListener('hagenbeck:map-transform', schedule);
-window.addEventListener('hagenbeck:heading', schedule);
+window.addEventListener('hagenbeck:map-rotation', event => {
+  updateCounterRotation(Number(event.detail?.rotation) || 0);
+});
+
 document.addEventListener('click', event => {
-  if (event.target.closest('[data-action="toggle-labels"]')) setTimeout(schedule, 0);
+  const button = event.target.closest('[data-action="toggle-labels"]');
+  if (!button) return;
+  event.preventDefault();
+  event.stopPropagation();
+  event.stopImmediatePropagation();
+  saveLabelsEnabled(!labelsEnabled());
+  renderLabels();
 }, true);
 
 watchApp();
