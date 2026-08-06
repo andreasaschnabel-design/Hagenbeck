@@ -36,6 +36,9 @@ drei Altersstufen.
   sucht den kuerzesten Weg ueber das echte Wegenetz des Parks (Dijkstra
   ueber die OSM-Wege) und zeigt ihn mit animierten Pfeilen, Ziel-Emoji
   und Restdistanz an; mit GPS wandert der Startpunkt live mit.
+- **Tierpass** - Stempel fuer jede besuchte Station (automatisch beim
+  "Gesehen"-Haken oder bei Ankunft mit der Navigation), Park-Quests wie
+  "Polarforscher" und ein Tagesrueckblick mit Dauer und Tierarten.
 - **Fuetterungszeiten als Tagesplan** - die tagesaktuellen Zeiten vom
   Aushang einmal eintippen, die App sortiert den Tag danach.
 - **Offline nutzbar** - als PWA installierbar ("Zum Startbildschirm

@@ -27,6 +27,8 @@ const STANDARD = {
   karte3d: false,
   karteDrehung: 45,
   navZiel: null, // Stations-ID, zu der die Pfeil-Navigation fuehrt
+  entdeckt: [], // Tierpass: gestempelte Stationen
+  passStart: null, // Zeitpunkt des ersten Stempels (fuer den Tagesrueckblick)
   erstbesuch: true,
 };
 
@@ -80,6 +82,18 @@ function minutenText(m) {
 const istKind = () => S.alter === 'mini' || S.alter === 'kind';
 
 /* Heutige Oeffnungszeit aus den OSM-Regeln (Sondertage vor Monatsregeln). */
+/* Verbleibende Minuten bis Parkschluss (null, wenn unbekannt/geschlossen). */
+function oeffnungRest(datum = new Date()) {
+  const zeit = oeffnungHeute(datum);
+  const treffer = [...zeit.matchAll(/(\d{1,2}):(\d{2})/g)];
+  if (treffer.length < 2) return null;
+  const jetzt = datum.getHours() * 60 + datum.getMinutes();
+  const auf = Number(treffer[0][1]) * 60 + Number(treffer[0][2]);
+  const zu = Number(treffer[1][1]) * 60 + Number(treffer[1][2]);
+  if (jetzt < auf || jetzt >= zu) return null;
+  return zu - jetzt;
+}
+
 function oeffnungHeute(datum = new Date()) {
   const monat = datum.getMonth() + 1;
   const tag = datum.getDate();
@@ -154,6 +168,24 @@ function entfernungMeter(a, b) {
 /* =========================================================
  * Sprachausgabe
  * ======================================================= */
+
+/* Tierpass: Station stempeln (einmalig); beim ersten Stempel startet der Tag. */
+function stempeln(stationId) {
+  if (S.entdeckt.includes(stationId)) return false;
+  setze({
+    entdeckt: [...S.entdeckt, stationId],
+    passStart: S.passStart || Date.now(),
+  });
+  return true;
+}
+
+const QUESTS = [
+  { icon: '🧊', titel: 'Polarforscher', text: 'Besuche das Eismeer und die Seebaeren.', noetig: ['eismeer', 'seeloewen'] },
+  { icon: '🦁', titel: 'Safari-Blick', text: 'Entdecke Loewen, Afrika-Panorama und Steppenweg.', noetig: ['loewen', 'afrikapanorama', 'strausse'] },
+  { icon: '🐘', titel: 'Die grossen Drei', text: 'Elefanten, Tiger und Eismeer an einem Tag.', noetig: ['elefanten', 'tiger', 'eismeer'] },
+  { icon: '🌿', titel: 'Ruheinsel', text: 'Mache eine Pause im Japanischen Garten.', noetig: ['japangarten'] },
+  { icon: '🏅', titel: 'Parkprofi', text: 'Sammle zwoelf Stempel an einem Tag.', anzahl: 12 },
+];
 
 const Vorleser = {
   laeuft: false,
@@ -465,12 +497,23 @@ function navVerfolgung(anAus) {
       const y = ((PARK_BOUNDS.nord - pos.coords.latitude) / (PARK_BOUNDS.nord - PARK_BOUNDS.sued)) * GEO.MASS.h;
       if (x < -5 || x > GEO.MASS.w + 5 || y < -5 || y > GEO.MASS.h + 5) return; // ausserhalb des Parks
       navPosition = [x, y];
+      const ziel = S.navZiel ? stationVon(S.navZiel) : null;
+      if (ziel && Math.hypot(ziel.mapX - x, ziel.mapY - y) < 4.5) {
+        /* Angekommen (~25 m): Stempel, kleiner Jubel, Navigation beenden. */
+        const neu = stempeln(ziel.id);
+        setze({ navZiel: null });
+        navVerfolgung(false);
+        if (Vorleser.verfuegbar()) {
+          Vorleser.starten(`Geschafft! Du bist bei ${ziel.name} angekommen.${neu ? ' Es gibt einen neuen Stempel fuer deinen Tierpass.' : ''}`);
+        }
+        zeichne();
+        return;
+      }
       const box = $('.kartenbox');
       if (box && S.navZiel) {
         karteNeuZeichnen(box);
         const banner = $('#nav-meter');
         if (banner) {
-          const ziel = stationVon(S.navZiel);
           banner.textContent = `noch ca. ${navRoute(navPosition, [ziel.mapX, ziel.mapY]).meter} m`;
         }
       }
@@ -906,6 +949,54 @@ function orten(beiErfolg) {
  * Ansichten
  * ======================================================= */
 
+/* "Als Naechstes": zeitkritische Fuetterung oder naechste ungestempelte Station. */
+function empfehlungsKarte() {
+  const jetzt = new Date();
+  const jetztMin = jetzt.getHours() * 60 + jetzt.getMinutes();
+  const anstehend = FUETTERUNGEN
+    .map((f) => ({ ...f, zeit: S.zeiten[f.id] || f.zeit }))
+    .filter((f) => f.zeit)
+    .map((f) => {
+      const [h, m] = f.zeit.split(':').map(Number);
+      return { ...f, inMin: h * 60 + m - jetztMin };
+    })
+    .filter((f) => f.inMin >= -5 && f.inMin <= 60)
+    .sort((a, b) => a.inMin - b.inMin)[0];
+
+  if (anstehend) {
+    const st = stationVon(anstehend.station);
+    return `
+      <div class="karte" style="border-left:4px solid var(--akzent)">
+        <div class="zeile-zwischen">
+          <div>
+            <div class="schwach">⏰ Gleich ${anstehend.inMin <= 0 ? 'jetzt' : `in ${anstehend.inMin} Min.`}</div>
+            <strong>${esc(anstehend.titel)}</strong>
+            <div class="schwach">${anstehend.zeit} Uhr · ${esc(st?.name || '')}</div>
+          </div>
+          ${st ? `<button class="btn btn--klein" data-nav-start="${st.id}">🧭 Hin</button>` : ''}
+        </div>
+      </div>`;
+  }
+
+  const offen = STATIONEN.filter((st) => !S.entdeckt.includes(st.id) && st.id !== 'haupteingang');
+  if (!offen.length) return '';
+  const [sx, sy] = navStartpunkt();
+  const naechste = offen.sort((a, b) =>
+    Math.hypot(a.mapX - sx, a.mapY - sy) - Math.hypot(b.mapX - sx, b.mapY - sy))[0];
+  const meter = navRoute(navStartpunkt(), [naechste.mapX, naechste.mapY]).meter;
+  return `
+    <div class="karte">
+      <div class="zeile-zwischen">
+        <div>
+          <div class="schwach">${NAV_EMOJI[naechste.id] || '📍'} In deiner Naehe</div>
+          <strong>${esc(naechste.name)}</strong>
+          <div class="schwach">ca. ${meter} m · noch kein Stempel</div>
+        </div>
+        <button class="btn btn--klein" data-nav-start="${naechste.id}">🧭 Hin</button>
+      </div>
+    </div>`;
+}
+
 function seiteTouren() {
   const laufend = S.aktiveTour ? tourVon(S.aktiveTour) : null;
   const besucht = laufend ? (S.besucht[laufend.id] || []).length : 0;
@@ -925,7 +1016,8 @@ function seiteTouren() {
 
   return `
     <h1>Welche Runde soll es sein?</h1>
-    ${oeffnungHeute() ? `<p class="schwach">🕘 Heute geoeffnet: <strong>${oeffnungHeute()}</strong> <span style="opacity:.7">(${esc(OEFFNUNG.quelle)})</span></p>` : ''}
+    ${oeffnungHeute() ? `<p class="schwach">🕘 Heute geoeffnet: <strong>${oeffnungHeute()}</strong>${oeffnungRest() ? ` · noch ${minutenText(oeffnungRest())}` : ''} <span style="opacity:.7">(${esc(OEFFNUNG.quelle)})</span></p>` : ''}
+    ${empfehlungsKarte()}
     <p class="schwach">${istKind()
       ? 'Such dir eine Tour aus. Die App sagt dir, wo es langgeht.'
       : 'Jede Tour ist ein fertiger Rundweg mit eigenem Schwerpunkt. Du kannst jederzeit wechseln.'}</p>
@@ -1275,6 +1367,7 @@ function zeigeStationsBlatt(id) {
     </div>
     <div class="knopfreihe" style="margin-top:10px">
       <button class="btn btn--klein" data-nav-start="${st.id}">🧭 Bring mich hin</button>
+      <button class="btn btn--klein btn--zweit" data-stempel="${st.id}">${S.entdeckt.includes(st.id) ? '✓ Gestempelt' : '🏅 Stempeln'}</button>
     </div>
     <p class="schwach" style="margin-top:8px">${esc(inhalt.beschreibung)}</p>
     ${tiere.length ? `<div class="tour-karte__meta">${tiere.map((t) => `<span class="chip">${esc(t.name)}</span>`).join('')}</div>` : ''}
@@ -1390,6 +1483,61 @@ function seiteEinstellungen() {
   `;
 }
 
+function seitePass() {
+  const anteil = Math.round((S.entdeckt.length / STATIONEN.length) * 100);
+  const tierarten = new Set(S.entdeckt.flatMap((id) => stationVon(id)?.tiere || [])).size;
+  const questErledigt = (q) =>
+    q.anzahl ? S.entdeckt.length >= q.anzahl : q.noetig.every((id) => S.entdeckt.includes(id));
+
+  let rueckblick;
+  if (!S.entdeckt.length) {
+    rueckblick = istKind()
+      ? 'Dein Abenteuer wartet! Hol dir deinen ersten Stempel, indem du eine Station besuchst.'
+      : 'Noch keine Stempel. Markiere unterwegs Stationen als "Gesehen" oder stemple direkt auf der Karte.';
+  } else {
+    const minuten = Math.max(1, Math.round((Date.now() - S.passStart) / 60000));
+    rueckblick = `${istKind() ? 'Ihr wart' : 'Du warst'} etwa ${minutenText(minuten)} unterwegs und ${istKind() ? 'habt' : 'hast'} ${S.entdeckt.length} Stationen mit rund ${tierarten} Tierarten entdeckt.`;
+  }
+
+  return `
+    <h1>🏅 ${istKind() ? 'Dein Tierpass' : 'Tierpass'}</h1>
+    <p class="schwach">${S.entdeckt.length} von ${STATIONEN.length} Stempeln gesammelt</p>
+    <div class="fortschritt"><div class="fortschritt__balken" style="width:${anteil}%"></div></div>
+
+    <div class="stempel-gitter">
+      ${STATIONEN.map((st) => {
+        const hat = S.entdeckt.includes(st.id);
+        return `
+          <button class="stempel ${hat ? 'stempel--da' : ''}" data-stempel="${st.id}"
+                  aria-label="${esc(st.name)} ${hat ? 'entstempeln' : 'stempeln'}">
+            <span class="stempel__bild">${hat ? (NAV_EMOJI[st.id] || '✓') : '?'}</span>
+            <span class="stempel__name">${esc(st.name)}</span>
+          </button>`;
+      }).join('')}
+    </div>
+    <p class="schwach">Stempel gibt es automatisch, wenn du auf einer Tour "Gesehen" drueckst - oder tippe hier selbst.</p>
+
+    <h2>${istKind() ? 'Deine Missionen' : 'Park-Quests'}</h2>
+    ${QUESTS.map((q) => {
+      const fertig = questErledigt(q);
+      return `
+        <div class="karte quest ${fertig ? 'quest--fertig' : ''}">
+          <span class="quest__icon">${fertig ? '✓' : q.icon}</span>
+          <div>
+            <strong>${esc(q.titel)}</strong>
+            <p class="schwach" style="margin:0">${esc(q.text)}</p>
+          </div>
+        </div>`;
+    }).join('')}
+
+    <h2>Tagesrueckblick</h2>
+    <div class="karte">
+      <p>${esc(rueckblick)}</p>
+      ${S.entdeckt.length ? '<button class="btn btn--zweit btn--klein" data-pass-reset>Neuen Besuch starten</button>' : ''}
+    </div>
+  `;
+}
+
 function fuelleStimmen(feld) {
   const stimmen = Vorleser.stimmen();
   feld.innerHTML = `<option value="">Standardstimme</option>` +
@@ -1421,7 +1569,7 @@ const NAV = [
   { pfad: '#/touren', name: 'Touren', symbol: 'M4 6h16M4 12h16M4 18h10' },
   { pfad: '#/karte', name: 'Karte', symbol: 'M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2Zm0 0v14m6-12v14' },
   { pfad: '#/tiere', name: 'Tiere', symbol: 'M12 3a4 4 0 0 1 4 4c0 3-4 5-4 10 0-5-4-7-4-10a4 4 0 0 1 4-4Z' },
-  { pfad: '#/fuetterungen', name: 'Zeiten', symbol: 'M12 8v4l3 2m6-2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z' },
+  { pfad: '#/pass', name: 'Tierpass', symbol: 'M12 14a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0 0-3 7 3-2 3 2-3-7' },
   { pfad: '#/mehr', name: 'Mehr', symbol: 'M5 12h.01M12 12h.01M19 12h.01' },
 ];
 
@@ -1465,6 +1613,8 @@ function zeichne() {
       html = seiteKarte(parameter); seitenTitel = 'Karte'; break;
     case 'fuetterungen':
       html = seiteFuetterungen(); seitenTitel = 'Zeiten'; break;
+    case 'pass':
+      html = seitePass(); seitenTitel = 'Tierpass'; tiefe = false; break;
     case 'wissen':
       html = seiteWissen(); seitenTitel = 'Gut zu wissen'; break;
     case 'einstellungen':
@@ -1491,6 +1641,7 @@ function seiteMehr() {
   return `
     <h1>Mehr</h1>
     <div class="tier-liste">
+      <button class="tier-zeile" data-route="#/fuetterungen"><span><span class="tier-zeile__name">Fuetterungen & Zeiten</span><span class="schwach" style="display:block">Tagesplan mit den Zeiten vom Aushang</span></span><span class="tier-zeile__pfeil">›</span></button>
       <button class="tier-zeile" data-route="#/wissen"><span><span class="tier-zeile__name">Gut zu wissen</span><span class="schwach" style="display:block">Geschichte des Parks, Tipps fuer den Besuch</span></span><span class="tier-zeile__pfeil">›</span></button>
       <button class="tier-zeile" data-route="#/einstellungen"><span><span class="tier-zeile__name">Einstellungen</span><span class="schwach" style="display:block">Altersstufe, Vorlesen, Standort</span></span><span class="tier-zeile__pfeil">›</span></button>
       <button class="tier-zeile" data-route="#/start"><span><span class="tier-zeile__name">Startbildschirm</span><span class="schwach" style="display:block">Altersstufe neu waehlen</span></span><span class="tier-zeile__pfeil">›</span></button>
@@ -1508,7 +1659,7 @@ function aktualisiereNav(pfad) {
     const aktiv = pfad === ziel
       || (ziel === 'touren' && pfad.startsWith('tour'))
       || (ziel === 'tiere' && pfad.startsWith('tier'))
-      || (ziel === 'mehr' && ['wissen', 'einstellungen', 'start'].includes(pfad));
+      || (ziel === 'mehr' && ['wissen', 'einstellungen', 'start', 'fuetterungen'].includes(pfad));
     if (aktiv) a.setAttribute('aria-current', 'page');
     else a.removeAttribute('aria-current');
   });
@@ -1597,8 +1748,21 @@ document.addEventListener('click', (e) => {
   if (besucht) {
     const [tourId, stationId] = besucht.dataset.besucht.split('|');
     const liste = new Set(S.besucht[tourId] || []);
-    if (liste.has(stationId)) liste.delete(stationId); else liste.add(stationId);
+    if (liste.has(stationId)) liste.delete(stationId);
+    else {
+      liste.add(stationId);
+      stempeln(stationId); // Tierpass fuellt sich beim Rundgang von selbst
+    }
     setze({ besucht: { ...S.besucht, [tourId]: [...liste] } });
+    zeichne();
+    return;
+  }
+
+  const stempel = ziel('[data-stempel]');
+  if (stempel) {
+    const id = stempel.dataset.stempel;
+    if (S.entdeckt.includes(id)) setze({ entdeckt: S.entdeckt.filter((x) => x !== id) });
+    else stempeln(id);
     zeichne();
     return;
   }
@@ -1725,6 +1889,14 @@ document.addEventListener('click', (e) => {
     tiereFilter = filter.dataset.filter;
     $('#inhalt').innerHTML = seiteTiere(tiereSuche, tiereFilter);
     nachbereiten(['tiere']);
+    return;
+  }
+
+  if (ziel('[data-pass-reset]')) {
+    if (confirm('Stempel und Tagesrueckblick zuruecksetzen?')) {
+      setze({ entdeckt: [], passStart: null });
+      zeichne();
+    }
     return;
   }
 
