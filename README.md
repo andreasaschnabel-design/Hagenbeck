@@ -23,7 +23,7 @@ drei Altersstufen.
   Park: Kartendaten (c) OpenStreetMap-Mitwirkende, Lizenz ODbL 1.0
   (openstreetmap.org/copyright). Quelldaten liegen in `osm/map.osm`;
   `python3 scripts/osm2geo.py` erzeugt daraus `app/mapgeo.js` neu.
-- **Tierlexikon** - 29 Tierartikel mit Steckbrief, Beobachtungstipps und
+- **Tierlexikon** - 27 Tierartikel mit Steckbrief, Beobachtungstipps und
   "Wusstest du schon"-Fakten, durchsuchbar und nach Parkbereich filterbar.
 - **Vorlesen** - alle Texte lassen sich ueber die Sprachausgabe des Geraets
   vorlesen (Web Speech API): Play/Pause, Tempo, Stimmenwahl. Keine Cloud,

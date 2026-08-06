@@ -61,24 +61,6 @@ export const KINDER_TIERE = {
       erklaerung: 'Pinguine leben nur auf der Suedhalbkugel. Am Nordpol wohnt der Eisbaer.',
     },
   },
-  kegelrobbe: {
-    kurz: 'Das groesste wilde Raubtier in Deutschland - und es lebt in der Nordsee.',
-    text: [
-      'Kegelrobben leben an der Nordsee, gar nicht weit von Hamburg. Sie liegen dort auf Sandbaenken in der Sonne.',
-      'Ihre Babys haben ein weisses Fell. Das ist noch nicht wasserdicht. Deshalb muessen sie am Anfang an Land bleiben.',
-      'Mit ihren Schnurrhaaren spueren sie, wo ein Fisch geschwommen ist. Wie eine Spur in der Luft, nur im Wasser.',
-    ],
-    wusstest: [
-      'Eine Kegelrobbe kann 20 Minuten tauchen, ohne Luft zu holen.',
-      'Ihren Namen hat sie von ihrem Kopf - er ist spitz wie ein Kegel.',
-    ],
-    quiz: {
-      frage: 'Warum koennen kleine Kegelrobben am Anfang nicht schwimmen?',
-      antworten: ['Ihr weisses Fell ist nicht wasserdicht', 'Sie haben Angst', 'Sie sind zu dick'],
-      richtig: 0,
-      erklaerung: 'Erst wenn sie das weisse Babyfell verlieren, duerfen sie ins Wasser.',
-    },
-  },
   seebaer: {
     kurz: 'Die flinke Robbe mit dem dicken Pelz. Bei der Fuetterung zeigt sie ihre Tricks.',
     text: [
@@ -172,25 +154,6 @@ export const KINDER_TIERE = {
       erklaerung: 'Fett. Das ist der Notvorrat fuer schlechte Zeiten.',
     },
   },
-  giraffe: {
-    kurz: 'Das hoechste Tier der Welt. Ihr Hals hat genauso viele Knochen wie deiner.',
-    text: [
-      'Eine Giraffe ist so hoch wie ein Haus mit zwei Stockwerken.',
-      'Ihr langer Hals hat nur sieben Halsknochen - genau so viele wie du. Die sind aber jeder so lang wie dein Unterarm.',
-      'Ihre Zunge ist einen halben Meter lang und blau-schwarz. Damit holt sie Blaetter zwischen den Dornen heraus.',
-      'Zum Trinken muss die Giraffe die Vorderbeine weit auseinanderstellen. Sonst kommt sie nicht runter ans Wasser.',
-    ],
-    wusstest: [
-      'Ein Giraffenbaby faellt bei der Geburt fast zwei Meter tief - und steht trotzdem nach einer Stunde.',
-      'Giraffen koennen sich mit der Zunge die Ohren putzen.',
-    ],
-    quiz: {
-      frage: 'Wie viele Halsknochen hat eine Giraffe?',
-      antworten: ['Sieben - genauso viele wie du', 'Hundert', 'Nur einen langen'],
-      richtig: 0,
-      erklaerung: 'Sieben. Sie sind nur viel, viel laenger als deine.',
-    },
-  },
   zebra: {
     kurz: 'Ein Wildpferd im Streifenpyjama. Kein Zebra sieht aus wie das andere.',
     text: [
@@ -246,25 +209,6 @@ export const KINDER_TIERE = {
       erklaerung: 'Bis zu 20 Stunden. Jagen ist anstrengend - danach braucht er viel Ruhe.',
     },
   },
-  erdmaennchen: {
-    kurz: 'Kleine Wachposten. Immer steht eines aufrecht und passt auf.',
-    text: [
-      'Erdmaennchen leben in grossen Familien unter der Erde. Ihr Bau hat viele Gaenge, wie ein U-Bahn-Netz.',
-      'Waehrend die anderen fressen, steht immer eines Wache. Sieht es einen Adler, ruft es anders als bei einer Schlange. Alle wissen sofort, wo die Gefahr ist.',
-      'Morgens stellen sie sich mit dem Bauch in die Sonne. Am Bauch haben sie fast keine Haare - so waermen sie sich schnell auf.',
-      'Sie fressen sogar Skorpione. Vorher beissen sie den Stachel ab.',
-    ],
-    wusstest: [
-      'Die dunklen Ringe um die Augen sind wie eine Sonnenbrille.',
-      'Auch Erdmaennchen, die keine eigenen Kinder haben, passen auf den Nachwuchs auf.',
-    ],
-    quiz: {
-      frage: 'Was macht das Erdmaennchen, das aufrecht steht?',
-      antworten: ['Es haelt Wache', 'Es tanzt', 'Es ruht sich aus'],
-      richtig: 0,
-      erklaerung: 'Es ist der Wachposten und warnt die anderen.',
-    },
-  },
   flamingo: {
     kurz: 'Rosa wird er erst durch sein Futter. Als Baby ist er grau.',
     text: [
@@ -300,6 +244,25 @@ export const KINDER_TIERE = {
       antworten: ['Am hellen Fleck am Hals', 'An der Schwanzspitze', 'Am Schnurrbart'],
       richtig: 0,
       erklaerung: 'Jeder hat einen anderen Kehlfleck - wie ein Namensschild.',
+    },
+  },
+  alpaka: {
+    kurz: 'Ein kleines Kamel ohne Hoecker - mit besonders warmer Wolle.',
+    text: [
+      'Alpakas kommen aus den hohen Bergen von Suedamerika. Dort ist es nachts sehr kalt. Deshalb haben sie so dicke Wolle.',
+      'Ihre Wolle waermt besser als Schafwolle. Aus einer Schur wird ungefaehr ein ganzer Pullover und noch eine Muetze.',
+      'Alpakas spucken. Aber fast nur untereinander, wenn sie sich um Futter streiten.',
+      'Wenn ein Alpaka neugierig ist, summt es leise vor sich hin.',
+    ],
+    wusstest: [
+      'Alpakas machen ihr Geschaeft alle an derselben Stelle. So bleibt die Wiese sauber.',
+      'Ohren nach vorn heisst: Ich finde dich interessant. Ohren flach nach hinten heisst: Lass mich in Ruhe.',
+    ],
+    quiz: {
+      frage: 'Was macht ein Alpaka, wenn es neugierig ist?',
+      antworten: ['Es summt leise', 'Es bellt', 'Es klatscht'],
+      richtig: 0,
+      erklaerung: 'Alpakas summen - ganz leise vor sich hin.',
     },
   },
   zwergziege: {
@@ -554,8 +517,8 @@ export const KINDER_STATIONEN = {
   orangutans: 'Hier wohnen die Menschenaffen. Sei ganz leise - dann schauen sie zurueck.',
   tiger: 'Die groesste Katze der Welt. Such sie an den hohen Plaetzen, da liegt sie gern.',
   loewen: 'Hier gibt es kein Gitter, sondern einen tiefen Graben. Findest du ihn?',
-  afrikapanorama: 'Giraffen, Zebras und Strausse - alle sehen aus, als waeren sie auf einer Wiese.',
-  strausse: 'Schau nach unten: Die Erdmaennchen stehen wie kleine Wachposten da.',
+  afrikapanorama: 'Zebras, Strausse und Antilopen - alle sehen aus, als waeren sie auf einer grossen Wiese.',
+  strausse: 'Hier wohnen Strausse, Zebras und Warzenschweine zusammen auf einer grossen Steppe.',
   eismeer: 'Eisbaeren, Walrosse und Pinguine. Am besten sind die Fenster unter Wasser.',
   seeloewen: 'Hier wohnen die Seebaeren. Bei der Fuetterung zeigen sie ihre Tricks - komm frueh, dann siehst du am meisten.',
   kamele: 'Kamele mit zwei Hoeckern. Im Hoecker ist Fett, kein Wasser.',
@@ -564,4 +527,5 @@ export const KINDER_STATIONEN = {
   spielplatz: 'Klettern, rutschen, planschen. Zeit zum Toben!',
   japangarten: 'Ein ruhiger Garten mit Teich und dicken Fischen. Gut fuer eine Pause.',
   tropenaquarium: 'Ein ganzes Haus voller Haie, Krokodile und bunter Fische.',
+  alpakawiese: 'Kleine Kamele mit dicker Wolle - und daneben laufen die grossen Nandu-Voegel herum.',
 };

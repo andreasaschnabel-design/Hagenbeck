@@ -46,6 +46,7 @@ export const STATIONEN = [
     bereich: 'eingang',
     mapX: 90.3, mapY: 81.6,
     dauer: 5,
+    planNr: '1',
     tiere: [],
     beschreibung:
       'Das grosse Eingangsportal mit den steinernen Tieren ist seit 1907 das Gesicht des Tierparks. Hier bekommst du den aktuellen Parkplan und die Tafel mit den Fuetterungszeiten des Tages - ein Foto davon lohnt sich, denn Zeiten koennen tagesaktuell abweichen.',
@@ -57,6 +58,7 @@ export const STATIONEN = [
     bereich: 'afrika',
     mapX: 45.1, mapY: 27.2,
     dauer: 10,
+    planNr: '55',
     tiere: ['flamingo'],
     beschreibung:
       'Gleich hinter dem Eingang liegt einer der grossen Teiche. Wasservoegel und Flamingos stehen hier oft dicht am Weg - ein guter erster Halt, um anzukommen.',
@@ -68,6 +70,7 @@ export const STATIONEN = [
     bereich: 'asien',
     mapX: 82.8, mapY: 62.2,
     dauer: 25,
+    planNr: '7',
     tiere: ['elefant'],
     beschreibung:
       'Die Elefantenanlage gehoert zu den bekanntesten Ecken des Parks. Hagenbeck haelt Asiatische Elefanten und hat eine lange Zuchtgeschichte mit dieser Art. Von der Besucherseite blickt man ueber einen Graben in die Anlage - genau das Prinzip, fuer das der Park beruehmt ist.',
@@ -79,6 +82,7 @@ export const STATIONEN = [
     bereich: 'asien',
     mapX: 92.2, mapY: 41.3,
     dauer: 20,
+    planNr: '70',
     tiere: ['orangutan'],
     innen: true,
     beschreibung:
@@ -91,6 +95,7 @@ export const STATIONEN = [
     bereich: 'asien',
     mapX: 87.7, mapY: 8.1,
     dauer: 15,
+    planNr: '66',
     tiere: ['tiger', 'leopard'],
     beschreibung:
       'Eine weitlaeufige Anlage mit Wasserbecken und erhoehten Liegeplaetzen. Tiger sind Einzelgaenger und schlafen tagsueber viel - Geduld wird hier oft belohnt.',
@@ -113,21 +118,23 @@ export const STATIONEN = [
     bereich: 'afrika',
     mapX: 26.9, mapY: 53.5,
     dauer: 25,
-    tiere: ['giraffe', 'zebra', 'strauss'],
+    planNr: '44',
+    tiere: ['zebra', 'strauss'],
     beschreibung:
       'Das grosse Panorama ist das Herzstueck der Hagenbeck-Idee: Mehrere Tierarten stehen scheinbar in einer einzigen Landschaft hintereinander, getrennt nur durch Graeben, die man von vorn nicht sieht. Genau diese Bauweise hat Carl Hagenbeck 1896 patentieren lassen.',
     tipp: 'Stell dich mittig vor die Anlage und geh ein paar Schritte zur Seite - dann siehst du, wie die Tiefenwirkung entsteht.',
   },
   {
     id: 'strausse',
-    name: 'Steppenweg',
+    name: 'Afrikanische Steppe',
     bereich: 'afrika',
     mapX: 28.1, mapY: 65.1,
     dauer: 10,
-    tiere: ['strauss', 'erdmaennchen'],
+    tiere: ['strauss', 'zebra'],
+    planNr: '47',
     beschreibung:
-      'Ein Weg entlang mehrerer kleinerer Steppenanlagen. Hier lohnt sich der Blick nach unten: Erdmaennchen halten fast immer Wache.',
-    tipp: 'Erdmaennchen sind Sonnenanbeter - bei Sonnenschein stehen sie aufrecht am Bau, bei Regen sind sie meist verschwunden.',
+      'Die grosse Steppenanlage teilen sich Strausse, Zebras und Warzenschweine - mehrere Arten in einer Landschaft, wie es das Hagenbeck-Prinzip vorsieht.',
+    tipp: 'Ein paar Minuten bleiben: Zwischen Zebras und Straussen gibt es fast immer kleine Rangeleien um die besten Futterstellen zu sehen.',
   },
   {
     id: 'eismeer',
@@ -135,7 +142,8 @@ export const STATIONEN = [
     bereich: 'eismeer',
     mapX: 7.3, mapY: 58.0,
     dauer: 40,
-    tiere: ['eisbaer', 'walross', 'pinguin', 'kegelrobbe'],
+    planNr: '36-42',
+    tiere: ['eisbaer', 'walross', 'pinguin', 'seebaer'],
     innen: true,
     beschreibung:
       'Das Eismeer ist die grosse Polaranlage des Parks und wurde 2012 eroeffnet. Ueber Wege und Unterwasserfenster geht es an Eisbaeren, Walrossen, Pinguinen und Robben vorbei - teils oberhalb, teils unter der Wasserlinie.',
@@ -147,6 +155,7 @@ export const STATIONEN = [
     bereich: 'eismeer',
     mapX: 15.6, mapY: 55.8,
     dauer: 20,
+    planNr: '37/38',
     tiere: ['seebaer'],
     beschreibung:
       'Am Becken der Suedamerikanischen Seebaeren gibt es taeglich eine Schaufuetterung mit Erklaerungen der Tierpfleger. Das ist einer der wenigen festen Programmpunkte im Park - und einer der beliebtesten.',
@@ -159,6 +168,7 @@ export const STATIONEN = [
     bereich: 'asien',
     mapX: 72.1, mapY: 53.0,
     dauer: 15,
+    planNr: '9',
     tiere: ['trampeltier', 'onager', 'kamtschatkabaer'],
     beschreibung:
       'Weitlaeufige Anlage fuer die zweihoeckrigen Trampeltiere. In der Saison werden hier traditionell Reitrunden fuer Kinder angeboten - ob und wann, haengt vom Wetter und vom Tagesbetrieb ab.',
@@ -170,6 +180,7 @@ export const STATIONEN = [
     bereich: 'suedamerika',
     mapX: 58.6, mapY: 30.5,
     dauer: 15,
+    planNr: '13',
     tiere: ['riesenotter'],
     beschreibung:
       'Wasseranlage der Suedamerikanischen Riesenotter - der groessten Otter der Welt. Die Familiengruppe ist fast immer in Bewegung und gut zu hoeren: Riesenotter gehoeren zu den gespraechigsten Raubtieren ueberhaupt.',
@@ -181,6 +192,7 @@ export const STATIONEN = [
     bereich: 'kinder',
     mapX: 33.0, mapY: 42.0,
     dauer: 25,
+    planNr: '28',
     tiere: ['zwergziege'],
     beschreibung:
       'Hier duerfen Kinder rein und die Zwergziegen anfassen. Erfahrungsgemaess der Ort, an dem eine geplante Viertelstunde zu einer Dreiviertelstunde wird.',
@@ -193,6 +205,7 @@ export const STATIONEN = [
     bereich: 'kinder',
     mapX: 50.5, mapY: 16.7,
     dauer: 30,
+    planNr: '56',
     tiere: ['praeriebison'],
     beschreibung:
       'Grosser Spielbereich mit Klettergeraeten und Wasserspielstellen. Rundherum gibt es Baenke und Gastronomie - der uebliche Wendepunkt eines Familienbesuchs.',
@@ -205,11 +218,24 @@ export const STATIONEN = [
     bereich: 'garten',
     mapX: 46.4, mapY: 40.2,
     dauer: 15,
+    planNr: '27',
     tiere: [],
     beschreibung:
       'Ein angelegter Garten mit Teich, Bruecken und Koi-Karpfen. Keine Tierschau, sondern die ruhigste Ecke des Parks - ideal, wenn die Fuesse schwer werden.',
     tipp: 'Guter Ort fuer eine Pause zwischen zwei Parkhaelften. Von hier sind Elefanten und Afrika-Panorama beide schnell erreichbar.',
     barrierearm: true,
+  },
+  {
+    id: 'alpakawiese',
+    name: 'Alpakas & Nandus',
+    bereich: 'suedamerika',
+    mapX: 66, mapY: 16,
+    dauer: 10,
+    tiere: ['alpaka'],
+    planNr: '60',
+    beschreibung:
+      'Wiesenanlage im Norden des Parks: Alpakas teilen sich das Gelaende mit Nandus, den grossen Laufvoegeln Suedamerikas.',
+    tipp: 'Alpakas summen leise, wenn sie neugierig sind - einfach mal still hinhoeren.',
   },
   {
     id: 'tropenaquarium',
@@ -313,33 +339,6 @@ export const TIERE = [
     ],
     beobachten:
       'Nicht nur an Land schauen. Wer sich ans Unterwasserfenster stellt, sieht den Unterschied zwischen watschelndem Vogel und Raketenschwimmer sofort.',
-  },
-  {
-    id: 'kegelrobbe',
-    name: 'Kegelrobbe',
-    lateinisch: 'Halichoerus grypus',
-    bereich: 'eismeer',
-    station: 'eismeer',
-    kurz: 'Groesstes Raubtier Deutschlands - und ein Rueckkehrer an unsere Kueste.',
-    steckbrief: {
-      Groesse: 'Bullen bis 2,3 m',
-      Gewicht: 'bis 300 kg',
-      Alter: '25 bis 35 Jahre',
-      Nahrung: 'Fisch',
-      Heimat: 'Nordatlantik, Nord- und Ostsee',
-      Status: 'nicht gefaehrdet (IUCN: least concern)',
-    },
-    text: [
-      'Die Kegelrobbe ist das groesste in Deutschland frei lebende Raubtier. Nach starker Bejagung war sie an der deutschen Kueste verschwunden und ist heute auf den Sandbaenken vor den Nordseeinseln zurueck.',
-      'Ihren Namen verdankt sie der kegelfoermigen Kopfform. Bullen haben ein deutlich laengeres, geradliniges Profil als Seehunde - das ist das sicherste Unterscheidungsmerkmal.',
-      'Junge Kegelrobben kommen mit weissem Fell zur Welt, das nicht wasserdicht ist. Sie muessen erst an Land bleiben und wechseln das Fell, bevor sie schwimmen gehen.',
-    ],
-    wusstest: [
-      'Kegelrobben tauchen bis zu 20 Minuten und in ueber 100 Meter Tiefe.',
-      'Ihre Schnurrhaare spueren Wirbel im Wasser - so folgen sie der Spur eines Fisches, den sie gar nicht sehen.',
-      'Sie sind die einzigen heimischen Robben, die ihre Jungen im Winter bekommen.',
-    ],
-    beobachten: 'Achte auf das Profil: gerader, langer Kopf statt runder Hundekopf - das ist die Kegelrobbe.',
   },
   {
     id: 'seebaer',
@@ -487,40 +486,11 @@ export const TIERE = [
       'Haengende Hoecker sind kein schlechtes Zeichen fuer die Haltung, sondern zeigen nur, wie voll der Fettspeicher gerade ist.',
   },
   {
-    id: 'giraffe',
-    name: 'Giraffe',
-    lateinisch: 'Giraffa',
-    bereich: 'afrika',
-    station: 'afrikapanorama',
-    kurz: 'Hoechstes Landtier der Erde - mit genauso vielen Halswirbeln wie du.',
-    steckbrief: {
-      Groesse: 'bis 5,5 m',
-      Gewicht: '800 bis 1.900 kg',
-      Alter: '20 bis 25 Jahre',
-      Nahrung: 'Blaetter, vor allem von Akazien',
-      Heimat: 'Savannen suedlich der Sahara',
-      Status: 'gefaehrdet (IUCN: vulnerable)',
-    },
-    text: [
-      'Der Giraffenhals besteht aus sieben Halswirbeln - genau wie beim Menschen. Sie sind nur jeweils bis zu 25 Zentimeter lang.',
-      'Um das Gehirn in mehreren Metern Hoehe zu versorgen, braucht die Giraffe einen enormen Blutdruck, etwa doppelt so hoch wie beim Menschen. Beim Trinken senkt sie den Kopf tief - spezielle Klappen in den Halsvenen verhindern, dass ihr dabei der Blutdruck im Kopf gefaehrlich wird.',
-      'Die bis zu 50 Zentimeter lange, blaeuliche Zunge ist so zaeh, dass Giraffen zwischen den Dornen der Akazien fressen koennen.',
-      'Giraffen schlafen nur wenige Stunden am Tag, oft im Stehen und in kurzen Abschnitten.',
-    ],
-    wusstest: [
-      'Das Fleckenmuster ist individuell und wird von der Mutter teilweise vererbt.',
-      'Ein Kalb faellt bei der Geburt aus rund zwei Metern Hoehe zu Boden und steht meist innerhalb einer Stunde.',
-      'Giraffen koennen ihre Ohren mit der Zunge saeubern.',
-    ],
-    beobachten:
-      'Beim Trinken oder Fressen am Boden sieht man die Beinstellung: Giraffen muessen die Vorderbeine weit spreizen, um herunterzukommen.',
-  },
-  {
     id: 'zebra',
     name: 'Zebra',
     lateinisch: 'Equus quagga',
     bereich: 'afrika',
-    station: 'afrikapanorama',
+    station: 'strausse',
     kurz: 'Gestreifte Wildpferde - und niemand hat zwei gleiche Muster.',
     steckbrief: {
       Groesse: 'Schulterhoehe bis 1,4 m',
@@ -599,34 +569,6 @@ export const TIERE = [
       'Sieh dir den Graben vor der Anlage an - er ist das eigentliche "Gitter". Genau diese Bauweise hat Hagenbeck beruehmt gemacht.',
   },
   {
-    id: 'erdmaennchen',
-    name: 'Erdmaennchen',
-    lateinisch: 'Suricata suricatta',
-    bereich: 'afrika',
-    station: 'strausse',
-    kurz: 'Kleine Raubtiere mit Schichtplan - immer steht eines Wache.',
-    steckbrief: {
-      Groesse: '25 bis 35 cm plus Schwanz',
-      Gewicht: '600 bis 1.000 g',
-      Alter: '10 bis 14 Jahre',
-      Nahrung: 'Insekten, Skorpione, kleine Wirbeltiere',
-      Heimat: 'Trockengebiete im suedlichen Afrika',
-      Status: 'nicht gefaehrdet (IUCN: least concern)',
-    },
-    text: [
-      'Erdmaennchen leben in Gruppen von bis zu 30 Tieren in weitverzweigten Bauen. Waehrend die Gruppe frisst, steht immer mindestens ein Tier aufrecht Wache und warnt mit unterschiedlichen Rufen - je nachdem, ob die Gefahr aus der Luft oder vom Boden kommt.',
-      'Sie sind gegen Skorpiongift weitgehend unempfindlich und bringen ihren Jungen bei, wie man einen Skorpion sicher entschaerft: erst den Stachel abbeissen, dann fressen.',
-      'Der dunkle Bauchfleck ist duenn behaart. Morgens stellen sich Erdmaennchen mit dem Bauch zur Sonne, um sich aufzuwaermen - wie ein lebender Sonnenkollektor.',
-    ],
-    wusstest: [
-      'Die dunklen Augenringe wirken wie eine Sonnenbrille und mindern Blendung.',
-      'Ihre langen Krallen sind reine Grabwerkzeuge; ein Bau kann mehrere Meter tief sein.',
-      'In der Gruppe kuemmern sich auch nicht verwandte Tiere um den Nachwuchs.',
-    ],
-    beobachten:
-      'Such zuerst das Waechtertier auf dem hoechsten Punkt der Anlage - von da aus findest du den Rest der Gruppe.',
-  },
-  {
     id: 'flamingo',
     name: 'Flamingo',
     lateinisch: 'Phoenicopterus',
@@ -681,6 +623,34 @@ export const TIERE = [
     ],
     beobachten:
       'Auf die Kehlflecken achten: Damit lassen sich die einzelnen Familienmitglieder auseinanderhalten.',
+  },
+  {
+    id: 'alpaka',
+    name: 'Alpaka',
+    lateinisch: 'Vicugna pacos',
+    bereich: 'suedamerika',
+    station: 'alpakawiese',
+    kurz: 'Kleinkamel aus den Anden - seit ueber 5.000 Jahren wegen der Wolle gehalten.',
+    steckbrief: {
+      Groesse: 'Schulterhoehe etwa 1 m',
+      Gewicht: '55 bis 75 kg',
+      Alter: '15 bis 20 Jahre',
+      Nahrung: 'Graeser und Kraeuter',
+      Heimat: 'Hochanden in Peru, Bolivien, Chile',
+      Status: 'Haustierform, nicht gefaehrdet',
+    },
+    text: [
+      'Alpakas sind Kamele ohne Hoecker. Sie stammen vom wilden Vikunja ab und wurden von den Andenvoelkern ueber Jahrtausende auf Wollqualitaet gezuechtet.',
+      'Ihre Wolle ist waermer als Schafwolle und enthaelt kein Wollfett, deshalb reagieren viele Menschen mit Wollallergie darauf nicht.',
+      'In der Gruppe klaeren sie Rangfragen mit Halsringen, Spucken und Drohblicken - fuer Menschen ist das Spucken selten ein Thema.',
+      'Alpakas nutzen gemeinsame Kotplaetze. Das haelt die Weide sauber und begrenzt Parasiten.',
+    ],
+    wusstest: [
+      'Alpakas summen leise, wenn sie unsicher oder neugierig sind.',
+      'Ein Tier liefert pro Schur etwa drei Kilogramm Wolle.',
+      'Sie haben gespaltene Sohlen mit Schwielen statt Hufen und schaedigen die Grasnarbe kaum.',
+    ],
+    beobachten: 'Ohrenstellung beachten: nach vorn heisst interessiert, flach angelegt heisst genervt.',
   },
   {
     id: 'zwergziege',
@@ -1128,12 +1098,12 @@ export const TOUREN = [
     laenge: 'ca. 1,8 km',
     fuer: 'Panorama-Fans, Fotografen',
     beschreibung:
-      'Die Route entlang der Freianlagen, fuer die Hagenbeck beruehmt ist: Giraffen, Zebras, Strausse, Loewen - alle ohne Gitter, nur durch Graeben getrennt.',
+      'Die Route entlang der Freianlagen, fuer die Hagenbeck beruehmt ist: Zebras, Strausse, Antilopen und die grosse Panorama-Perspektive - ohne Gitter, nur durch Graeben getrennt.',
     stationen: [
       { id: 'haupteingang' },
       { id: 'loewen' },
       { id: 'afrikapanorama', fokus: 'Der beste Blick des Parks' },
-      { id: 'strausse', fokus: 'Erdmaennchen nicht uebersehen' },
+      { id: 'strausse', fokus: 'Zebras und Strausse in einer Anlage' },
       { id: 'flamingoteich' },
       { id: 'elefanten' },
     ],
@@ -1153,7 +1123,7 @@ export const TOUREN = [
       { id: 'tiger', fokus: 'Erhoehte Liegeplaetze absuchen' },
       { id: 'loewen' },
       { id: 'eismeer', fokus: 'Eisbaer - das groesste Landraubtier der Welt' },
-      { id: 'strausse', fokus: 'Erdmaennchen: Raubtier im Kleinformat' },
+      { id: 'strausse', fokus: 'Kurzer Schwenk durch die Steppe' },
       { id: 'tropenaquarium', fokus: 'Haie und Krokodile - eigenes Ticket noetig' },
     ],
   },

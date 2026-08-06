@@ -381,6 +381,7 @@ const NAV_EMOJI = {
   tiger: '🐅', loewen: '🦁', afrikapanorama: '🦒', strausse: '🪶',
   eismeer: '🐻‍❄️', seeloewen: '🦭', kamele: '🐫', alpakas: '🦦',
   streichelgehege: '🐐', spielplatz: '🛝', japangarten: '🎏', tropenaquarium: '🦈',
+  alpakawiese: '🦙',
 };
 
 let navGraph = null;
@@ -1137,6 +1138,7 @@ function seiteStation(tourId, index) {
       <div>
         <h1 style="margin-bottom:2px">${esc(st.name)}</h1>
         <span class="chip" style="background:${BEREICHE[st.bereich].farbe}22;color:${BEREICHE[st.bereich].farbe}">${esc(BEREICHE[st.bereich].name)}</span>
+        ${st.planNr ? `<span class="chip">🗺 Plan-Nr. ${esc(st.planNr)}</span>` : ''}
         ${st.extraTicket ? '<span class="chip chip--warn">Extra-Ticket</span>' : ''}
         ${st.innen ? '<span class="chip">🏠 ueberdacht</span>' : ''}
       </div>
@@ -1362,7 +1364,7 @@ function zeigeStationsBlatt(id) {
   box.style.cssText = 'position:fixed;left:12px;right:12px;bottom:calc(var(--nav-hoehe) + 16px);z-index:50;max-width:736px;margin:0 auto;';
   box.innerHTML = `
     <div class="zeile-zwischen">
-      <strong>${esc(st.name)}</strong>
+      <strong>${esc(st.name)}${st.planNr ? ` <span class="schwach">(Plan-Nr. ${esc(st.planNr)})</span>` : ''}</strong>
       <button class="btn btn--klein btn--zweit" data-blatt-zu>Schliessen</button>
     </div>
     <div class="knopfreihe" style="margin-top:10px">
