@@ -506,6 +506,444 @@ export const KINDER_TIERE = {
       erklaerung: 'Onager sind Wildtiere geblieben - anders als unsere Hausesel.',
     },
   },
+  tapir: {
+    kurz: 'Ein Tier mit Mini-Ruessel, das unter Wasser laufen kann.',
+    text: [
+      'Der Tapir hat eine kleine Ruesselnase, die er in alle Richtungen biegen kann. Damit pflueckt er Blaetter.',
+      'Tapire lieben Wasser. Sie koennen sogar tauchen und dabei ueber den Boden vom Fluss laufen.',
+      'Tapir-Babys haben helle Streifen und Punkte - wie ein Wildschwein-Frischling im Pyjama.',
+    ],
+    wusstest: [
+      'Der Ruessel ist Nase und Greifhand zugleich.',
+      'Tapire sind mit Pferden und Nashoernern verwandt.',
+    ],
+    quiz: {
+      frage: 'Was kann ein Tapir unter Wasser?',
+      antworten: ['Ueber den Boden laufen', 'Schlafen', 'Fliegen'],
+      richtig: 0,
+      erklaerung: 'Er taucht ab und spaziert einfach unten am Flussboden entlang.',
+    },
+  },
+  wasserschwein: {
+    kurz: 'Das groesste Meerschweinchen der Welt - so schwer wie du und ein Freund zusammen.',
+    text: [
+      'Das Wasserschwein ist das groesste Nagetier der Welt. Es ist ein Riesen-Verwandter vom Meerschweinchen.',
+      'Augen, Ohren und Nase sitzen oben auf dem Kopf. So kann es fast ganz unter Wasser sein und trotzdem alles sehen und hoeren.',
+      'Wasserschweine sind superfriedlich. In Suedamerika setzen sich sogar Voegel auf ihren Ruecken.',
+    ],
+    wusstest: [
+      'Zwischen den Zehen haben sie Schwimmhaeute wie eine Ente.',
+      'Sie koennen beim Schwimmen ein Nickerchen machen.',
+    ],
+    quiz: {
+      frage: 'Mit wem ist das Wasserschwein verwandt?',
+      antworten: ['Mit dem Meerschweinchen', 'Mit dem Schwein', 'Mit dem Nilpferd'],
+      richtig: 0,
+      erklaerung: 'Es ist ein Riesen-Meerschweinchen - das groesste Nagetier der Welt.',
+    },
+  },
+  nasenbaer: {
+    kurz: 'Der Schnueffler mit dem Ringelschwanz, der immer nach oben zeigt.',
+    text: [
+      'Der Nasenbaer hat eine lange, bewegliche Nase. Damit schnueffelt er im Laub nach Kaefern und Fruechten.',
+      'Beim Laufen haelt er seinen geringelten Schwanz kerzengerade nach oben - wie eine kleine Fahne.',
+      'So sehen sich die Nasenbaeren im hohen Gras gegenseitig und keiner geht verloren.',
+    ],
+    wusstest: [
+      'Nasenbaeren koennen kopfvoran einen Baum hinunterklettern.',
+      'Sie sind mit den Waschbaeren verwandt.',
+    ],
+    quiz: {
+      frage: 'Warum haelt der Nasenbaer den Schwanz nach oben?',
+      antworten: ['Damit ihn die anderen sehen', 'Damit er nicht schmutzig wird', 'Zum Fliegen'],
+      richtig: 0,
+      erklaerung: 'Der Schwanz ist wie eine Fahne - so verliert die Gruppe niemanden.',
+    },
+  },
+  pavian: {
+    kurz: 'Der Affe mit der Silbermaehne, der auf Felsen schlaeft.',
+    text: [
+      'Mantelpaviane leben in grossen Familien auf einem Felsen. Der Chef traegt einen silbernen Umhang aus Haaren.',
+      'Sie krabbeln sich gegenseitig durchs Fell. Das ist wie Freunde umarmen - wer sich pflegt, mag sich.',
+      'Nachts schlafen Paviane im Sitzen auf schmalen Felskanten. Ihr Po hat dafuer extra dicke Sitzpolster.',
+    ],
+    wusstest: [
+      'Im alten Aegypten waren Paviane heilige Tiere.',
+      'Wenn ein Pavian gaehnt und die Zaehne zeigt, heisst das: Vorsicht, ich bin sauer!',
+    ],
+    quiz: {
+      frage: 'Wo schlafen Paviane?',
+      antworten: ['Im Sitzen auf dem Felsen', 'Im Nest im Baum', 'In einer Hoehle unter der Erde'],
+      richtig: 0,
+      erklaerung: 'Sie sitzen nachts auf Felskanten - ihr Po hat eingebaute Sitzkissen.',
+    },
+  },
+  pelikan: {
+    kurz: 'Der Vogel mit dem eingebauten Kescher unterm Schnabel.',
+    text: [
+      'Unter dem Schnabel hat der Pelikan einen dehnbaren Hautbeutel. Da passt mehr Wasser hinein als in einen Putzeimer!',
+      'Der Beutel ist sein Kescher: Wasser wird rausgedrueckt, der Fisch bleibt drin und wird verschluckt.',
+      'Pelikane fischen im Team. Sie schwimmen im Halbkreis und treiben die Fische zusammen - wie beim Fussball-Angriff.',
+    ],
+    wusstest: [
+      'Ein Pelikan frisst jeden Tag ungefaehr ein Kilo Fisch.',
+      'Seine Fluegel sind so breit wie ein Auto lang ist.',
+    ],
+    quiz: {
+      frage: 'Wofuer benutzt der Pelikan seinen Kehlsack?',
+      antworten: ['Als Kescher zum Fischen', 'Als Schlafsack', 'Zum Wasser aufbewahren'],
+      richtig: 0,
+      erklaerung: 'Er faengt damit Fische - das Wasser laeuft raus, der Fisch bleibt drin.',
+    },
+  },
+  meerschweinchen: {
+    kurz: 'Die kleinen Quieker aus Suedamerika.',
+    text: [
+      'Meerschweinchen kommen aus den Bergen von Suedamerika. Dort leben sie schon seit tausenden Jahren bei den Menschen.',
+      'Sie reden den ganzen Tag miteinander: quieken, gurren, brummeln. Jeder Laut bedeutet etwas anderes.',
+      'Wenn sich ein Meerschweinchen richtig freut, springt es in die Luft. Das nennt man Popcornen!',
+    ],
+    wusstest: [
+      'Mit dem Meer haben sie nichts zu tun - sie kamen nur mit dem Schiff uebers Meer zu uns.',
+      'Lautes Pfeifen heisst meistens: Futter her!',
+    ],
+    quiz: {
+      frage: 'Was macht ein Meerschweinchen, wenn es sich freut?',
+      antworten: ['Es springt in die Luft', 'Es klatscht', 'Es schuettelt den Kopf'],
+      richtig: 0,
+      erklaerung: 'Es huepft vor Freude - das heisst Popcornen, wie hupfendes Popcorn.',
+    },
+  },
+  kaninchen: {
+    kurz: 'Langohr mit Klimaanlage - die Ohren heissen Loeffel.',
+    text: [
+      'Das Hasenkaninchen sieht aus wie ein Feldhase, ist aber ein Kaninchen.',
+      'So merkst du dir den Unterschied: Hasen wohnen draussen im Feld, Kaninchen graben Hoehlen unter der Erde.',
+      'Die langen Ohren heissen Loeffel. Damit hoert das Kaninchen super - und kuehlt sich ab, wenn ihm heiss ist.',
+      'Wenn Gefahr droht, klopft es laut mit den Hinterbeinen auf den Boden. Das warnt alle anderen.',
+    ],
+    wusstest: [
+      'Kaninchen koennen jedes Ohr einzeln drehen.',
+      'Beim Wegrennen schlagen sie blitzschnelle Haken.',
+    ],
+    quiz: {
+      frage: 'Wie warnt ein Kaninchen seine Freunde?',
+      antworten: ['Es klopft mit den Hinterbeinen', 'Es schreit laut', 'Es winkt mit den Ohren'],
+      richtig: 0,
+      erklaerung: 'Es trommelt mit den Hinterbeinen auf den Boden - das hoeren alle.',
+    },
+  },
+  ara: {
+    kurz: 'Der Riesenpapagei, der Nuesse knackt wie ein Nussknacker.',
+    text: [
+      'Der Gruenfluegel-Ara ist einer der groessten Papageien der Welt - rot, blau und gruen wie ein fliegender Regenbogen.',
+      'Sein Schnabel ist so stark, dass er die haertesten Nuesse der Welt knackt.',
+      'Aras bleiben ihr Leben lang mit ihrem Partner zusammen und fliegen immer dicht nebeneinander.',
+      'Ein Ara kann aelter werden als ein Mensch in Rente geht - ueber 60 Jahre!',
+    ],
+    wusstest: [
+      'Beim Klettern benutzt der Ara seinen Schnabel wie eine dritte Hand.',
+      'Papageien greifen mit zwei Zehen nach vorne und zwei nach hinten.',
+    ],
+    quiz: {
+      frage: 'Was kann der Ara mit seinem Schnabel?',
+      antworten: ['Die haertesten Nuesse knacken', 'Pfeifen wie eine Floete', 'Loecher bohren'],
+      richtig: 0,
+      erklaerung: 'Sein Schnabel ist ein super Nussknacker - staerker als deine Haende.',
+    },
+  },
+  kranich: {
+    kurz: 'Der Gluecksvogel, der tanzen kann.',
+    text: [
+      'Der Mandschurenkranich ist in China und Japan ein Gluecksbringer. Er steht fuer langes Leben.',
+      'Kraniche tanzen! Sie springen hoch, breiten die Fluegel aus und verbeugen sich voreinander.',
+      'Kranich-Paare bleiben fuer immer zusammen und singen im Duett - so genau, dass es wie ein einziger Vogel klingt.',
+    ],
+    wusstest: [
+      'Der rote Fleck auf dem Kopf ist keine Feder, sondern Haut - bei Aufregung leuchtet er.',
+      'Kranich-Kueken koennen schon nach ein paar Stunden laufen.',
+    ],
+    quiz: {
+      frage: 'Was machen Kraniche zusammen?',
+      antworten: ['Sie tanzen', 'Sie bauen Tuerme', 'Sie schwimmen um die Wette'],
+      richtig: 0,
+      erklaerung: 'Sie springen, verbeugen sich und tanzen miteinander - das ganze Jahr.',
+    },
+  },
+  muntjak: {
+    kurz: 'Der Mini-Hirsch, der bellt wie ein Hund.',
+    text: [
+      'Der Muntjak ist ein winziger Hirsch - kaum groesser als ein Dackel auf langen Beinen.',
+      'Wenn er sich erschreckt, bellt er! Deshalb heisst er auch Bellhirsch.',
+      'Sein Geweih ist winzig. Dafuer hat er kleine Hauer im Maul, wie ein Vampir.',
+    ],
+    wusstest: [
+      'Muntjaks gibt es schon seit Millionen von Jahren fast unveraendert.',
+      'Sie leben am liebsten ganz allein.',
+    ],
+    quiz: {
+      frage: 'Welches Geraeusch macht der Muntjak?',
+      antworten: ['Er bellt wie ein Hund', 'Er miaut', 'Er kraeht'],
+      richtig: 0,
+      erklaerung: 'Er bellt - deshalb nennt man ihn auch Bellhirsch.',
+    },
+  },
+  pinselohrschwein: {
+    kurz: 'Das bunteste Schwein der Welt - mit Quasten an den Ohren.',
+    text: [
+      'Das Pinselohrschwein hat rotes Fell und lange weisse Haarpinsel an den Ohrenspitzen - wie kleine Quasten.',
+      'Es wohnt im afrikanischen Regenwald und wuehlt dort mit der Schnauze nach Wurzeln.',
+      'Die Babys haben Streifen wie unsere Wildschwein-Frischlinge.',
+    ],
+    wusstest: [
+      'Pinselohrschweine koennen richtig gut schwimmen.',
+      'Sie riechen Futter sogar tief unter der Erde.',
+    ],
+    quiz: {
+      frage: 'Was hat das Pinselohrschwein an den Ohren?',
+      antworten: ['Lange Haarpinsel', 'Goldene Ringe', 'Kleine Hoerner'],
+      richtig: 0,
+      erklaerung: 'Weisse Haarquasten - deshalb heisst es Pinselohrschwein.',
+    },
+  },
+  stachelschwein: {
+    kurz: 'Ein Nagetier mit eingebauter Ritterruestung.',
+    text: [
+      'Das Stachelschwein ist kein Schwein und kein Igel - es ist ein grosses Nagetier mit langen Stacheln.',
+      'Bei Gefahr stellt es alle Stacheln auf und rasselt mit dem Schwanz wie mit einer Rassel. Das heisst: Bleib weg!',
+      'Wenn das nicht hilft, laeuft es rueckwaerts auf den Angreifer zu. Die Stacheln piksen und bleiben stecken.',
+      'Sogar Loewen lassen Stachelschweine lieber in Ruhe.',
+    ],
+    wusstest: [
+      'Die Stacheln sind umgebaute Haare und werden so lang wie dein Unterarm.',
+      'Stachelschwein-Paare bleiben fuer immer zusammen.',
+    ],
+    quiz: {
+      frage: 'Was macht das Stachelschwein bei Gefahr?',
+      antworten: ['Stacheln aufstellen und rasseln', 'Sich tot stellen', 'Schnell weglaufen'],
+      richtig: 0,
+      erklaerung: 'Es stellt die Stacheln auf und rasselt laut - die beste Warnung der Welt.',
+    },
+  },
+  serval: {
+    kurz: 'Die Katze mit den laengsten Beinen und Riesenohren.',
+    text: [
+      'Der Serval ist eine wilde Katze aus Afrika mit superlangen Beinen und riesigen Ohren.',
+      'Mit den Ohren hoert er Maeuse sogar unter der Erde rascheln.',
+      'Dann springt er hoch in die Luft und landet genau auf der Maus - bis zu drei Meter hoch!',
+    ],
+    wusstest: [
+      'Der Serval kann Voegel im Flug aus der Luft fangen.',
+      'Seine Ohren drehen sich wie kleine Satellitenschuesseln.',
+    ],
+    quiz: {
+      frage: 'Womit findet der Serval seine Beute?',
+      antworten: ['Mit seinen Riesenohren', 'Mit der Nase', 'Mit den Schnurrhaaren'],
+      richtig: 0,
+      erklaerung: 'Er hoert die Maeuse rascheln - sogar unter der Erde.',
+    },
+  },
+  kudu: {
+    kurz: 'Die Antilope mit den Korkenzieher-Hoernern.',
+    text: [
+      'Der Grosse Kudu ist eine riesige Antilope. Die Maennchen tragen Hoerner, die wie Korkenzieher gedreht sind.',
+      'Die weissen Streifen auf dem Fell sind Tarnung: Im Gebuesch sieht der Kudu aus wie Aeste und Schatten.',
+      'Kudus koennen aus dem Stand ueber eine Mauer springen, die hoeher ist als ein Erwachsener.',
+    ],
+    wusstest: [
+      'Je aelter der Kudu-Mann, desto mehr Drehungen haben seine Hoerner.',
+      'Auf der Anlage wohnen auch Impalas und andere Antilopen - wie in der echten Savanne.',
+    ],
+    quiz: {
+      frage: 'Wie sehen die Hoerner vom Kudu aus?',
+      antworten: ['Gedreht wie ein Korkenzieher', 'Gerade wie ein Stock', 'Rund wie ein Ring'],
+      richtig: 0,
+      erklaerung: 'Sie drehen sich in grossen Schrauben - bis zu drei Umdrehungen.',
+    },
+  },
+  maehnenspringer: {
+    kurz: 'Der Bergsteiger aus der Wueste mit dem Haar-Vorhang.',
+    text: [
+      'Der Maehnenspringer lebt in den Bergen der Wueste Sahara. An Hals und Brust haengt ein langer Haar-Vorhang.',
+      'Er klettert steile Felswaende hoch, als waere es eine Treppe.',
+      'Bei Gefahr bleibt er einfach stehen wie eine Statue - seine Fellfarbe sieht dann aus wie Fels.',
+    ],
+    wusstest: [
+      'Maehnenspringer muessen fast nie trinken - das Wasser holen sie aus den Pflanzen.',
+      'Sein Lieblingsplatz ist immer der hoechste Punkt vom Felsen.',
+    ],
+    quiz: {
+      frage: 'Was macht der Maehnenspringer bei Gefahr?',
+      antworten: ['Er steht still wie eine Statue', 'Er rennt im Zickzack', 'Er versteckt sich im Wasser'],
+      richtig: 0,
+      erklaerung: 'Er bleibt reglos stehen - dann sieht er aus wie ein Stueck Fels.',
+    },
+  },
+  tahr: {
+    kurz: 'Die Bergziege mit der Loewenmaehne aus dem hoechsten Gebirge der Welt.',
+    text: [
+      'Der Tahr kommt aus dem Himalaya - dem hoechsten Gebirge der Erde.',
+      'Die Maenner tragen im Winter eine dicke helle Maehne um den Hals, fast wie ein Loewe.',
+      'Seine Hufe haben Gummi-Sohlen. Damit klettert er auf Felsen, ohne auszurutschen - wie mit Kletterschuhen.',
+    ],
+    wusstest: [
+      'Tahre halten Kaelte von minus 20 Grad aus.',
+      'Im Sommer wandern sie den Berg hoch, im Winter wieder runter.',
+    ],
+    quiz: {
+      frage: 'Was haben Tahre unter den Hufen?',
+      antworten: ['Weiche Gummi-Sohlen', 'Spitze Krallen', 'Saugnaepfe'],
+      richtig: 0,
+      erklaerung: 'Gummiartige Ballen - damit rutschen sie auf Felsen nicht aus.',
+    },
+  },
+  tamarin: {
+    kurz: 'Winzige Aeffchen - der Papa traegt die Babys.',
+    text: [
+      'Tamarine sind so klein, dass sie auf deine Hand passen wuerden.',
+      'Fast immer werden Zwillinge geboren. Und dann passiert etwas Besonderes: Der Papa traegt die Babys auf dem Ruecken!',
+      'Nur zum Milchtrinken gibt er sie kurz der Mama.',
+      'Statt Fingernaegeln haben Tamarine kleine Krallen zum Klettern.',
+    ],
+    wusstest: [
+      'Ihre Rufe klingen wie Vogelpfeifen.',
+      'Grosse Geschwister helfen beim Babysitten.',
+    ],
+    quiz: {
+      frage: 'Wer traegt bei den Tamarinen die Babys?',
+      antworten: ['Der Papa', 'Nur die Mama', 'Die Oma'],
+      richtig: 0,
+      erklaerung: 'Der Papa traegt die Zwillinge auf dem Ruecken - fast den ganzen Tag.',
+    },
+  },
+  praeriehund: {
+    kurz: 'Die Erdmaennchen Amerikas - sie bauen Staedte unter der Erde.',
+    text: [
+      'Praeriehunde sind keine Hunde - sie heissen nur so, weil sie bellen koennen.',
+      'Unter der Erde bauen sie richtige Staedte mit Schlafzimmern, Kinderzimmern und vielen Gaengen.',
+      'Einer steht immer Wache. Bellt er, flitzen alle blitzschnell in ihre Loecher.',
+      'Zur Begruessung geben sich Praeriehunde ein Kuesschen!',
+    ],
+    wusstest: [
+      'Fuer jeden Feind haben sie einen eigenen Warnruf - einer fuer Adler, einer fuer Fuechse.',
+      'Nebenan wohnen die Baumstachler - Klettertiere mit Stachel-Fell.',
+    ],
+    quiz: {
+      frage: 'Wie begruessen sich Praeriehunde?',
+      antworten: ['Mit einem Kuesschen', 'Mit Winken', 'Mit einem Purzelbaum'],
+      richtig: 0,
+      erklaerung: 'Sie beruehren sich mit den Zaehnen - das sieht aus wie ein Kuss.',
+    },
+  },
+  wapiti: {
+    kurz: 'Der Riesenhirsch aus Amerika mit dem lauten Ruf.',
+    text: [
+      'Der Wapiti ist einer der groessten Hirsche der Welt - viel groesser als unsere Rehe.',
+      'Sein Geweih waechst jedes Jahr komplett neu und wird so lang wie du gross bist.',
+      'Im Herbst ruft der Wapiti-Mann so laut, dass man ihn kilometerweit hoert. Das klingt wie eine Mischung aus Pfeifen und Bruellen.',
+    ],
+    wusstest: [
+      'Wapiti bedeutet in einer Indianersprache "weisser Po".',
+      'Das alte Geweih faellt einfach ab - und ein neues waechst nach.',
+    ],
+    quiz: {
+      frage: 'Was passiert jedes Jahr mit dem Geweih?',
+      antworten: ['Es faellt ab und waechst neu', 'Es wird immer groesser', 'Es wechselt die Farbe'],
+      richtig: 0,
+      erklaerung: 'Jedes Fruehjahr faellt es ab, und ein ganz neues waechst nach.',
+    },
+  },
+  schneeeule: {
+    kurz: 'Die weisse Eule vom Nordpol - jagt auch am Tag.',
+    text: [
+      'Die Schnee-Eule wohnt in der Arktis, wo fast immer Schnee liegt. Ihr weisses Federkleid ist die perfekte Tarnung.',
+      'Andere Eulen jagen nachts - die Schnee-Eule auch am Tag. Im Sommer wird es an ihrer Heimat naemlich gar nicht dunkel!',
+      'Sogar ihre Fuesse sind mit Federn ueberzogen - wie warme Daunenstiefel.',
+    ],
+    wusstest: [
+      'Die Maenner sind fast ganz weiss, die Frauen haben dunkle Sprenkel.',
+      'Sie kann ihren Kopf fast einmal ganz herumdrehen.',
+    ],
+    quiz: {
+      frage: 'Was ist an den Fuessen der Schnee-Eule besonders?',
+      antworten: ['Sie sind mit Federn ueberzogen', 'Sie sind knallrot', 'Sie haben Schwimmhaeute'],
+      richtig: 0,
+      erklaerung: 'Federstiefel! Damit friert sie nicht am eisigen Boden.',
+    },
+  },
+  riesenschildkroete: {
+    kurz: 'Die gepanzerte Uroma - aelter als alle Menschen, die du kennst.',
+    text: [
+      'Riesenschildkroeten koennen ueber 100 Jahre alt werden - manche sogar 150!',
+      'Ihr Panzer ist mit dem Skelett verwachsen. Sie kann ihn niemals ausziehen - er waechst ihr Leben lang mit.',
+      'Zaehne hat sie keine. Sie schneidet Pflanzen mit scharfen Kanten am Maul ab, wie mit einer Schere.',
+    ],
+    wusstest: [
+      'Eine Riesenschildkroete kann ein ganzes Jahr ohne Essen auskommen.',
+      'Neben der Anlage stehen Saurier-Figuren - Schildkroeten gab es schon zur Dino-Zeit!',
+    ],
+    quiz: {
+      frage: 'Kann die Schildkroete ihren Panzer ausziehen?',
+      antworten: ['Nein, er ist mit ihr verwachsen', 'Ja, zum Schlafen', 'Nur im Sommer'],
+      richtig: 0,
+      erklaerung: 'Der Panzer gehoert zu ihrem Skelett - wie bei dir die Rippen.',
+    },
+  },
+  zwergotter: {
+    kurz: 'Der kleinste Otter der Welt - mit geschickten Fingerchen.',
+    text: [
+      'Zwergotter sind die kleinsten Otter der Welt und wohnen mit im Orang-Utan-Haus.',
+      'Ihre Pfoten sind fast wie Haende: Damit tasten sie unter Steinen nach Krebsen.',
+      'Sie leben in Grossfamilien und quatschen dauernd miteinander - piepsen, quieken, pfeifen.',
+      'Manche Zwergotter jonglieren mit kleinen Steinen!',
+    ],
+    wusstest: [
+      'Harte Muscheln legen sie in die Sonne, bis sie von selbst aufgehen.',
+      'Grosse Geschwister passen auf die kleinen auf.',
+    ],
+    quiz: {
+      frage: 'Womit jonglieren Zwergotter gern?',
+      antworten: ['Mit kleinen Steinen', 'Mit Fischen', 'Mit Baellen'],
+      richtig: 0,
+      erklaerung: 'Mit Steinchen - so trainieren sie ihre flinken Finger.',
+    },
+  },
+  mara: {
+    kurz: 'Sieht aus wie ein Hase auf Reh-Beinen - und gehoert zu den Meerschweinchen.',
+    text: [
+      'Der Mara sieht aus wie eine Mischung aus Hase und Reh. In Wirklichkeit ist er ein grosses Nagetier aus Argentinien.',
+      'Mara-Paare bleiben fuer immer zusammen. Wo einer ist, ist der andere nie weit weg.',
+      'Alle Mara-Babys der Gruppe wohnen zusammen in einer grossen Hoehle - wie in einem Kindergarten.',
+    ],
+    wusstest: [
+      'Maras koennen mit allen vier Beinen gleichzeitig abspringen.',
+      'Sie sind mit den Meerschweinchen verwandt.',
+    ],
+    quiz: {
+      frage: 'Wo wohnen die Mara-Babys?',
+      antworten: ['Alle zusammen in einer Hoehle', 'Jedes allein', 'Im Baum'],
+      richtig: 0,
+      erklaerung: 'In einer Gemeinschafts-Hoehle - wie in einem Kindergarten unter der Erde.',
+    },
+  },
+  warzenschwein: {
+    kurz: 'Das Schwein, das beim Fressen kniet und den Schwanz wie eine Antenne traegt.',
+    text: [
+      'Das Warzenschwein hat dicke Beulen im Gesicht - die Warzen. Sie schuetzen es wie ein Helm beim Raufen.',
+      'Zum Fressen kniet es sich hin! Auf den Knien rutscht es grasend uebers Feld.',
+      'Wenn Warzenschweine rennen, stehen alle Schwaenze senkrecht nach oben - wie kleine Antennen. So verliert keiner die Familie.',
+    ],
+    wusstest: [
+      'Warzenschweine schlafen rueckwaerts in Erdhoehlen - mit den Hauern zum Eingang.',
+      'Aus dem Film Koenig der Loewen kennst du eines: Pumbaa ist ein Warzenschwein!',
+    ],
+    quiz: {
+      frage: 'Wie frisst das Warzenschwein?',
+      antworten: ['Auf den Knien', 'Im Liegen', 'Im Stehen auf zwei Beinen'],
+      richtig: 0,
+      erklaerung: 'Es kniet sich hin und rutscht auf den Knien von Grasbueschel zu Grasbueschel.',
+    },
+  },
 };
 
 /* Kurze, kindgerechte Beschreibung der Stationen. Faellt eine Station hier
