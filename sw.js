@@ -1,5 +1,5 @@
 /* Offline-Cache fuer klassische App und Erlebnis-V2. */
-const VERSION = 'v21-map-label-overlay';
+const VERSION = 'v22-map-labels-zoom';
 const CACHE = `tierpark-begleiter-${VERSION}`;
 const DATEIEN = [
   './',

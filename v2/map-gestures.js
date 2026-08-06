@@ -1,5 +1,7 @@
-const MIN_SCALE = 0.78;
-const MAX_SCALE = 2.8;
+const MIN_SCALE = 0.62;
+const MAX_SCALE = 3.2;
+const STORAGE_KEY = 'hagenbeck-v24';
+const ZOOM_FACTOR = 1.22;
 
 let frame = 0;
 let gesture = null;
@@ -9,18 +11,44 @@ function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
 }
 
-function readStage(stage) {
-  const match = stage.style.transform.match(/translate\((-?[\d.]+)px,\s*(-?[\d.]+)px\)\s*scale\(([\d.]+)\)/);
-  if (match) {
-    state = { x: Number(match[1]), y: Number(match[2]), scale: Number(match[3]) };
-  }
+function readStoredState() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); }
+  catch { return {}; }
 }
 
-function draw(stage) {
+function persistState() {
+  try {
+    const stored = readStoredState();
+    stored.x = state.x;
+    stored.y = state.y;
+    stored.scale = state.scale;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(stored));
+  } catch {}
+}
+
+function readStage(stage) {
+  const transform = stage.style.transform || getComputedStyle(stage).transform || '';
+  const direct = transform.match(/translate(?:3d)?\((-?[\d.]+)px,\s*(-?[\d.]+)px(?:,\s*0(?:px)?)?\)\s*scale\(([\d.]+)\)/);
+  if (direct) {
+    state = { x: Number(direct[1]), y: Number(direct[2]), scale: Number(direct[3]) };
+    return;
+  }
+
+  const stored = readStoredState();
+  state = {
+    x: Number.isFinite(Number(stored.x)) ? Number(stored.x) : 0,
+    y: Number.isFinite(Number(stored.y)) ? Number(stored.y) : 0,
+    scale: Number.isFinite(Number(stored.scale)) ? clamp(Number(stored.scale), MIN_SCALE, MAX_SCALE) : 1
+  };
+}
+
+function draw(stage, persist = true) {
   cancelAnimationFrame(frame);
   frame = requestAnimationFrame(() => {
     stage.style.transition = 'none';
     stage.style.transform = `translate3d(${state.x}px, ${state.y}px, 0) scale(${state.scale})`;
+    if (persist) persistState();
+    window.dispatchEvent(new CustomEvent('hagenbeck:map-transform', { detail: { ...state } }));
   });
 }
 
@@ -35,13 +63,25 @@ function midpoint(a, b, rect) {
   };
 }
 
-function zoomAround(stage, viewport, nextScale, point) {
+function viewportCenter(viewport) {
+  const rect = viewport.getBoundingClientRect();
+  return { x: rect.width / 2, y: rect.height / 2 };
+}
+
+function zoomAround(stage, nextScale, point) {
   const previousScale = state.scale;
-  if (nextScale === previousScale) return;
+  nextScale = clamp(nextScale, MIN_SCALE, MAX_SCALE);
+  if (Math.abs(nextScale - previousScale) < 0.001) return;
+
   const ratio = nextScale / previousScale;
   state.x = point.x - (point.x - state.x) * ratio;
   state.y = point.y - (point.y - state.y) * ratio;
   state.scale = nextScale;
+  draw(stage);
+}
+
+function resetMap(stage) {
+  state = { x: 0, y: 0, scale: 1 };
   draw(stage);
 }
 
@@ -61,7 +101,7 @@ function attach() {
     const rect = viewport.getBoundingClientRect();
     const point = { x: event.clientX - rect.left, y: event.clientY - rect.top };
     const factor = Math.exp(-event.deltaY * 0.0014);
-    zoomAround(stage, viewport, clamp(state.scale * factor, MIN_SCALE, MAX_SCALE), point);
+    zoomAround(stage, state.scale * factor, point);
   }, { passive: false, capture: true });
 
   viewport.addEventListener('touchstart', event => {
@@ -109,16 +149,45 @@ function attach() {
   viewport.addEventListener('touchend', finish, { passive: false, capture: true });
   viewport.addEventListener('touchcancel', finish, { passive: false, capture: true });
 
-  // Safari-spezifischen Seitenzoom innerhalb der Karte unterbinden.
   ['gesturestart', 'gesturechange', 'gestureend'].forEach(type => {
     viewport.addEventListener(type, event => event.preventDefault(), { passive: false });
   });
 }
 
+function handleToolClick(event) {
+  const button = event.target.closest('.map .tools [data-action]');
+  if (!button) return;
+
+  const action = button.dataset.action;
+  if (!['zoom-in', 'zoom-out', 'reset-map'].includes(action)) return;
+
+  const viewport = document.querySelector('#viewport.map');
+  const stage = document.querySelector('#mapStage');
+  if (!viewport || !stage) return;
+
+  event.preventDefault();
+  event.stopPropagation();
+  event.stopImmediatePropagation();
+
+  readStage(stage);
+  if (action === 'reset-map') {
+    resetMap(stage);
+    return;
+  }
+
+  const factor = action === 'zoom-in' ? ZOOM_FACTOR : 1 / ZOOM_FACTOR;
+  zoomAround(stage, state.scale * factor, viewportCenter(viewport));
+}
+
+document.addEventListener('click', handleToolClick, true);
+
 const style = document.createElement('style');
 style.textContent = `
   #viewport.map { touch-action: none; overscroll-behavior: contain; }
-  #viewport.map .map-stage { transition: none !important; transform-origin: 0 0; }
+  #viewport.map .map-stage {
+    transition: none !important;
+    transform-origin: 0 0;
+  }
 `;
 document.head.appendChild(style);
 
