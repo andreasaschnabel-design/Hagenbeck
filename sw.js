@@ -1,5 +1,5 @@
 /* Offline-Cache fuer klassische App und Erlebnis-V2. */
-const VERSION = 'v26-map-boundary-fix';
+const VERSION = 'v27-compact-navigation-ui';
 const CACHE = `tierpark-begleiter-${VERSION}`;
 const DATEIEN = [
   './',
@@ -22,6 +22,7 @@ const DATEIEN = [
   './v2/route-controls.js',
   './v2/tour-start-fix.js',
   './v2/mobile-navigation.js',
+  './v2/compact-navigation.js',
   './v2/animal-experience.js',
   './v2/navigation-arrival.js',
   './v2/README.md',
