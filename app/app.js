@@ -28,6 +28,7 @@ const STANDARD = {
   karteDrehung: 45,
   navZiel: null, // Stations-ID, zu der die Pfeil-Navigation fuehrt
   entdeckt: [], // Tierpass: gestempelte Stationen
+  eigeneTiere: [], // Wunschtiere fuer die selbst zusammengestellte Tour
   passStart: null, // Zeitpunkt des ersten Stempels (fuer den Tagesrueckblick)
   erstbesuch: true,
 };
@@ -65,7 +66,7 @@ function setze(teil) {
 const $ = (sel, wurzel = document) => wurzel.querySelector(sel);
 const stationVon = (id) => STATIONEN.find((s) => s.id === id);
 const tierVon = (id) => TIERE.find((t) => t.id === id);
-const tourVon = (id) => TOUREN.find((t) => t.id === id);
+const tourVon = (id) => (id === 'eigene' ? eigeneTour() : TOUREN.find((t) => t.id === id));
 
 function esc(text = '') {
   return String(text).replace(/[&<>"']/g, (z) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[z]));
@@ -383,6 +384,98 @@ const NAV_EMOJI = {
   streichelgehege: '🐐', spielplatz: '🛝', japangarten: '🎏', tropenaquarium: '🦈',
   alpakawiese: '🦙',
 };
+
+const TIER_EMOJI = {
+  eisbaer: '🐻‍❄️', walross: '🦭', pinguin: '🐧', seebaer: '🦭', elefant: '🐘',
+  orangutan: '🦧', tiger: '🐅', trampeltier: '🐫', zebra: '🦓', strauss: '🪶',
+  loewe: '🦁', flamingo: '🦩', riesenotter: '🦦', alpaka: '🦙', zwergziege: '🐐',
+  hai: '🦈', krokodil: '🐊', rochen: '🐟', clownfisch: '🐠', riesenschlange: '🐍',
+  flughund: '🦇', kamtschatkabaer: '🐻', leopard: '🐆', praeriebison: '🦬',
+  mandrill: '🐒', riesenkaenguru: '🦘', onager: '🐴', tapir: '🐖',
+  wasserschwein: '🐹', nasenbaer: '🦝', pavian: '🐵', pelikan: '🦢',
+  meerschweinchen: '🐹', kaninchen: '🐰', ara: '🦜', kranich: '🕊', muntjak: '🦌',
+  pinselohrschwein: '🐗', stachelschwein: '🦔', serval: '🐈', kudu: '🦌',
+  maehnenspringer: '🐏', tahr: '🐐', tamarin: '🐒', praeriehund: '🐿',
+  wapiti: '🦌', schneeeule: '🦉', riesenschildkroete: '🐢', zwergotter: '🦦',
+  mara: '🐇', warzenschwein: '🐗',
+};
+
+/* Fussweg-Distanz zwischen zwei Stationen ueber das Wegenetz (gecacht). */
+const distanzCache = new Map();
+function stationDistanz(aId, bId) {
+  const key = aId < bId ? `${aId}|${bId}` : `${bId}|${aId}`;
+  if (distanzCache.has(key)) return distanzCache.get(key);
+  const a = stationVon(aId);
+  const b = stationVon(bId);
+  const m = navRoute([a.mapX, a.mapY], [b.mapX, b.mapY]).meter;
+  distanzCache.set(key, m);
+  return m;
+}
+
+/* Eigene Tour aus den Wunschtieren: Stationen sammeln, Reihenfolge mit
+ * Naechster-Nachbar-Heuristik + 2-Opt-Verbesserung ueber die echten
+ * Wegstrecken optimieren. Start ist immer der Haupteingang. */
+let eigeneTourCache = null;
+function eigeneTour() {
+  if (!S.eigeneTiere.length) return null;
+  const signatur = [...S.eigeneTiere].sort().join(',');
+  if (eigeneTourCache && eigeneTourCache.signatur === signatur) return eigeneTourCache.tour;
+
+  const proStation = new Map();
+  for (const tid of S.eigeneTiere) {
+    const t = tierVon(tid);
+    if (!t) continue;
+    if (!proStation.has(t.station)) proStation.set(t.station, []);
+    proStation.get(t.station).push(t.name);
+  }
+  let rest = [...proStation.keys()].filter((id) => id !== 'haupteingang' && stationVon(id));
+  const folge = ['haupteingang'];
+  let aktuell = 'haupteingang';
+  while (rest.length) {
+    rest.sort((x, y) => stationDistanz(aktuell, x) - stationDistanz(aktuell, y));
+    aktuell = rest.shift();
+    folge.push(aktuell);
+  }
+  /* 2-Opt: Teilstrecken umdrehen, solange die Gesamtstrecke kuerzer wird. */
+  const laengeVon = (f) => {
+    let m = 0;
+    for (let i = 1; i < f.length; i++) m += stationDistanz(f[i - 1], f[i]);
+    return m;
+  };
+  let besser = true;
+  while (besser && folge.length > 3) {
+    besser = false;
+    for (let i = 1; i < folge.length - 1; i++) {
+      for (let j = i + 1; j < folge.length; j++) {
+        const neu = [...folge.slice(0, i), ...folge.slice(i, j + 1).reverse(), ...folge.slice(j + 1)];
+        if (laengeVon(neu) < laengeVon(folge) - 1) {
+          folge.splice(0, folge.length, ...neu);
+          besser = true;
+        }
+      }
+    }
+  }
+
+  const meter = laengeVon(folge);
+  const aufenthalt = folge.reduce((a, id) => a + (stationVon(id)?.dauer || 0), 0);
+  const minuten = aufenthalt + Math.round(meter / 67); // ~4 km/h Gehtempo
+  const tour = {
+    id: 'eigene',
+    titel: 'Meine Tour',
+    schwerpunkt: 'Selbst zusammengestellt',
+    emoji: '⭐',
+    minuten,
+    laenge: `ca. ${(meter / 1000).toFixed(1).replace('.', ',')} km`,
+    fuer: 'Deine eigene Auswahl',
+    beschreibung: `Deine Route zu ${S.eigeneTiere.length} Wunschtieren an ${folge.length - 1} Stationen - in der kuerzesten Reihenfolge ueber die echten Parkwege.`,
+    stationen: folge.map((id) => ({
+      id,
+      fokus: proStation.has(id) ? `Deine Tiere: ${proStation.get(id).join(', ')}` : undefined,
+    })),
+  };
+  eigeneTourCache = { signatur, tour };
+  return tour;
+}
 
 let navGraph = null;
 let navPosition = null; // letzte bekannte eigene Position in Kartenkoordinaten
@@ -1019,6 +1112,30 @@ function seiteTouren() {
     <h1>Welche Runde soll es sein?</h1>
     ${oeffnungHeute() ? `<p class="schwach">🕘 Heute geoeffnet: <strong>${oeffnungHeute()}</strong>${oeffnungRest() ? ` · noch ${minutenText(oeffnungRest())}` : ''} <span style="opacity:.7">(${esc(OEFFNUNG.quelle)})</span></p>` : ''}
     ${empfehlungsKarte()}
+    ${(() => {
+      const t = eigeneTour();
+      return t
+        ? `<div class="karte" style="border-left:4px solid var(--gruen)">
+            <div class="zeile-zwischen">
+              <div>
+                <div class="schwach">⭐ Selbst zusammengestellt</div>
+                <strong>Meine Tour</strong>
+                <div class="schwach">${S.eigeneTiere.length} Tiere · ${minutenText(t.minuten)} · ${t.laenge}</div>
+              </div>
+              <div style="display:grid;gap:6px">
+                <a class="btn btn--klein" href="#/tour/eigene">Ansehen</a>
+                <a class="btn btn--klein btn--zweit" href="#/eigene">Aendern</a>
+              </div>
+            </div>
+          </div>`
+        : `<button class="tour-karte" data-route="#/eigene">
+            <div class="tour-karte__kopf">
+              <span class="tour-karte__emoji" aria-hidden="true">⭐</span>
+              <span class="tour-karte__titel">${istKind() ? 'Deine eigene Tour bauen' : 'Eigene Tour zusammenstellen'}</span>
+            </div>
+            <div class="schwach">${istKind() ? 'Such dir deine Lieblingstiere aus - die App baut den Weg.' : 'Wunschtiere auswaehlen, die App berechnet die kuerzeste Route.'}</div>
+          </button>`;
+    })()}
     <p class="schwach">${istKind()
       ? 'Such dir eine Tour aus. Die App sagt dir, wo es langgeht.'
       : 'Jede Tour ist ein fertiger Rundweg mit eigenem Schwerpunkt. Du kannst jederzeit wechseln.'}</p>
@@ -1540,6 +1657,48 @@ function seitePass() {
   `;
 }
 
+function seiteEigene() {
+  const gewaehlt = new Set(S.eigeneTiere);
+  const gruppen = {};
+  for (const t of TIERE) {
+    if (!gruppen[t.bereich]) gruppen[t.bereich] = [];
+    gruppen[t.bereich].push(t);
+  }
+  const tour = eigeneTour();
+  return `
+    <h1>⭐ ${istKind() ? 'Welche Tiere willst du sehen?' : 'Meine Tour zusammenstellen'}</h1>
+    <p class="schwach">${istKind()
+      ? 'Tippe deine Lieblingstiere an. Die App baut dir den kuerzesten Weg.'
+      : 'Wunschtiere antippen - die App berechnet die kuerzeste Route ueber die Parkwege und sortiert die Stationen passend.'}</p>
+
+    <div class="karte eigene-leiste">
+      <div class="zeile-zwischen">
+        <div id="eigene-info">
+          ${tour
+            ? `<strong>${S.eigeneTiere.length} Tiere</strong> · ${tour.stationen.length - 1} Stationen · ${minutenText(tour.minuten)} · ${tour.laenge}`
+            : '<span class="schwach">Noch keine Tiere gewaehlt</span>'}
+        </div>
+        <button class="btn btn--klein" data-eigene-los ${tour ? '' : 'disabled'}>Route ansehen</button>
+      </div>
+    </div>
+
+    ${Object.entries(gruppen).map(([bereich, tiere]) => `
+      <h2 style="color:${BEREICHE[bereich].farbe}">${esc(BEREICHE[bereich].name)}</h2>
+      <div class="stempel-gitter">
+        ${tiere.map((t) => `
+          <button class="stempel ${gewaehlt.has(t.id) ? 'stempel--da' : ''}" data-tier-wahl="${t.id}">
+            <span class="stempel__bild">${TIER_EMOJI[t.id] || '🐾'}</span>
+            <span class="stempel__name">${esc(t.name)}</span>
+          </button>`).join('')}
+      </div>`).join('')}
+
+    <div class="knopfreihe" style="margin-top:16px">
+      <button class="btn" data-eigene-los ${tour ? '' : 'disabled'}>Route ansehen</button>
+      <button class="btn btn--zweit" data-eigene-leeren ${S.eigeneTiere.length ? '' : 'disabled'}>Leeren</button>
+    </div>
+  `;
+}
+
 function fuelleStimmen(feld) {
   const stimmen = Vorleser.stimmen();
   feld.innerHTML = `<option value="">Standardstimme</option>` +
@@ -1617,6 +1776,8 @@ function zeichne() {
       html = seiteFuetterungen(); seitenTitel = 'Zeiten'; break;
     case 'pass':
       html = seitePass(); seitenTitel = 'Tierpass'; tiefe = false; break;
+    case 'eigene':
+      html = seiteEigene(); seitenTitel = 'Meine Tour'; break;
     case 'wissen':
       html = seiteWissen(); seitenTitel = 'Gut zu wissen'; break;
     case 'einstellungen':
@@ -1756,6 +1917,37 @@ document.addEventListener('click', (e) => {
       stempeln(stationId); // Tierpass fuellt sich beim Rundgang von selbst
     }
     setze({ besucht: { ...S.besucht, [tourId]: [...liste] } });
+    zeichne();
+    return;
+  }
+
+  const wahl = ziel('[data-tier-wahl]');
+  if (wahl) {
+    const id = wahl.dataset.tierWahl;
+    const neu = S.eigeneTiere.includes(id)
+      ? S.eigeneTiere.filter((x) => x !== id)
+      : [...S.eigeneTiere, id];
+    setze({ eigeneTiere: neu });
+    wahl.classList.toggle('stempel--da');
+    const info = $('#eigene-info');
+    const t = eigeneTour();
+    if (info) {
+      info.innerHTML = t
+        ? `<strong>${neu.length} Tiere</strong> · ${t.stationen.length - 1} Stationen · ${minutenText(t.minuten)} · ${t.laenge}`
+        : '<span class="schwach">Noch keine Tiere gewaehlt</span>';
+    }
+    document.querySelectorAll('[data-eigene-los]').forEach((b) => { b.disabled = !t; });
+    document.querySelectorAll('[data-eigene-leeren]').forEach((b) => { b.disabled = !neu.length; });
+    return;
+  }
+
+  if (ziel('[data-eigene-los]')) {
+    if (eigeneTour()) location.hash = '#/tour/eigene';
+    return;
+  }
+
+  if (ziel('[data-eigene-leeren]')) {
+    setze({ eigeneTiere: [], besucht: { ...S.besucht, eigene: [] } });
     zeichne();
     return;
   }

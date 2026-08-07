@@ -36,6 +36,10 @@ drei Altersstufen.
   sucht den kuerzesten Weg ueber das echte Wegenetz des Parks (Dijkstra
   ueber die OSM-Wege) und zeigt ihn mit animierten Pfeilen, Ziel-Emoji
   und Restdistanz an; mit GPS wandert der Startpunkt live mit.
+- **Meine Tour** - Wunschtiere auswaehlen, die App berechnet die
+  kuerzeste Route ueber das echte Wegenetz (Naechster-Nachbar-Heuristik
+  mit 2-Opt-Verbesserung) und erzeugt daraus eine vollwertige Tour mit
+  Stationen, Fortschritt und Routenlinie auf der Karte.
 - **Tierpass** - Stempel fuer jede besuchte Station (automatisch beim
   "Gesehen"-Haken oder bei Ankunft mit der Navigation), Park-Quests wie
   "Polarforscher" und ein Tagesrueckblick mit Dauer und Tierarten.
