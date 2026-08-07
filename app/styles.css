@@ -487,6 +487,57 @@ select, input[type='time'], input[type='text'] {
 .quest--fertig .quest__icon { background: var(--gruen); color: #fff; border-style: solid; border-color: var(--gruen); }
 .quest--fertig { border-left: 4px solid var(--gruen); }
 
+details.quest { display: block; }
+details.quest summary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  list-style: none;
+}
+details.quest summary::-webkit-details-marker { display: none; }
+.quest__kopf { flex: 1; min-width: 0; }
+details.quest[open] summary { margin-bottom: 10px; }
+
+.aufgaben { margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--linie); }
+.aufgabe {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--linie);
+}
+.aufgabe:last-child { border-bottom: 0; }
+.aufgabe__haken {
+  flex: 0 0 auto;
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  border: 2px solid var(--linie);
+  background: var(--karte);
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+  display: grid; place-items: center;
+}
+.aufgabe--fertig .aufgabe__haken { background: var(--gruen); border-color: var(--gruen); }
+.aufgabe--fertig > div > span { opacity: 0.55; text-decoration: line-through; }
+.aufgabe__antwort { margin-top: 4px; }
+.aufgabe__antwort summary {
+  color: var(--gruen);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+}
+.aufgabe__antwort summary::-webkit-details-marker { display: none; }
+.aufgabe__antwort p {
+  margin: 6px 0 0;
+  padding: 8px 10px;
+  background: var(--gruen-hell);
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
 /* ---------- Altersstufen ---------- */
 /* Je juenger, desto groesser Schrift und Tippflaechen. */
 body[data-alterstufe='kind'] { font-size: 1.06rem; }

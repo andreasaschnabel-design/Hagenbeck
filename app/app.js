@@ -29,6 +29,7 @@ const STANDARD = {
   navZiel: null, // Stations-ID, zu der die Pfeil-Navigation fuehrt
   entdeckt: [], // Tierpass: gestempelte Stationen
   eigeneTiere: [], // Wunschtiere fuer die selbst zusammengestellte Tour
+  questAufgaben: {}, // { [questIndex]: [erledigte Aufgaben-Indizes] }
   passStart: null, // Zeitpunkt des ersten Stempels (fuer den Tagesrueckblick)
   erstbesuch: true,
 };
@@ -181,11 +182,86 @@ function stempeln(stationId) {
 }
 
 const QUESTS = [
-  { icon: '🧊', titel: 'Polarforscher', text: 'Besuche das Eismeer und die Seebaeren.', noetig: ['eismeer', 'seeloewen'] },
-  { icon: '🦁', titel: 'Safari-Blick', text: 'Entdecke Loewen, Afrika-Panorama und Steppenweg.', noetig: ['loewen', 'afrikapanorama', 'strausse'] },
-  { icon: '🐘', titel: 'Die grossen Drei', text: 'Elefanten, Tiger und Eismeer an einem Tag.', noetig: ['elefanten', 'tiger', 'eismeer'] },
-  { icon: '🌿', titel: 'Ruheinsel', text: 'Mache eine Pause im Japanischen Garten.', noetig: ['japangarten'] },
-  { icon: '🏅', titel: 'Parkprofi', text: 'Sammle zwoelf Stempel an einem Tag.', anzahl: 12 },
+  {
+    icon: '🧊', titel: 'Polarforscher', text: 'Besuche das Eismeer und die Seebaeren.',
+    noetig: ['eismeer', 'seeloewen'],
+    aufgaben: [
+      { text: 'Finde das Unterwasserfenster im Eismeer und bleib eine Minute stehen.' },
+      { text: 'Welche Farbe hat die Haut vom Eisbaeren unter dem Fell?', antwort: 'Schwarz - so nimmt sie die Waerme der Sonne besonders gut auf.' },
+      { text: 'Zaehle mindestens fuenf Pinguine.' },
+      { text: 'Beobachte ein Walross: Taucht es gerade oder doest es?' },
+      { text: 'Wozu benutzt das Walross seine langen Zaehne?', antwort: 'Als Kletterhilfe: Es zieht sich damit aufs Eis.' },
+      { text: 'Finde heraus, wann heute die Seebaeren-Fuetterung ist, und trag sie unter "Zeiten" ein.' },
+      { text: 'Schau den Seebaeren beim Schwimmen zu: Mit welchen Flossen paddeln sie?', antwort: 'Mit den Vorderflossen - wie grosse Pinguine.' },
+      { text: 'Mach ein Foto vom Eismeer-Felsen von aussen.' },
+      { text: 'Leben Pinguine am Nordpol?', antwort: 'Nein - alle Pinguine leben auf der Suedhalbkugel. Am Nordpol wohnt der Eisbaer.' },
+      { text: 'Erklaere jemandem, warum sich Eisbaer und Pinguin in der Natur nie begegnen.' },
+    ],
+  },
+  {
+    icon: '🦁', titel: 'Safari-Blick', text: 'Entdecke Loewen, Afrika-Panorama und die Afrikanische Steppe.',
+    noetig: ['loewen', 'afrikapanorama', 'strausse'],
+    aufgaben: [
+      { text: 'Finde den versteckten Graben, der beim Panorama die Tiere trennt.' },
+      { text: 'Warum hat das Zebra Streifen?', antwort: 'Die Streifen stoeren stechende Fliegen - sie landen dort viel seltener.' },
+      { text: 'Zaehle die Zebras auf der Steppe.' },
+      { text: 'Vergleiche zwei Zebras: Findest du Unterschiede im Muster?' },
+      { text: 'Ist der schwarz-weisse Strauss ein Mann oder eine Frau?', antwort: 'Ein Mann. Die Frauen sind graubraun getarnt.' },
+      { text: 'Entdecke ein Warzenschwein: Kniet es gerade beim Fressen?' },
+      { text: 'Such das Mandrill-Maennchen mit dem buntesten Gesicht.' },
+      { text: 'Wie viele Schrauben-Drehungen koennen Kudu-Hoerner haben?', antwort: 'Bis zu drei volle Drehungen - je aelter, desto mehr.' },
+      { text: 'Bleib zwei Minuten still am Panorama stehen und lausche den Geraeuschen.' },
+      { text: 'Warum sieht das Panorama aus wie eine einzige grosse Landschaft?', antwort: 'Versteckte Graeben statt Zaeune trennen die Tiere - Carl Hagenbecks beruehmte Erfindung von 1896.' },
+    ],
+  },
+  {
+    icon: '🐘', titel: 'Die grossen Drei', text: 'Elefanten, Tiger und Eismeer an einem Tag.',
+    noetig: ['elefanten', 'tiger', 'eismeer'],
+    aufgaben: [
+      { text: 'Beobachte eine Minute lang, was ein Elefant mit seinem Ruessel macht.' },
+      { text: 'Trinkt der Elefant durch den Ruessel?', antwort: 'Nein - er saugt Wasser an und spritzt es sich ins Maul.' },
+      { text: 'Finde heraus, ob gerade ein Elefanten-Junges im Gehege ist.' },
+      { text: 'Such den Tiger zuerst auf den erhoehten Liegeplaetzen.' },
+      { text: 'Was ist bei jedem Tiger einmalig?', antwort: 'Sein Streifenmuster - wie ein Fingerabdruck.' },
+      { text: 'Schau dir die Elefantenhaut genau an: Entdeckst du Borsten?' },
+      { text: 'Mag der Tiger Wasser?', antwort: 'Ja! Anders als die meisten Katzen badet er gern.' },
+      { text: 'Am Eismeer: Schlaeft der Eisbaer gerade oder ist er unterwegs?' },
+      { text: 'Wie schwer kann ein Eisbaer-Maennchen werden?', antwort: 'Bis zu 600 Kilogramm - so viel wie ein kleines Auto.' },
+      { text: 'Kuere deinen Sieger des Tages: Elefant, Tiger oder Eisbaer?' },
+    ],
+  },
+  {
+    icon: '🌿', titel: 'Ruheinsel', text: 'Mache eine Pause im Japanischen Garten.',
+    noetig: ['japangarten'],
+    aufgaben: [
+      { text: 'Finde die rote japanische Bruecke.' },
+      { text: 'Zaehle die Koi-Karpfen, die du entdecken kannst.' },
+      { text: 'Setz dich fuenf Minuten auf eine Bank - ohne aufs Handy zu schauen.' },
+      { text: 'Welche Tiere wohnen im Japanischen Garten?', antwort: 'Fast keine - er ist die Ruheinsel des Parks, nur die Koi-Karpfen schwimmen im Teich.' },
+      { text: 'Entdecke drei verschiedene Pflanzen und beschreibe ihre Blaetter.' },
+      { text: 'Lausche: Welche drei Geraeusche hoerst du gerade?' },
+      { text: 'Finde eine Steinlaterne.' },
+      { text: 'Aus welchem Land kommt diese Art Garten?', antwort: 'Aus Japan - dort ist Gartenkunst seit Jahrhunderten eine eigene Kunstform.' },
+      { text: 'Mach ein Foto an der Bruecke.' },
+      { text: 'Trink etwas und plant gemeinsam eure naechste Station.' },
+    ],
+  },
+  {
+    icon: '🏅', titel: 'Parkprofi', text: 'Sammle zwoelf Stempel an einem Tag.',
+    anzahl: 12,
+    aufgaben: [
+      { text: 'Trag morgens die Fuetterungszeiten vom Aushang in die App ein.' },
+      { text: 'In welchem Jahr wurde der Tierpark in Stellingen eroeffnet?', antwort: '1907 - als erster Zoo der Welt mit Freianlagen ohne Gitter.' },
+      { text: 'Finde das historische Jugendstil-Tor.' },
+      { text: 'Benutz einmal "Bring mich hin" und folge den orangen Pfeilen.' },
+      { text: 'Was hat Carl Hagenbeck erfunden?', antwort: 'Gehege ohne Gitter: Versteckte Graeben trennen Tiere und Besucher.' },
+      { text: 'Lies an einer Station ein Tier-Schild von oben bis unten durch.' },
+      { text: 'Beantworte im Tierlexikon eine Quizfrage richtig.' },
+      { text: 'Wie viele Stationen hat diese App?', antwort: '17 - vom Haupteingang bis zur Alpakawiese.' },
+      { text: 'Finde das Carl-Hagenbeck-Denkmal.' },
+      { text: 'Sammle deinen zwoelften Stempel!' },
+    ],
+  },
 ];
 
 const Vorleser = {
@@ -1637,16 +1713,31 @@ function seitePass() {
     <p class="schwach">Stempel gibt es automatisch, wenn du auf einer Tour "Gesehen" drueckst - oder tippe hier selbst.</p>
 
     <h2>${istKind() ? 'Deine Missionen' : 'Park-Quests'}</h2>
-    ${QUESTS.map((q) => {
+    <p class="schwach">Antippen zum Aufklappen - jede Mission hat zehn Aufgaben zum Abhaken.</p>
+    ${QUESTS.map((q, qi) => {
       const fertig = questErledigt(q);
+      const erledigt = new Set(S.questAufgaben[qi] || []);
       return `
-        <div class="karte quest ${fertig ? 'quest--fertig' : ''}">
-          <span class="quest__icon">${fertig ? '✓' : q.icon}</span>
-          <div>
-            <strong>${esc(q.titel)}</strong>
-            <p class="schwach" style="margin:0">${esc(q.text)}</p>
-          </div>
-        </div>`;
+        <details class="karte quest ${fertig ? 'quest--fertig' : ''}">
+          <summary>
+            <span class="quest__icon">${fertig ? '✓' : q.icon}</span>
+            <span class="quest__kopf">
+              <strong>${esc(q.titel)}</strong>
+              <span class="schwach" style="display:block">${esc(q.text)}</span>
+            </span>
+            <span class="chip" data-quest-zaehler="${qi}">${erledigt.size}/${q.aufgaben.length}</span>
+          </summary>
+          <ol class="aufgaben">
+            ${q.aufgaben.map((a, ai) => `
+              <li class="aufgabe ${erledigt.has(ai) ? 'aufgabe--fertig' : ''}">
+                <button class="aufgabe__haken" data-aufgabe="${qi}|${ai}" aria-label="Aufgabe abhaken">${erledigt.has(ai) ? '✓' : ''}</button>
+                <div>
+                  <span>${esc(a.text)}</span>
+                  ${a.antwort ? `<details class="aufgabe__antwort"><summary>Antwort zeigen</summary><p>${esc(a.antwort)}</p></details>` : ''}
+                </div>
+              </li>`).join('')}
+          </ol>
+        </details>`;
     }).join('')}
 
     <h2>Tagesrueckblick</h2>
@@ -2086,9 +2177,23 @@ document.addEventListener('click', (e) => {
     return;
   }
 
+  const aufgabe = ziel('[data-aufgabe]');
+  if (aufgabe) {
+    const [qi, ai] = aufgabe.dataset.aufgabe.split('|').map(Number);
+    const liste = new Set(S.questAufgaben[qi] || []);
+    if (liste.has(ai)) liste.delete(ai); else liste.add(ai);
+    setze({ questAufgaben: { ...S.questAufgaben, [qi]: [...liste] } });
+    const zeile = aufgabe.closest('.aufgabe');
+    zeile.classList.toggle('aufgabe--fertig');
+    aufgabe.textContent = liste.has(ai) ? '✓' : '';
+    const zaehler = document.querySelector(`[data-quest-zaehler="${qi}"]`);
+    if (zaehler) zaehler.textContent = `${liste.size}/${QUESTS[qi].aufgaben.length}`;
+    return;
+  }
+
   if (ziel('[data-pass-reset]')) {
     if (confirm('Stempel und Tagesrueckblick zuruecksetzen?')) {
-      setze({ entdeckt: [], passStart: null });
+      setze({ entdeckt: [], passStart: null, questAufgaben: {} });
       zeichne();
     }
     return;
