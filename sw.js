@@ -1,9 +1,9 @@
 /* Service Worker: macht die App im Park ohne Netz nutzbar.
  * Strategie: Alles Eigene beim ersten Aufruf in den Cache legen und
  * danach zuerst aus dem Cache bedienen (die Inhalte sind statisch).
- * Bei jeder Inhaltsaenderung VERSION hochzaehlen. */
+ * Bei jeder Inhaltsänderung VERSION hochzählen. */
 
-const VERSION = 'v32';
+const VERSION = 'v33';
 const CACHE = `tierpark-begleiter-${VERSION}`;
 
 const DATEIEN = [
@@ -34,11 +34,11 @@ self.addEventListener('activate', (e) => {
   );
 });
 
-/* WICHTIG: kein Datei-fuer-Datei-Auffrischen im Hintergrund. Sonst mischen
+/* WICHTIG: kein Datei-für-Datei-Auffrischen im Hintergrund. Sonst mischen
  * sich alte und neue Modul-Dateien und die App startet mit einem
- * Importfehler (leere Seite). Updates kommen ausschliesslich ueber eine
- * neue VERSION: install laedt alles frisch, activate loescht den alten
- * Cache - dadurch ist ein Update immer vollstaendig oder gar nicht. */
+ * Importfehler (leere Seite). Updates kommen ausschließlich über eine
+ * neue VERSION: install lädt alles frisch, activate löscht den alten
+ * Cache - dadurch ist ein Update immer vollständig oder gar nicht. */
 self.addEventListener('fetch', (e) => {
   if (e.request.method !== 'GET') return;
   const url = new URL(e.request.url);

@@ -1,7 +1,7 @@
 {
   "name": "Tierpark-Begleiter",
   "short_name": "Tierpark",
-  "description": "Gefuehrte Rundwege durch den Tierpark mit Karte, Tierlexikon und Vorlesefunktion - offline nutzbar.",
+  "description": "Geführte Rundwege durch den Tierpark mit Karte, Tierlexikon und Vorlesefunktion - offline nutzbar.",
   "lang": "de",
   "dir": "ltr",
   "start_url": "./index.html",

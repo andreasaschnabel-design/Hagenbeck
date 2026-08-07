@@ -2,7 +2,7 @@
  * Tierpark-Begleiter - Anwendungslogik
  *
  * Reines JavaScript ohne Framework, damit die App offline und ohne
- * Build-Schritt laeuft. Zustand liegt im localStorage des Geraets;
+ * Build-Schritt läuft. Zustand liegt im localStorage des Geräts;
  * es werden keine Daten an einen Server gesendet.
  */
 
@@ -22,15 +22,15 @@ const STANDARD = {
   aktiveTour: null,
   besucht: {}, // { [tourId]: [stationId, ...] }
   koordinaten: {}, // { [stationId]: {lat, lon} } - vor Ort kalibriert
-  zeiten: {}, // { [fuetterungId]: 'HH:MM' }
-  quizGeloest: {}, // { [tierId]: true }
+  zeiten: {}, // { [fütterungId]: 'HH:MM' }
+  quizGelöst: {}, // { [tierId]: true }
   karte3d: false,
   karteDrehung: 45,
-  navZiel: null, // Stations-ID, zu der die Pfeil-Navigation fuehrt
+  navZiel: null, // Stations-ID, zu der die Pfeil-Navigation führt
   entdeckt: [], // Tierpass: gestempelte Stationen
-  eigeneTiere: [], // Wunschtiere fuer die selbst zusammengestellte Tour
+  eigeneTiere: [], // Wunschtiere für die selbst zusammengestellte Tour
   questAufgaben: {}, // { [questIndex]: [erledigte Aufgaben-Indizes] }
-  passStart: null, // Zeitpunkt des ersten Stempels (fuer den Tagesrueckblick)
+  passStart: null, // Zeitpunkt des ersten Stempels (für den Tagesrückblick)
   erstbesuch: true,
 };
 
@@ -51,7 +51,7 @@ function sichern() {
   try {
     localStorage.setItem(SPEICHER, JSON.stringify(S));
   } catch {
-    /* privater Modus o. ae. - App funktioniert trotzdem, nur ohne Merken */
+    /* privater Modus o. ä. - App funktioniert trotzdem, nur ohne Merken */
   }
 }
 
@@ -83,7 +83,7 @@ function minutenText(m) {
 
 const istKind = () => S.alter === 'mini' || S.alter === 'kind';
 
-/* Heutige Oeffnungszeit aus den OSM-Regeln (Sondertage vor Monatsregeln). */
+/* Heutige Öffnungszeit aus den OSM-Regeln (Sondertage vor Monatsregeln). */
 /* Verbleibende Minuten bis Parkschluss (null, wenn unbekannt/geschlossen). */
 function oeffnungRest(datum = new Date()) {
   const zeit = oeffnungHeute(datum);
@@ -111,7 +111,7 @@ function oeffnungHeute(datum = new Date()) {
 
 /* Inhalte je nach Altersstufe zusammenstellen.
  * mini: nur das Wichtigste, sehr kurz. kind: die einfachen Texte komplett.
- * erwachsen: die ausfuehrlichen Texte. */
+ * erwachsen: die ausführlichen Texte. */
 function tierInhalt(tier) {
   const k = KINDER_TIERE[tier.id];
   if (!istKind() || !k) {
@@ -132,7 +132,7 @@ function tierInhalt(tier) {
     wusstest: k.wusstest,
     quiz: k.quiz,
     steckbrief: {
-      Groesse: tier.steckbrief.Groesse,
+      Größe: tier.steckbrief.Größe,
       Gewicht: tier.steckbrief.Gewicht,
       Nahrung: tier.steckbrief.Nahrung,
       Heimat: tier.steckbrief.Heimat,
@@ -147,14 +147,14 @@ function stationInhalt(station) {
   return { beschreibung: station.beschreibung, tipp: station.tipp };
 }
 
-/* Ungefaehre Koordinaten einer Station: entweder vor Ort kalibriert oder
+/* Ungefähre Koordinaten einer Station: entweder vor Ort kalibriert oder
  * aus der Kartenposition abgeleitet. */
 function koordinaten(station) {
   const eigen = S.koordinaten[station.id];
   if (eigen) return eigen;
-  const lat = PARK_BOUNDS.nord - (station.mapY / GEO.MASS.h) * (PARK_BOUNDS.nord - PARK_BOUNDS.sued);
+  const lat = PARK_BOUNDS.nord - (station.mapY / GEO.MASS.h) * (PARK_BOUNDS.nord - PARK_BOUNDS.süd);
   const lon = PARK_BOUNDS.west + (station.mapX / GEO.MASS.w) * (PARK_BOUNDS.ost - PARK_BOUNDS.west);
-  return { lat, lon, geschaetzt: true };
+  return { lat, lon, geschätzt: true };
 }
 
 function entfernungMeter(a, b) {
@@ -183,89 +183,89 @@ function stempeln(stationId) {
 
 const QUESTS = [
   {
-    icon: '🧊', titel: 'Polarforscher', text: 'Besuche das Eismeer und die Seebaeren.',
-    noetig: ['eismeer', 'seeloewen'],
+    icon: '🧊', titel: 'Polarforscher', text: 'Besuche das Eismeer und die Seebären.',
+    braucht: ['eismeer', 'seeloewen'],
     aufgaben: [
       { text: 'Finde das Unterwasserfenster im Eismeer und bleib eine Minute stehen.' },
-      { text: 'Welche Farbe hat die Haut vom Eisbaeren unter dem Fell?', antwort: 'Schwarz - so nimmt sie die Waerme der Sonne besonders gut auf.' },
-      { text: 'Zaehle mindestens fuenf Pinguine.' },
-      { text: 'Beobachte ein Walross: Taucht es gerade oder doest es?' },
-      { text: 'Wozu benutzt das Walross seine langen Zaehne?', antwort: 'Als Kletterhilfe: Es zieht sich damit aufs Eis.' },
-      { text: 'Finde heraus, wann heute die Seebaeren-Fuetterung ist, und trag sie unter "Zeiten" ein.' },
-      { text: 'Schau den Seebaeren beim Schwimmen zu: Mit welchen Flossen paddeln sie?', antwort: 'Mit den Vorderflossen - wie grosse Pinguine.' },
+      { text: 'Welche Farbe hat die Haut vom Eisbären unter dem Fell?', antwort: 'Schwarz - so nimmt sie die Wärme der Sonne besonders gut auf.' },
+      { text: 'Zähle mindestens fünf Pinguine.' },
+      { text: 'Beobachte ein Walross: Taucht es gerade oder döst es?' },
+      { text: 'Wozu benutzt das Walross seine langen Zähne?', antwort: 'Als Kletterhilfe: Es zieht sich damit aufs Eis.' },
+      { text: 'Finde heraus, wann heute die Seebären-Fütterung ist, und trag sie unter "Zeiten" ein.' },
+      { text: 'Schau den Seebären beim Schwimmen zu: Mit welchen Flossen paddeln sie?', antwort: 'Mit den Vorderflossen - wie große Pinguine.' },
       { text: 'Mach ein Foto vom Eismeer-Felsen von aussen.' },
-      { text: 'Leben Pinguine am Nordpol?', antwort: 'Nein - alle Pinguine leben auf der Suedhalbkugel. Am Nordpol wohnt der Eisbaer.' },
-      { text: 'Erklaere jemandem, warum sich Eisbaer und Pinguin in der Natur nie begegnen.' },
+      { text: 'Leben Pinguine am Nordpol?', antwort: 'Nein - alle Pinguine leben auf der Südhalbkugel. Am Nordpol wohnt der Eisbär.' },
+      { text: 'Erkläre jemandem, warum sich Eisbär und Pinguin in der Natur nie begegnen.' },
     ],
   },
   {
-    icon: '🦁', titel: 'Safari-Blick', text: 'Entdecke Loewen, Afrika-Panorama und die Afrikanische Steppe.',
-    noetig: ['loewen', 'afrikapanorama', 'strausse'],
+    icon: '🦁', titel: 'Safari-Blick', text: 'Entdecke Löwen, Afrika-Panorama und die Afrikanische Steppe.',
+    braucht: ['loewen', 'afrikapanorama', 'strausse'],
     aufgaben: [
       { text: 'Finde den versteckten Graben, der beim Panorama die Tiere trennt.' },
-      { text: 'Warum hat das Zebra Streifen?', antwort: 'Die Streifen stoeren stechende Fliegen - sie landen dort viel seltener.' },
-      { text: 'Zaehle die Zebras auf der Steppe.' },
+      { text: 'Warum hat das Zebra Streifen?', antwort: 'Die Streifen stören stechende Fliegen - sie landen dort viel seltener.' },
+      { text: 'Zähle die Zebras auf der Steppe.' },
       { text: 'Vergleiche zwei Zebras: Findest du Unterschiede im Muster?' },
-      { text: 'Ist der schwarz-weisse Strauss ein Mann oder eine Frau?', antwort: 'Ein Mann. Die Frauen sind graubraun getarnt.' },
+      { text: 'Ist der schwarz-weiße Strauß ein Mann oder eine Frau?', antwort: 'Ein Mann. Die Frauen sind graubraun getarnt.' },
       { text: 'Entdecke ein Warzenschwein: Kniet es gerade beim Fressen?' },
-      { text: 'Such das Mandrill-Maennchen mit dem buntesten Gesicht.' },
-      { text: 'Wie viele Schrauben-Drehungen koennen Kudu-Hoerner haben?', antwort: 'Bis zu drei volle Drehungen - je aelter, desto mehr.' },
-      { text: 'Bleib zwei Minuten still am Panorama stehen und lausche den Geraeuschen.' },
-      { text: 'Warum sieht das Panorama aus wie eine einzige grosse Landschaft?', antwort: 'Versteckte Graeben statt Zaeune trennen die Tiere - Carl Hagenbecks beruehmte Erfindung von 1896.' },
+      { text: 'Such das Mandrill-Männchen mit dem buntesten Gesicht.' },
+      { text: 'Wie viele Schrauben-Drehungen können Kudu-Hörner haben?', antwort: 'Bis zu drei volle Drehungen - je älter, desto mehr.' },
+      { text: 'Bleib zwei Minuten still am Panorama stehen und lausche den Geräuschen.' },
+      { text: 'Warum sieht das Panorama aus wie eine einzige große Landschaft?', antwort: 'Versteckte Gräben statt Zäune trennen die Tiere - Carl Hagenbecks berühmte Erfindung von 1896.' },
     ],
   },
   {
-    icon: '🐘', titel: 'Die grossen Drei', text: 'Elefanten, Tiger und Eismeer an einem Tag.',
-    noetig: ['elefanten', 'tiger', 'eismeer'],
+    icon: '🐘', titel: 'Die großen Drei', text: 'Elefanten, Tiger und Eismeer an einem Tag.',
+    braucht: ['elefanten', 'tiger', 'eismeer'],
     aufgaben: [
-      { text: 'Beobachte eine Minute lang, was ein Elefant mit seinem Ruessel macht.' },
-      { text: 'Trinkt der Elefant durch den Ruessel?', antwort: 'Nein - er saugt Wasser an und spritzt es sich ins Maul.' },
+      { text: 'Beobachte eine Minute lang, was ein Elefant mit seinem Rüssel macht.' },
+      { text: 'Trinkt der Elefant durch den Rüssel?', antwort: 'Nein - er saugt Wasser an und spritzt es sich ins Maul.' },
       { text: 'Finde heraus, ob gerade ein Elefanten-Junges im Gehege ist.' },
-      { text: 'Such den Tiger zuerst auf den erhoehten Liegeplaetzen.' },
+      { text: 'Such den Tiger zuerst auf den erhöhten Liegeplätzen.' },
       { text: 'Was ist bei jedem Tiger einmalig?', antwort: 'Sein Streifenmuster - wie ein Fingerabdruck.' },
       { text: 'Schau dir die Elefantenhaut genau an: Entdeckst du Borsten?' },
       { text: 'Mag der Tiger Wasser?', antwort: 'Ja! Anders als die meisten Katzen badet er gern.' },
-      { text: 'Am Eismeer: Schlaeft der Eisbaer gerade oder ist er unterwegs?' },
-      { text: 'Wie schwer kann ein Eisbaer-Maennchen werden?', antwort: 'Bis zu 600 Kilogramm - so viel wie ein kleines Auto.' },
-      { text: 'Kuere deinen Sieger des Tages: Elefant, Tiger oder Eisbaer?' },
+      { text: 'Am Eismeer: Schläft der Eisbär gerade oder ist er unterwegs?' },
+      { text: 'Wie schwer kann ein Eisbär-Männchen werden?', antwort: 'Bis zu 600 Kilogramm - so viel wie ein kleines Auto.' },
+      { text: 'Küre deinen Sieger des Tages: Elefant, Tiger oder Eisbär?' },
     ],
   },
   {
     icon: '🌿', titel: 'Ruheinsel', text: 'Mache eine Pause im Japanischen Garten.',
-    noetig: ['japangarten'],
+    braucht: ['japangarten'],
     aufgaben: [
-      { text: 'Finde die rote japanische Bruecke.' },
-      { text: 'Zaehle die Koi-Karpfen, die du entdecken kannst.' },
-      { text: 'Setz dich fuenf Minuten auf eine Bank - ohne aufs Handy zu schauen.' },
+      { text: 'Finde die rote japanische Brücke.' },
+      { text: 'Zähle die Koi-Karpfen, die du entdecken kannst.' },
+      { text: 'Setz dich fünf Minuten auf eine Bank - ohne aufs Handy zu schauen.' },
       { text: 'Welche Tiere wohnen im Japanischen Garten?', antwort: 'Fast keine - er ist die Ruheinsel des Parks, nur die Koi-Karpfen schwimmen im Teich.' },
-      { text: 'Entdecke drei verschiedene Pflanzen und beschreibe ihre Blaetter.' },
-      { text: 'Lausche: Welche drei Geraeusche hoerst du gerade?' },
+      { text: 'Entdecke drei verschiedene Pflanzen und beschreibe ihre Blätter.' },
+      { text: 'Lausche: Welche drei Geräusche hörst du gerade?' },
       { text: 'Finde eine Steinlaterne.' },
       { text: 'Aus welchem Land kommt diese Art Garten?', antwort: 'Aus Japan - dort ist Gartenkunst seit Jahrhunderten eine eigene Kunstform.' },
-      { text: 'Mach ein Foto an der Bruecke.' },
-      { text: 'Trink etwas und plant gemeinsam eure naechste Station.' },
+      { text: 'Mach ein Foto an der Brücke.' },
+      { text: 'Trink etwas und plant gemeinsam eure nächste Station.' },
     ],
   },
   {
-    icon: '🏅', titel: 'Parkprofi', text: 'Sammle zwoelf Stempel an einem Tag.',
+    icon: '🏅', titel: 'Parkprofi', text: 'Sammle zwölf Stempel an einem Tag.',
     anzahl: 12,
     aufgaben: [
-      { text: 'Trag morgens die Fuetterungszeiten vom Aushang in die App ein.' },
-      { text: 'In welchem Jahr wurde der Tierpark in Stellingen eroeffnet?', antwort: '1907 - als erster Zoo der Welt mit Freianlagen ohne Gitter.' },
+      { text: 'Trag morgens die Fütterungszeiten vom Aushang in die App ein.' },
+      { text: 'In welchem Jahr wurde der Tierpark in Stellingen eröffnet?', antwort: '1907 - als erster Zoo der Welt mit Freianlagen ohne Gitter.' },
       { text: 'Finde das historische Jugendstil-Tor.' },
       { text: 'Benutz einmal "Bring mich hin" und folge den orangen Pfeilen.' },
-      { text: 'Was hat Carl Hagenbeck erfunden?', antwort: 'Gehege ohne Gitter: Versteckte Graeben trennen Tiere und Besucher.' },
+      { text: 'Was hat Carl Hagenbeck erfunden?', antwort: 'Gehege ohne Gitter: Versteckte Gräben trennen Tiere und Besucher.' },
       { text: 'Lies an einer Station ein Tier-Schild von oben bis unten durch.' },
       { text: 'Beantworte im Tierlexikon eine Quizfrage richtig.' },
       { text: 'Wie viele Stationen hat diese App?', antwort: '17 - vom Haupteingang bis zur Alpakawiese.' },
       { text: 'Finde das Carl-Hagenbeck-Denkmal.' },
-      { text: 'Sammle deinen zwoelften Stempel!' },
+      { text: 'Sammle deinen zwölften Stempel!' },
     ],
   },
 ];
 
 const Vorleser = {
-  laeuft: false,
+  läuft: false,
   pausiert: false,
   stuecke: [],
   index: 0,
@@ -276,17 +276,17 @@ const Vorleser = {
     return alle.filter((v) => v.lang && v.lang.toLowerCase().startsWith('de'));
   },
 
-  verfuegbar() {
+  verfügbar() {
     return 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
   },
 
   /* Lange Texte in Abschnitte zerlegen: manche Browser brechen sonst
    * nach etwa 200 Zeichen ab. */
   zerlegen(text) {
-    const saetze = text.replace(/\s+/g, ' ').match(/[^.!?]+[.!?]*/g) || [text];
+    const sätze = text.replace(/\s+/g, ' ').match(/[^.!?]+[.!?]*/g) || [text];
     const teile = [];
     let puffer = '';
-    for (const satz of saetze) {
+    for (const satz of sätze) {
       if ((puffer + satz).length > 180) {
         if (puffer) teile.push(puffer.trim());
         puffer = satz;
@@ -299,20 +299,20 @@ const Vorleser = {
   },
 
   starten(text, beiEnde) {
-    if (!this.verfuegbar()) return;
+    if (!this.verfügbar()) return;
     this.stoppen();
     this.stuecke = this.zerlegen(text);
     this.index = 0;
     this.beiEnde = beiEnde || null;
-    this.laeuft = true;
+    this.läuft = true;
     this.pausiert = false;
-    this.naechstes();
+    this.nächstes();
     aktualisiereVorleser();
   },
 
-  naechstes() {
+  nächstes() {
     if (this.index >= this.stuecke.length) {
-      this.laeuft = false;
+      this.läuft = false;
       aktualisiereVorleser();
       if (this.beiEnde) this.beiEnde();
       return;
@@ -323,19 +323,19 @@ const Vorleser = {
     const stimme = this.stimmen().find((v) => v.name === S.stimme);
     if (stimme) u.voice = stimme;
     u.onend = () => {
-      if (!this.laeuft) return;
+      if (!this.läuft) return;
       this.index += 1;
-      this.naechstes();
+      this.nächstes();
     };
     u.onerror = () => {
-      this.laeuft = false;
+      this.läuft = false;
       aktualisiereVorleser();
     };
     window.speechSynthesis.speak(u);
   },
 
   pause() {
-    if (!this.laeuft) return;
+    if (!this.läuft) return;
     if (this.pausiert) {
       window.speechSynthesis.resume();
       this.pausiert = false;
@@ -347,16 +347,16 @@ const Vorleser = {
   },
 
   stoppen() {
-    this.laeuft = false;
+    this.läuft = false;
     this.pausiert = false;
     this.stuecke = [];
     this.index = 0;
-    if (this.verfuegbar()) window.speechSynthesis.cancel();
+    if (this.verfügbar()) window.speechSynthesis.cancel();
     aktualisiereVorleser();
   },
 };
 
-if (Vorleser.verfuegbar() && window.speechSynthesis.onvoiceschanged !== undefined) {
+if (Vorleser.verfügbar() && window.speechSynthesis.onvoiceschanged !== undefined) {
   window.speechSynthesis.onvoiceschanged = () => {
     const feld = $('#stimmenwahl');
     if (feld) fuelleStimmen(feld);
@@ -369,7 +369,7 @@ function aktualisiereVorleser() {
   const knopf = $('.vorleser__start', leiste);
   const pause = $('.vorleser__pause', leiste);
   const status = $('.vorleser__status', leiste);
-  if (Vorleser.laeuft) {
+  if (Vorleser.läuft) {
     knopf.textContent = '■';
     knopf.setAttribute('aria-label', 'Vorlesen beenden');
     pause.hidden = false;
@@ -387,8 +387,8 @@ function aktualisiereVorleser() {
 }
 
 function vorleserLeiste(textFn) {
-  if (!Vorleser.verfuegbar()) {
-    return `<div class="hinweis">Dieses Geraet bietet keine Sprachausgabe an. Die Texte lassen sich aber ganz normal lesen.</div>`;
+  if (!Vorleser.verfügbar()) {
+    return `<div class="hinweis">Dieses Gerät bietet keine Sprachausgabe an. Die Texte lassen sich aber ganz normal lesen.</div>`;
   }
   window.__vorlesetext = textFn;
   return `
@@ -409,7 +409,7 @@ function vorleserLeiste(textFn) {
 const blickStart = () => {
   const { w, h } = GEO.MASS;
   if (!S.karte3d) return { x: -3, y: -3, w: w + 6, h: h + 6 };
-  /* Projizierte Parkgrenze einrahmen - haengt vom Drehwinkel ab. */
+  /* Projizierte Parkgrenze einrahmen - hängt vom Drehwinkel ab. */
   let minX = 1e9, maxX = -1e9, minY = 1e9, maxY = -1e9;
   for (const [gx, gy] of GEO.GRENZE) {
     const p = proj(gx, gy);
@@ -418,15 +418,15 @@ const blickStart = () => {
     if (p.Y < minY) minY = p.Y;
     if (p.Y > maxY) maxY = p.Y;
   }
-  minY -= 10; /* Platz fuer Gebaeudehoehen und Marker-Nadeln */
+  minY -= 10; /* Platz für Gebäudehöhen und Marker-Nadeln */
   return { x: minX - 4, y: minY - 4, w: maxX - minX + 8, h: maxY - minY + 8 };
 };
 
 let kartenBlick = blickStart();
 
-/* Projektion Kartenkoordinate -> Zeichenflaeche.
- * 2D: unveraendert. 3D: um 45 Grad gedrehte, abgeflachte Isometrie;
- * h hebt Punkte (Gebaeudehoehen) an. */
+/* Projektion Kartenkoordinate -> Zeichenfläche.
+ * 2D: unverändert. 3D: um 45 Grad gedrehte, abgeflachte Isometrie;
+ * h hebt Punkte (Gebäudehöhen) an. */
 function proj(x, y, h = 0) {
   if (!S.karte3d) return { X: x, Y: y };
   /* Drehung um die Parkmitte, dann isometrisch abflachen. Bei 45 Grad
@@ -442,7 +442,7 @@ function proj(x, y, h = 0) {
 const rund = (n) => Math.round(n * 100) / 100;
 
 /* Stationsnamen erst zeigen, wenn nah genug herangezoomt ist -
- * in der Uebersicht ueberlappen sie sich sonst. */
+ * in der Übersicht überlappen sie sich sonst. */
 const labelsSichtbar = () => kartenBlick.w < (S.karte3d ? 150 : 80);
 
 function labelsAktualisieren(svg) {
@@ -450,7 +450,7 @@ function labelsAktualisieren(svg) {
 }
 
 /* =========================================================
- * Navigation: kuerzester Weg ueber das OSM-Wegenetz
+ * Navigation: kürzester Weg über das OSM-Wegenetz
  * ======================================================= */
 
 const NAV_EMOJI = {
@@ -476,7 +476,7 @@ const TIER_EMOJI = {
   mara: '🐇', warzenschwein: '🐗',
 };
 
-/* Fussweg-Distanz zwischen zwei Stationen ueber das Wegenetz (gecacht). */
+/* Fußweg-Distanz zwischen zwei Stationen über das Wegenetz (gecacht). */
 const distanzCache = new Map();
 function stationDistanz(aId, bId) {
   const key = aId < bId ? `${aId}|${bId}` : `${bId}|${aId}`;
@@ -489,7 +489,7 @@ function stationDistanz(aId, bId) {
 }
 
 /* Eigene Tour aus den Wunschtieren: Stationen sammeln, Reihenfolge mit
- * Naechster-Nachbar-Heuristik + 2-Opt-Verbesserung ueber die echten
+ * Nächster-Nachbar-Heuristik + 2-Opt-Verbesserung über die echten
  * Wegstrecken optimieren. Start ist immer der Haupteingang. */
 let eigeneTourCache = null;
 function eigeneTour() {
@@ -512,7 +512,7 @@ function eigeneTour() {
     aktuell = rest.shift();
     folge.push(aktuell);
   }
-  /* 2-Opt: Teilstrecken umdrehen, solange die Gesamtstrecke kuerzer wird. */
+  /* 2-Opt: Teilstrecken umdrehen, solange die Gesamtstrecke kürzer wird. */
   const laengeVon = (f) => {
     let m = 0;
     for (let i = 1; i < f.length; i++) m += stationDistanz(f[i - 1], f[i]);
@@ -543,7 +543,7 @@ function eigeneTour() {
     minuten,
     laenge: `ca. ${(meter / 1000).toFixed(1).replace('.', ',')} km`,
     fuer: 'Deine eigene Auswahl',
-    beschreibung: `Deine Route zu ${S.eigeneTiere.length} Wunschtieren an ${folge.length - 1} Stationen - in der kuerzesten Reihenfolge ueber die echten Parkwege.`,
+    beschreibung: `Deine Route zu ${S.eigeneTiere.length} Wunschtieren an ${folge.length - 1} Stationen - in der kürzesten Reihenfolge über die echten Parkwege.`,
     stationen: folge.map((id) => ({
       id,
       fokus: proStation.has(id) ? `Deine Tiere: ${proStation.get(id).join(', ')}` : undefined,
@@ -560,11 +560,11 @@ let navWatchId = null;
 function bauNavGraph() {
   if (navGraph) return navGraph;
   /* Punkte mit gleichen Koordinaten verschmelzen: Kreuzungen liegen dank
-   * kreuzungstreuer Vereinfachung exakt uebereinander in mehreren Wegen. */
+   * kreuzungstreuer Vereinfachung exakt übereinander in mehreren Wegen. */
   const knoten = [];
   const index = new Map(); // "x,y" -> Knotenindex
   const kanten = new Map();
-  const knotenFuer = (x, y) => {
+  const knotenFür = (x, y) => {
     const k = `${x},${y}`;
     if (index.has(k)) return index.get(k);
     knoten.push([x, y]);
@@ -583,13 +583,13 @@ function bauNavGraph() {
   for (const weg of GEO.WEGE) {
     let vorher = -1;
     weg.forEach(([x, y], i) => {
-      const idx = knotenFuer(x, y);
+      const idx = knotenFür(x, y);
       if (vorher >= 0) kante(vorher, idx);
       if (i === 0 || i === weg.length - 1) enden.push(idx);
       vorher = idx;
     });
   }
-  /* Restluecken (z. B. an der Parkgrenze gekappte Wege) ueberbruecken. */
+  /* Restlücken (z. B. an der Parkgrenze gekappte Wege) überbrücken. */
   for (let a = 0; a < enden.length; a++) {
     for (let b = a + 1; b < enden.length; b++) {
       const i = enden[a]; const j = enden[b];
@@ -601,7 +601,7 @@ function bauNavGraph() {
   return navGraph;
 }
 
-function naechsterKnoten(p) {
+function nächsterKnoten(p) {
   const { knoten } = bauNavGraph();
   let best = 0; let bestD = Infinity;
   for (let i = 0; i < knoten.length; i++) {
@@ -611,13 +611,13 @@ function naechsterKnoten(p) {
   return best;
 }
 
-/* Dijkstra vom Start- zum Zielpunkt; Rueckgabe: Punktliste + Laenge in m. */
+/* Dijkstra vom Start- zum Zielpunkt; Rückgabe: Punktliste + Länge in m. */
 function navRoute(von, nach) {
   const { knoten, kanten } = bauNavGraph();
-  const start = naechsterKnoten(von);
-  const ziel = naechsterKnoten(nach);
+  const start = nächsterKnoten(von);
+  const ziel = nächsterKnoten(nach);
   const dist = new Map([[start, 0]]);
-  const vorgaenger = new Map();
+  const vorgänger = new Map();
   const offen = new Set([start]);
   while (offen.size) {
     let u = null; let uD = Infinity;
@@ -628,7 +628,7 @@ function navRoute(von, nach) {
       const d = uD + w;
       if (d < (dist.get(j) ?? Infinity)) {
         dist.set(j, d);
-        vorgaenger.set(j, u);
+        vorgänger.set(j, u);
         offen.add(j);
       }
     }
@@ -638,13 +638,13 @@ function navRoute(von, nach) {
     return { punkte: [von, nach], meter: Math.round(meter), luftlinie: true };
   }
   const folge = [ziel];
-  while (vorgaenger.has(folge[0])) folge.unshift(vorgaenger.get(folge[0]));
+  while (vorgänger.has(folge[0])) folge.unshift(vorgänger.get(folge[0]));
   const punkte = [von, ...folge.map((i) => knoten[i]), nach];
-  let laenge = 0;
+  let länge = 0;
   for (let i = 1; i < punkte.length; i++) {
-    laenge += Math.hypot(punkte[i][0] - punkte[i - 1][0], punkte[i][1] - punkte[i - 1][1]);
+    länge += Math.hypot(punkte[i][0] - punkte[i - 1][0], punkte[i][1] - punkte[i - 1][1]);
   }
-  return { punkte, meter: Math.round(laenge * GEO.MASS.meterProEinheit), luftlinie: false };
+  return { punkte, meter: Math.round(länge * GEO.MASS.meterProEinheit), luftlinie: false };
 }
 
 function navStartpunkt() {
@@ -664,8 +664,8 @@ function navVerfolgung(anAus) {
   navWatchId = navigator.geolocation.watchPosition(
     (pos) => {
       const x = ((pos.coords.longitude - PARK_BOUNDS.west) / (PARK_BOUNDS.ost - PARK_BOUNDS.west)) * GEO.MASS.w;
-      const y = ((PARK_BOUNDS.nord - pos.coords.latitude) / (PARK_BOUNDS.nord - PARK_BOUNDS.sued)) * GEO.MASS.h;
-      if (x < -5 || x > GEO.MASS.w + 5 || y < -5 || y > GEO.MASS.h + 5) return; // ausserhalb des Parks
+      const y = ((PARK_BOUNDS.nord - pos.coords.latitude) / (PARK_BOUNDS.nord - PARK_BOUNDS.süd)) * GEO.MASS.h;
+      if (x < -5 || x > GEO.MASS.w + 5 || y < -5 || y > GEO.MASS.h + 5) return; // außerhalb des Parks
       navPosition = [x, y];
       const ziel = S.navZiel ? stationVon(S.navZiel) : null;
       if (ziel && Math.hypot(ziel.mapX - x, ziel.mapY - y) < 4.5) {
@@ -673,8 +673,8 @@ function navVerfolgung(anAus) {
         const neu = stempeln(ziel.id);
         setze({ navZiel: null });
         navVerfolgung(false);
-        if (Vorleser.verfuegbar()) {
-          Vorleser.starten(`Geschafft! Du bist bei ${ziel.name} angekommen.${neu ? ' Es gibt einen neuen Stempel fuer deinen Tierpass.' : ''}`);
+        if (Vorleser.verfügbar()) {
+          Vorleser.starten(`Geschafft! Du bist bei ${ziel.name} angekommen.${neu ? ' Es gibt einen neuen Stempel für deinen Tierpass.' : ''}`);
         }
         zeichne();
         return;
@@ -693,14 +693,14 @@ function navVerfolgung(anAus) {
   );
 }
 
-function pfadAus(punkte, h = 0, schliessen = true) {
+function pfadAus(punkte, h = 0, schließen = true) {
   const d = punkte
     .map(([x, y], i) => {
       const p = proj(x, y, h);
       return `${i ? 'L' : 'M'}${rund(p.X)} ${rund(p.Y)}`;
     })
     .join(' ');
-  return schliessen ? d + ' Z' : d;
+  return schließen ? d + ' Z' : d;
 }
 
 function tiefe(punkte) {
@@ -713,8 +713,8 @@ function gebaeudeSvg(g) {
   if (!S.karte3d) {
     return `<path d="${pfadAus(g.punkte)}" fill="${g.farbe}" opacity="0.9" stroke="${g.dach}" stroke-width="0.4"/>`;
   }
-  /* Erst alle Seitenwaende, dann die Dachflaeche - einfache Maler-Reihenfolge. */
-  const waende = g.punkte
+  /* Erst alle Seitenwände, dann die Dachfläche - einfache Maler-Reihenfolge. */
+  const wände = g.punkte
     .map((a, i) => {
       const b = g.punkte[(i + 1) % g.punkte.length];
       const p1 = proj(a[0], a[1]);
@@ -724,7 +724,7 @@ function gebaeudeSvg(g) {
       return `<path d="M${rund(p1.X)} ${rund(p1.Y)} L${rund(p2.X)} ${rund(p2.Y)} L${rund(p3.X)} ${rund(p3.Y)} L${rund(p4.X)} ${rund(p4.Y)} Z" fill="${g.farbe}" stroke="${g.dach}" stroke-width="0.15"/>`;
     })
     .join('');
-  return `<g>${waende}<path d="${pfadAus(g.punkte, g.hoehe)}" fill="${g.dach}"/></g>`;
+  return `<g>${wände}<path d="${pfadAus(g.punkte, g.hoehe)}" fill="${g.dach}"/></g>`;
 }
 
 function baumSvg([x, y, s]) {
@@ -777,7 +777,7 @@ function kartenSvg({ tour = null, aktiveStation = null, position = null } = {}) 
       }), 0, false)
     : '';
 
-  /* Gebaeude und Baeume von hinten nach vorn zeichnen (Tiefe = x+y). */
+  /* Gebäude und Bäume von hinten nach vorn zeichnen (Tiefe = x+y). */
   const objekte = [
     ...GEO.GEBAEUDE.map((g) => ({ t: tiefe(g.punkte), html: gebaeudeSvg(g) })),
     ...GEO.BAEUME.map((b) => ({ t: proj(b[0], b[1]).Y, html: baumSvg(b) })),
@@ -808,7 +808,7 @@ function kartenSvg({ tour = null, aktiveStation = null, position = null } = {}) 
         <g class="marker ${aktiv ? 'marker--aktiv' : ''}" data-station="${st.id}" data-t="${rund(st.mapX + st.mapY)}">
           ${nadel}
           ${aktiv ? `<circle cx="${rund(kopf.X)}" cy="${rund(kopf.Y)}" r="${r + 2}" fill="${farbe}" opacity="0.25"/>` : ''}
-          <!-- unsichtbare, grosszuegige Tippflaeche fuer Finger -->
+          <!-- unsichtbare, grosszügige Tippfläche für Finger -->
           <circle cx="${rund(kopf.X)}" cy="${rund(kopf.Y)}" r="6" fill="transparent"/>
           <circle class="marker-kreis" cx="${rund(kopf.X)}" cy="${rund(kopf.Y)}" r="${r}" fill="${farbe}" stroke="#fff" stroke-width="0.7"/>
           ${beschriftung ? `<text class="marker-text" x="${rund(kopf.X)}" y="${rund(kopf.Y + 1)}">${beschriftung}</text>` : ''}
@@ -871,7 +871,7 @@ function kartenSvg({ tour = null, aktiveStation = null, position = null } = {}) 
   return `${nord}
   <svg viewBox="${kartenBlick.x} ${kartenBlick.y} ${kartenBlick.w} ${kartenBlick.h}" role="img"
        class="${d3 ? 'svg3d' : ''} ${labelsSichtbar() ? 'zeige-labels' : ''}"
-       aria-label="Schematische ${d3 ? '3D-' : ''}Uebersichtskarte des Tierparks">
+       aria-label="Schematische ${d3 ? '3D-' : ''}Übersichtskarte des Tierparks">
     <rect x="-160" y="-60" width="420" height="280" fill="${d3 ? '#dde7db' : '#e9efe4'}"/>
     <path d="${pfadAus(GEO.GRENZE)}" fill="#d3e0c8" stroke="#b9c9ab" stroke-width="0.6"/>
     ${gehege}
@@ -890,9 +890,9 @@ function kartenWerkzeug(mitZoom = true) {
   return `
   <div class="karten-werkzeug">
     ${mitZoom ? `
-      <button class="btn btn--zweit btn--klein" data-zoom="rein" aria-label="Karte vergroessern">+</button>
+      <button class="btn btn--zweit btn--klein" data-zoom="rein" aria-label="Karte vergrössern">+</button>
       <button class="btn btn--zweit btn--klein" data-zoom="raus" aria-label="Karte verkleinern">−</button>
-      <button class="btn btn--zweit btn--klein" data-zoom="reset">Ansicht zuruecksetzen</button>` : ''}
+      <button class="btn btn--zweit btn--klein" data-zoom="reset">Ansicht zurücksetzen</button>` : ''}
     <button class="btn btn--zweit btn--klein" data-dim>${S.karte3d ? '🗺 2D-Ansicht' : '⛰ 3D-Ansicht'}</button>
     ${S.karte3d ? `
       <button class="btn btn--zweit btn--klein" data-drehen="-45" aria-label="Karte nach links drehen">⟲</button>
@@ -902,18 +902,18 @@ function kartenWerkzeug(mitZoom = true) {
   </div>`;
 }
 
-/* Karteninteraktion: Ziehen und Zoomen ueber das viewBox-Fenster. */
+/* Karteninteraktion: Ziehen und Zoomen über das viewBox-Fenster. */
 function kartenInteraktion(box) {
   if (!$('svg', box)) return;
   const svgEl = () => $('svg', box);
 
-  const ZOOM_MIN = 15; // kleinste viewBox-Breite = maximale Vergroesserung
+  const ZOOM_MIN = 15; // kleinste viewBox-Breite = maximale Vergrösserung
   const ZOOM_MAX = 240;
 
   /* Aktive Finger/Zeiger. Ein Finger = verschieben (Maus) bzw. Seite
    * scrollen (Touch), zwei Finger = Pinch-Zoom und in 3D auch Drehen.
-   * Alle Listener haengen an der Box, nicht am SVG - das SVG wird
-   * waehrend der Drehgeste pro Frame ersetzt. */
+   * Alle Listener hängen an der Box, nicht am SVG - das SVG wird
+   * während der Drehgeste pro Frame ersetzt. */
   const zeiger = new Map();
   let geste = null;
   let bewegt = false;
@@ -964,9 +964,9 @@ function kartenInteraktion(box) {
     tippTimer = setTimeout(() => tipp.classList.remove('sichtbar'), 1400);
   };
 
-  /* iOS Safari zoomt sonst die ganze Seite mit, waehrend die Karte zoomt -
+  /* iOS Safari zoomt sonst die ganze Seite mit, während die Karte zoomt -
    * das wirkt hakelig und "doppelt". Zwei-Finger-Gesten auf der Karte
-   * gehoeren allein der Karte. */
+   * gehören allein der Karte. */
   box.addEventListener('touchmove', (e) => {
     if (e.touches.length > 1 && e.target.closest('svg')) e.preventDefault();
   }, { passive: false });
@@ -977,7 +977,7 @@ function kartenInteraktion(box) {
   }
 
   box.addEventListener('pointerdown', (e) => {
-    if (!e.target.closest('svg')) return; // Werkzeugknoepfe sind keine Kartengeste
+    if (!e.target.closest('svg')) return; // Werkzeugknöpfe sind keine Kartengeste
     zeiger.set(e.pointerId, { x: e.clientX, y: e.clientY });
     if (zeiger.size === 1) bewegt = false;
     gesteNeu();
@@ -999,14 +999,14 @@ function kartenInteraktion(box) {
 
     if (!bewegt && (zeiger.size > 1 || Math.hypot(m.x - geste.mitte.x, m.y - geste.mitte.y) > 6)) {
       bewegt = true;
-      /* Capture erst ab hier - beim pointerdown wuerde sie das Klick-Ziel
+      /* Capture erst ab hier - beim pointerdown würde sie das Klick-Ziel
        * umleiten und Marker-Tipps schlucken. */
       try { p.length && zeiger.forEach((_, id) => box.setPointerCapture(id)); } catch { /* synthetische Events */ }
     }
     if (!bewegt) return;
 
     if (p.length >= 2 && geste.spann > 0) {
-      /* Pinch: Faktor aus dem Fingerabstand, gedaempft (Exponent < 1),
+      /* Pinch: Faktor aus dem Fingerabstand, gedämpft (Exponent < 1),
        * damit der Zoom ruhig folgt statt zu springen. Fixpunkt ist die
        * Mitte der Finger. */
       const faktor = Math.pow(geste.spann / (spann(p) || geste.spann), 0.75);
@@ -1046,12 +1046,12 @@ function kartenInteraktion(box) {
 
   const ende = (e) => {
     if (zeiger.has(e.pointerId) && geste && geste.dreht) {
-      /* Drehwinkel dauerhaft speichern (S wurde waehrend der Geste nur
-       * im Speicher veraendert). */
+      /* Drehwinkel dauerhaft speichern (S wurde während der Geste nur
+       * im Speicher verändert). */
       setze({ karteDrehung: Math.round(S.karteDrehung) });
     }
     zeiger.delete(e.pointerId);
-    /* Beim Uebergang zwei Finger -> ein Finger neu verankern, sonst springt die Karte. */
+    /* Beim Übergang zwei Finger -> ein Finger neu verankern, sonst springt die Karte. */
     gesteNeu();
   };
   box.addEventListener('pointerup', ende);
@@ -1099,7 +1099,7 @@ function zoomen(richtung) {
 
 function orten(beiErfolg) {
   if (!navigator.geolocation) {
-    alert('Dieses Geraet gibt den Standort nicht frei.');
+    alert('Dieses Gerät gibt den Standort nicht frei.');
     return;
   }
   navigator.geolocation.getCurrentPosition(
@@ -1119,7 +1119,7 @@ function orten(beiErfolg) {
  * Ansichten
  * ======================================================= */
 
-/* "Als Naechstes": zeitkritische Fuetterung oder naechste ungestempelte Station. */
+/* "Als Nächstes": zeitkritische Fütterung oder nächste ungestempelte Station. */
 function empfehlungsKarte() {
   const jetzt = new Date();
   const jetztMin = jetzt.getHours() * 60 + jetzt.getMinutes();
@@ -1151,18 +1151,18 @@ function empfehlungsKarte() {
   const offen = STATIONEN.filter((st) => !S.entdeckt.includes(st.id) && st.id !== 'haupteingang');
   if (!offen.length) return '';
   const [sx, sy] = navStartpunkt();
-  const naechste = offen.sort((a, b) =>
+  const nah = offen.sort((a, b) =>
     Math.hypot(a.mapX - sx, a.mapY - sy) - Math.hypot(b.mapX - sx, b.mapY - sy))[0];
-  const meter = navRoute(navStartpunkt(), [naechste.mapX, naechste.mapY]).meter;
+  const meter = navRoute(navStartpunkt(), [nah.mapX, nah.mapY]).meter;
   return `
     <div class="karte">
       <div class="zeile-zwischen">
         <div>
-          <div class="schwach">${NAV_EMOJI[naechste.id] || '📍'} In deiner Naehe</div>
-          <strong>${esc(naechste.name)}</strong>
+          <div class="schwach">${NAV_EMOJI[nah.id] || '📍'} In deiner Nähe</div>
+          <strong>${esc(nah.name)}</strong>
           <div class="schwach">ca. ${meter} m · noch kein Stempel</div>
         </div>
-        <button class="btn btn--klein" data-nav-start="${naechste.id}">🧭 Hin</button>
+        <button class="btn btn--klein" data-nav-start="${nah.id}">🧭 Hin</button>
       </div>
     </div>`;
 }
@@ -1186,7 +1186,7 @@ function seiteTouren() {
 
   return `
     <h1>Welche Runde soll es sein?</h1>
-    ${oeffnungHeute() ? `<p class="schwach">🕘 Heute geoeffnet: <strong>${oeffnungHeute()}</strong>${oeffnungRest() ? ` · noch ${minutenText(oeffnungRest())}` : ''} <span style="opacity:.7">(${esc(OEFFNUNG.quelle)})</span></p>` : ''}
+    ${oeffnungHeute() ? `<p class="schwach">🕘 Heute geöffnet: <strong>${oeffnungHeute()}</strong>${oeffnungRest() ? ` · noch ${minutenText(oeffnungRest())}` : ''} <span style="opacity:.7">(${esc(OEFFNUNG.quelle)})</span></p>` : ''}
     ${empfehlungsKarte()}
     ${(() => {
       const t = eigeneTour();
@@ -1200,7 +1200,7 @@ function seiteTouren() {
               </div>
               <div style="display:grid;gap:6px">
                 <a class="btn btn--klein" href="#/tour/eigene">Ansehen</a>
-                <a class="btn btn--klein btn--zweit" href="#/eigene">Aendern</a>
+                <a class="btn btn--klein btn--zweit" href="#/eigene">Ändern</a>
               </div>
             </div>
           </div>`
@@ -1209,7 +1209,7 @@ function seiteTouren() {
               <span class="tour-karte__emoji" aria-hidden="true">⭐</span>
               <span class="tour-karte__titel">${istKind() ? 'Deine eigene Tour bauen' : 'Eigene Tour zusammenstellen'}</span>
             </div>
-            <div class="schwach">${istKind() ? 'Such dir deine Lieblingstiere aus - die App baut den Weg.' : 'Wunschtiere auswaehlen, die App berechnet die kuerzeste Route.'}</div>
+            <div class="schwach">${istKind() ? 'Such dir deine Lieblingstiere aus - die App baut den Weg.' : 'Wunschtiere auswählen, die App berechnet die kürzeste Route.'}</div>
           </button>`;
     })()}
     <p class="schwach">${istKind()
@@ -1265,7 +1265,7 @@ function seiteTour(id) {
       <span class="chip">⏱ ${minutenText(tour.minuten)}</span>
       <span class="chip">📍 ${tour.stationen.length} Stationen</span>
       <span class="chip">🚶 ${esc(tour.laenge)}</span>
-      ${extra ? '<span class="chip chip--warn">Extra-Ticket noetig</span>' : ''}
+      ${extra ? '<span class="chip chip--warn">Extra-Ticket nötig</span>' : ''}
     </div>
     <p>${esc(tour.beschreibung)}</p>
     ${tour.hinweis ? `<div class="hinweis">${esc(tour.hinweis)}</div>` : ''}
@@ -1275,11 +1275,11 @@ function seiteTour(id) {
       ${kartenSvg({ tour })}
       ${kartenWerkzeug()}
     </div>
-    <p class="schwach">Die Karte ist eine schematische Uebersicht zur Orientierung, kein massstabsgetreuer Lageplan.</p>
+    <p class="schwach">Die Karte ist eine schematische Übersicht zur Orientierung, kein maßstabsgetreuer Lageplan.</p>
 
     <div class="knopfreihe" style="margin:14px 0">
       <a class="btn" href="#/tour/${tour.id}/station/0">${aktiv && besucht.length ? 'Tour fortsetzen' : 'Tour starten'}</a>
-      ${besucht.length ? `<button class="btn btn--zweit" data-tour-reset="${tour.id}">Zuruecksetzen</button>` : ''}
+      ${besucht.length ? `<button class="btn btn--zweit" data-tour-reset="${tour.id}">Zurücksetzen</button>` : ''}
     </div>
 
     <h2>Stationen</h2>
@@ -1333,7 +1333,7 @@ function seiteStation(tourId, index) {
         <span class="chip" style="background:${BEREICHE[st.bereich].farbe}22;color:${BEREICHE[st.bereich].farbe}">${esc(BEREICHE[st.bereich].name)}</span>
         ${st.planNr ? `<span class="chip">🗺 Plan-Nr. ${esc(st.planNr)}</span>` : ''}
         ${st.extraTicket ? '<span class="chip chip--warn">Extra-Ticket</span>' : ''}
-        ${st.innen ? '<span class="chip">🏠 ueberdacht</span>' : ''}
+        ${st.innen ? '<span class="chip">🏠 überdacht</span>' : ''}
       </div>
     </div>
 
@@ -1365,7 +1365,7 @@ function seiteStation(tourId, index) {
     </div>
 
     <div class="knopfreihe" style="margin-top:16px">
-      ${i > 0 ? `<a class="btn btn--zweit" href="#/tour/${tour.id}/station/${i - 1}">‹ Zurueck</a>` : '<span></span>'}
+      ${i > 0 ? `<a class="btn btn--zweit" href="#/tour/${tour.id}/station/${i - 1}">‹ Zurück</a>` : '<span></span>'}
       <button class="btn ${fertig ? 'btn--zweit' : ''}" data-besucht="${tour.id}|${st.id}">${fertig ? '✓ Gesehen' : 'Gesehen'}</button>
     </div>
     <div style="margin-top:10px">
@@ -1428,7 +1428,7 @@ function seiteTiere(suchtext = '', filter = 'alle') {
           <button class="tier-zeile" data-route="#/tier/${t.id}">
             <span class="tier-zeile__punkt" style="background:${BEREICHE[t.bereich].farbe}"></span>
             <span>
-              <span class="tier-zeile__name">${esc(t.name)}${S.quizGeloest[t.id] ? ' ⭐' : ''}</span>
+              <span class="tier-zeile__name">${esc(t.name)}${S.quizGelöst[t.id] ? ' ⭐' : ''}</span>
               <span class="schwach" style="display:block">${esc(tierInhalt(t).kurz)}</span>
             </span>
             <span class="tier-zeile__pfeil">›</span>
@@ -1447,7 +1447,7 @@ function seiteTier(id) {
     tier.name + '.',
     inhalt.kurz,
     ...inhalt.text,
-    inhalt.wusstest.length ? (istKind() ? 'Wusstest du schon?' : 'Zum Weitererzaehlen:') : '',
+    inhalt.wusstest.length ? (istKind() ? 'Wusstest du schon?' : 'Zum Weitererzählen:') : '',
     ...inhalt.wusstest,
   ].filter(Boolean).join(' ');
 
@@ -1471,7 +1471,7 @@ function seiteTier(id) {
       </div>` : ''}
 
     ${inhalt.wusstest.length ? `
-      <h2>${istKind() ? 'Wusstest du schon?' : 'Zum Weitererzaehlen'}</h2>
+      <h2>${istKind() ? 'Wusstest du schon?' : 'Zum Weitererzählen'}</h2>
       <div class="karte"><ul class="wusstest">${inhalt.wusstest.map((w) => `<li>${esc(w)}</li>`).join('')}</ul></div>` : ''}
 
     ${inhalt.quiz ? quizBlock(tier.id, inhalt.quiz) : ''}
@@ -1489,7 +1489,7 @@ function seiteTier(id) {
 }
 
 function quizBlock(tierId, quiz) {
-  const geloest = S.quizGeloest[tierId];
+  const gelöst = S.quizGelöst[tierId];
   return `
     <h2>Quizfrage</h2>
     <div class="karte" data-quiz="${tierId}">
@@ -1501,13 +1501,13 @@ function quizBlock(tierId, quiz) {
           </button>`).join('')}
       </div>
       <div class="quiz-ergebnis" hidden></div>
-      <p class="schwach quiz-erklaerung" hidden>${esc(quiz.erklaerung)}</p>
-      ${geloest ? '<p class="schwach">⭐ Diese Frage hast du schon richtig beantwortet.</p>' : ''}
+      <p class="schwach quiz-erklärung" hidden>${esc(quiz.erklaerung)}</p>
+      ${gelöst ? '<p class="schwach">⭐ Diese Frage hast du schon richtig beantwortet.</p>' : ''}
     </div>`;
 }
 
 function seiteKarte(parameter = '') {
-  const gewaehlt = new URLSearchParams(parameter).get('station');
+  const markiert = new URLSearchParams(parameter).get('station');
   const tour = S.aktiveTour ? tourVon(S.aktiveTour) : null;
 
   return `
@@ -1525,10 +1525,10 @@ function seiteKarte(parameter = '') {
         ${navPosition ? '' : '<p class="schwach" style="margin:8px 0 0">Ohne GPS-Freigabe startet der Weg am Haupteingang. Tippe "Wo bin ich?", um deine Position zu nutzen.</p>'}
       </div>` : ''}
     <div class="kartenbox">
-      ${kartenSvg({ tour, aktiveStation: gewaehlt })}
+      ${kartenSvg({ tour, aktiveStation: markiert })}
       ${kartenWerkzeug()}
     </div>
-    <p class="schwach">Wege, Gehege und Gebaeude stammen aus OpenStreetMap und entsprechen der realen Lage im Park. Fuer den offiziellen Lageplan bitte den Parkplan am Eingang nutzen.</p>
+    <p class="schwach">Wege, Gehege und Gebäude stammen aus OpenStreetMap und entsprechen der realen Lage im Park. Für den offiziellen Lageplan bitte den Parkplan am Eingang nutzen.</p>
     ${tour ? `<div class="hinweis">Eingezeichnet ist die Route <strong>${esc(tour.titel)}</strong>. Die gestrichelte Linie zeigt die Reihenfolge der Stationen.</div>` : ''}
     <div id="ortungsergebnis"></div>
 
@@ -1558,7 +1558,7 @@ function zeigeStationsBlatt(id) {
   box.innerHTML = `
     <div class="zeile-zwischen">
       <strong>${esc(st.name)}${st.planNr ? ` <span class="schwach">(Plan-Nr. ${esc(st.planNr)})</span>` : ''}</strong>
-      <button class="btn btn--klein btn--zweit" data-blatt-zu>Schliessen</button>
+      <button class="btn btn--klein btn--zweit" data-blatt-zu>Schließen</button>
     </div>
     <div class="knopfreihe" style="margin-top:10px">
       <button class="btn btn--klein" data-nav-start="${st.id}">🧭 Bring mich hin</button>
@@ -1572,17 +1572,17 @@ function zeigeStationsBlatt(id) {
   document.body.appendChild(box);
 }
 
-function seiteFuetterungen() {
-  const eintraege = FUETTERUNGEN.map((f) => ({ ...f, zeit: S.zeiten[f.id] || f.zeit }));
-  const mitZeit = eintraege.filter((f) => f.zeit).sort((a, b) => a.zeit.localeCompare(b.zeit));
-  const ohneZeit = eintraege.filter((f) => !f.zeit);
+function seiteFütterungen() {
+  const einträge = FUETTERUNGEN.map((f) => ({ ...f, zeit: S.zeiten[f.id] || f.zeit }));
+  const mitZeit = einträge.filter((f) => f.zeit).sort((a, b) => a.zeit.localeCompare(b.zeit));
+  const ohneZeit = einträge.filter((f) => !f.zeit);
 
   return `
-    <h1>Fuetterungen & Vorfuehrungen</h1>
-    ${oeffnungHeute() ? `<div class="karte"><div class="zeile-zwischen"><span>🕘 Heute geoeffnet</span><strong>${oeffnungHeute()}</strong></div><p class="schwach" style="margin:6px 0 0">${esc(OEFFNUNG.quelle)} - Aushang am Eingang geht vor.</p></div>` : ''}
+    <h1>Fütterungen & Vorführungen</h1>
+    ${oeffnungHeute() ? `<div class="karte"><div class="zeile-zwischen"><span>🕘 Heute geöffnet</span><strong>${oeffnungHeute()}</strong></div><p class="schwach" style="margin:6px 0 0">${esc(OEFFNUNG.quelle)} - Aushang am Eingang geht vor.</p></div>` : ''}
     <div class="hinweis">
-      <strong>Zeiten bitte selbst eintragen.</strong> Die tatsaechlichen Zeiten haengen vom Tag ab und haengen am Eingang aus.
-      Trag sie hier einmal ein - die App merkt sie sich auf diesem Geraet und sortiert deinen Tag danach.
+      <strong>Zeiten bitte selbst eintragen.</strong> Die tatsächlichen Zeiten hängen vom Tag ab und hängen am Eingang aus.
+      Trag sie hier einmal ein - die App merkt sie sich auf diesem Gerät und sortiert deinen Tag danach.
     </div>
 
     ${mitZeit.length ? `
@@ -1595,7 +1595,7 @@ function seiteFuetterungen() {
 
     <h2>Zeiten eintragen</h2>
     <div class="karte">
-      ${eintraege.map((f) => `
+      ${einträge.map((f) => `
         <div class="schalter">
           <div>
             <strong>${esc(f.titel)}</strong>
@@ -1628,7 +1628,7 @@ function seiteEinstellungen() {
 
     <h2>Wer liest mit?</h2>
     <div class="karte">
-      <p class="schwach">Die Altersstufe aendert Textlaenge, Wortwahl und Schriftgroesse - und blendet fuer Kinder ein Quiz ein.</p>
+      <p class="schwach">Die Altersstufe ändert Textlänge, Wortwahl und Schriftgrösse - und blendet für Kinder ein Quiz ein.</p>
       <div class="filterzeile" style="margin-top:8px">
         <button class="filter-chip" data-alter="mini" aria-pressed="${S.alter === 'mini'}">Klein (3-6)</button>
         <button class="filter-chip" data-alter="kind" aria-pressed="${S.alter === 'kind'}">Kinder (7-11)</button>
@@ -1638,7 +1638,7 @@ function seiteEinstellungen() {
 
     <h2>Vorlesen</h2>
     <div class="karte">
-      ${Vorleser.verfuegbar() ? `
+      ${Vorleser.verfügbar() ? `
         <div class="schalter">
           <span>Tempo</span>
           <span><input type="range" min="0.6" max="1.4" step="0.1" value="${S.tempo}" data-tempo-regler> <span id="tempowert">${S.tempo.toFixed(1)}×</span></span>
@@ -1651,14 +1651,14 @@ function seiteEinstellungen() {
           <span>Beim Tier automatisch weiterlesen</span>
           <input type="checkbox" data-auto ${S.autoWeiter ? 'checked' : ''}>
         </div>
-        <button class="btn btn--zweit btn--klein" data-probe>Probe hoeren</button>
-        ${stimmen.length === 0 ? '<p class="schwach">Es wurde noch keine deutsche Stimme gefunden. Auf manchen Geraeten laedt die Liste erst nach dem ersten Vorlesen.</p>' : ''}
-      ` : '<p class="schwach">Dieses Geraet bietet keine Sprachausgabe an.</p>'}
+        <button class="btn btn--zweit btn--klein" data-probe>Probe hören</button>
+        ${stimmen.length === 0 ? '<p class="schwach">Es wurde noch keine deutsche Stimme gefunden. Auf manchen Geräten lädt die Liste erst nach dem ersten Vorlesen.</p>' : ''}
+      ` : '<p class="schwach">Dieses Gerät bietet keine Sprachausgabe an.</p>'}
     </div>
 
     <h2>Standort</h2>
     <div class="karte">
-      <p class="schwach">Die Stationskoordinaten sind aus der schematischen Karte abgeleitet und deshalb ungenau. Wenn du vor Ort an einer Station stehst, kannst du die echte Position speichern - danach stimmt "Wo bin ich?" fuer diese Station genau.</p>
+      <p class="schwach">Die Stationskoordinaten sind aus der schematischen Karte abgeleitet und deshalb ungenau. Wenn du vor Ort an einer Station stehst, kannst du die echte Position speichern - danach stimmt "Wo bin ich?" für diese Station genau.</p>
       <select id="kalibrierstation">
         ${STATIONEN.map((st) => `<option value="${st.id}">${esc(st.name)}</option>`).join('')}
       </select>
@@ -1669,8 +1669,8 @@ function seiteEinstellungen() {
 
     <h2>Daten</h2>
     <div class="karte">
-      <p class="schwach">Alles bleibt auf diesem Geraet. Es werden keine Daten an einen Server gesendet, es gibt keine Konten und kein Tracking.</p>
-      <button class="btn btn--zweit btn--klein" data-alles-loeschen>Fortschritt und Einstellungen loeschen</button>
+      <p class="schwach">Alles bleibt auf diesem Gerät. Es werden keine Daten an einen Server gesendet, es gibt keine Konten und kein Tracking.</p>
+      <button class="btn btn--zweit btn--klein" data-alles-löschen>Fortschritt und Einstellungen löschen</button>
     </div>
 
     <div class="hinweis"><strong>Inhaltsstand ${META.stand}.</strong> ${esc(META.quelleHinweis)}
@@ -1682,16 +1682,16 @@ function seitePass() {
   const anteil = Math.round((S.entdeckt.length / STATIONEN.length) * 100);
   const tierarten = new Set(S.entdeckt.flatMap((id) => stationVon(id)?.tiere || [])).size;
   const questErledigt = (q) =>
-    q.anzahl ? S.entdeckt.length >= q.anzahl : q.noetig.every((id) => S.entdeckt.includes(id));
+    q.anzahl ? S.entdeckt.length >= q.anzahl : q.braucht.every((id) => S.entdeckt.includes(id));
 
-  let rueckblick;
+  let rückblick;
   if (!S.entdeckt.length) {
-    rueckblick = istKind()
+    rückblick = istKind()
       ? 'Dein Abenteuer wartet! Hol dir deinen ersten Stempel, indem du eine Station besuchst.'
       : 'Noch keine Stempel. Markiere unterwegs Stationen als "Gesehen" oder stemple direkt auf der Karte.';
   } else {
     const minuten = Math.max(1, Math.round((Date.now() - S.passStart) / 60000));
-    rueckblick = `${istKind() ? 'Ihr wart' : 'Du warst'} etwa ${minutenText(minuten)} unterwegs und ${istKind() ? 'habt' : 'hast'} ${S.entdeckt.length} Stationen mit rund ${tierarten} Tierarten entdeckt.`;
+    rückblick = `${istKind() ? 'Ihr wart' : 'Du warst'} etwa ${minutenText(minuten)} unterwegs und ${istKind() ? 'habt' : 'hast'} ${S.entdeckt.length} Stationen mit rund ${tierarten} Tierarten entdeckt.`;
   }
 
   return `
@@ -1710,7 +1710,7 @@ function seitePass() {
           </button>`;
       }).join('')}
     </div>
-    <p class="schwach">Stempel gibt es automatisch, wenn du auf einer Tour "Gesehen" drueckst - oder tippe hier selbst.</p>
+    <p class="schwach">Stempel gibt es automatisch, wenn du auf einer Tour "Gesehen" drückst - oder tippe hier selbst.</p>
 
     <h2>${istKind() ? 'Deine Missionen' : 'Park-Quests'}</h2>
     <p class="schwach">Antippen zum Aufklappen - jede Mission hat zehn Aufgaben zum Abhaken.</p>
@@ -1740,16 +1740,16 @@ function seitePass() {
         </details>`;
     }).join('')}
 
-    <h2>Tagesrueckblick</h2>
+    <h2>Tagesrückblick</h2>
     <div class="karte">
-      <p>${esc(rueckblick)}</p>
+      <p>${esc(rückblick)}</p>
       ${S.entdeckt.length ? '<button class="btn btn--zweit btn--klein" data-pass-reset>Neuen Besuch starten</button>' : ''}
     </div>
   `;
 }
 
 function seiteEigene() {
-  const gewaehlt = new Set(S.eigeneTiere);
+  const auswahl = new Set(S.eigeneTiere);
   const gruppen = {};
   for (const t of TIERE) {
     if (!gruppen[t.bereich]) gruppen[t.bereich] = [];
@@ -1759,15 +1759,15 @@ function seiteEigene() {
   return `
     <h1>⭐ ${istKind() ? 'Welche Tiere willst du sehen?' : 'Meine Tour zusammenstellen'}</h1>
     <p class="schwach">${istKind()
-      ? 'Tippe deine Lieblingstiere an. Die App baut dir den kuerzesten Weg.'
-      : 'Wunschtiere antippen - die App berechnet die kuerzeste Route ueber die Parkwege und sortiert die Stationen passend.'}</p>
+      ? 'Tippe deine Lieblingstiere an. Die App baut dir den kürzesten Weg.'
+      : 'Wunschtiere antippen - die App berechnet die kürzeste Route über die Parkwege und sortiert die Stationen passend.'}</p>
 
     <div class="karte eigene-leiste">
       <div class="zeile-zwischen">
         <div id="eigene-info">
           ${tour
             ? `<strong>${S.eigeneTiere.length} Tiere</strong> · ${tour.stationen.length - 1} Stationen · ${minutenText(tour.minuten)} · ${tour.laenge}`
-            : '<span class="schwach">Noch keine Tiere gewaehlt</span>'}
+            : '<span class="schwach">Noch keine Tiere gewählt</span>'}
         </div>
         <button class="btn btn--klein" data-eigene-los ${tour ? '' : 'disabled'}>Route ansehen</button>
       </div>
@@ -1777,7 +1777,7 @@ function seiteEigene() {
       <h2 style="color:${BEREICHE[bereich].farbe}">${esc(BEREICHE[bereich].name)}</h2>
       <div class="stempel-gitter">
         ${tiere.map((t) => `
-          <button class="stempel ${gewaehlt.has(t.id) ? 'stempel--da' : ''}" data-tier-wahl="${t.id}">
+          <button class="stempel ${auswahl.has(t.id) ? 'stempel--da' : ''}" data-tier-wahl="${t.id}">
             <span class="stempel__bild">${TIER_EMOJI[t.id] || '🐾'}</span>
             <span class="stempel__name">${esc(t.name)}</span>
           </button>`).join('')}
@@ -1801,15 +1801,15 @@ function seiteStart() {
     <div style="text-align:center;padding:24px 8px">
       <div style="font-size:3rem">🐘</div>
       <h1>Willkommen im Tierpark</h1>
-      <p class="schwach">Dieser Begleiter fuehrt dich auf festen Routen durch den Park, erzaehlt dir etwas zu den Tieren und liest auf Wunsch alles vor.</p>
+      <p class="schwach">Dieser Begleiter führt dich auf festen Routen durch den Park, erzählt dir etwas zu den Tieren und liest auf Wunsch alles vor.</p>
     </div>
-    <h2>Fuer wen ist die App gerade eingestellt?</h2>
+    <h2>Für wen ist die App gerade eingestellt?</h2>
     <div class="tier-liste">
-      <button class="tier-zeile" data-start-alter="mini"><span><span class="tier-zeile__name">Kleine Kinder (3-6)</span><span class="schwach" style="display:block">Ganz kurze Texte zum Vorlesen, grosse Schrift</span></span><span class="tier-zeile__pfeil">›</span></button>
+      <button class="tier-zeile" data-start-alter="mini"><span><span class="tier-zeile__name">Kleine Kinder (3-6)</span><span class="schwach" style="display:block">Ganz kurze Texte zum Vorlesen, große Schrift</span></span><span class="tier-zeile__pfeil">›</span></button>
       <button class="tier-zeile" data-start-alter="kind"><span><span class="tier-zeile__name">Kinder (7-11)</span><span class="schwach" style="display:block">Einfache Texte und ein Quiz zu jedem Tier</span></span><span class="tier-zeile__pfeil">›</span></button>
-      <button class="tier-zeile" data-start-alter="erwachsen"><span><span class="tier-zeile__name">Ab 12 und Erwachsene</span><span class="schwach" style="display:block">Ausfuehrliche Texte mit Steckbrief</span></span><span class="tier-zeile__pfeil">›</span></button>
+      <button class="tier-zeile" data-start-alter="erwachsen"><span><span class="tier-zeile__name">Ab 12 und Erwachsene</span><span class="schwach" style="display:block">Ausführliche Texte mit Steckbrief</span></span><span class="tier-zeile__pfeil">›</span></button>
     </div>
-    <p class="schwach" style="margin-top:14px">Laesst sich jederzeit in den Einstellungen umschalten.</p>
+    <p class="schwach" style="margin-top:14px">Lässt sich jederzeit in den Einstellungen umschalten.</p>
   `;
 }
 
@@ -1834,7 +1834,7 @@ function zeichne() {
   const teile = pfad.split('/').filter(Boolean);
   const inhalt = $('#inhalt');
   const titel = $('.kopf__titel');
-  const zurueck = $('#zurueck');
+  const zurück = $('#zurueck');
 
   Vorleser.stoppen();
   document.querySelectorAll('[data-blatt]').forEach((e) => e.remove());
@@ -1864,7 +1864,7 @@ function zeichne() {
     case 'karte':
       html = seiteKarte(parameter); seitenTitel = 'Karte'; break;
     case 'fuetterungen':
-      html = seiteFuetterungen(); seitenTitel = 'Zeiten'; break;
+      html = seiteFütterungen(); seitenTitel = 'Zeiten'; break;
     case 'pass':
       html = seitePass(); seitenTitel = 'Tierpass'; tiefe = false; break;
     case 'eigene':
@@ -1883,7 +1883,7 @@ function zeichne() {
 
   inhalt.innerHTML = html;
   titel.textContent = seitenTitel;
-  zurueck.hidden = !tiefe;
+  zurück.hidden = !tiefe;
   document.body.dataset.alterstufe = S.alter;
   window.scrollTo(0, 0);
 
@@ -1895,13 +1895,13 @@ function seiteMehr() {
   return `
     <h1>Mehr</h1>
     <div class="tier-liste">
-      <button class="tier-zeile" data-route="#/fuetterungen"><span><span class="tier-zeile__name">Fuetterungen & Zeiten</span><span class="schwach" style="display:block">Tagesplan mit den Zeiten vom Aushang</span></span><span class="tier-zeile__pfeil">›</span></button>
-      <button class="tier-zeile" data-route="#/wissen"><span><span class="tier-zeile__name">Gut zu wissen</span><span class="schwach" style="display:block">Geschichte des Parks, Tipps fuer den Besuch</span></span><span class="tier-zeile__pfeil">›</span></button>
+      <button class="tier-zeile" data-route="#/fuetterungen"><span><span class="tier-zeile__name">Fütterungen & Zeiten</span><span class="schwach" style="display:block">Tagesplan mit den Zeiten vom Aushang</span></span><span class="tier-zeile__pfeil">›</span></button>
+      <button class="tier-zeile" data-route="#/wissen"><span><span class="tier-zeile__name">Gut zu wissen</span><span class="schwach" style="display:block">Geschichte des Parks, Tipps für den Besuch</span></span><span class="tier-zeile__pfeil">›</span></button>
       <button class="tier-zeile" data-route="#/einstellungen"><span><span class="tier-zeile__name">Einstellungen</span><span class="schwach" style="display:block">Altersstufe, Vorlesen, Standort</span></span><span class="tier-zeile__pfeil">›</span></button>
-      <button class="tier-zeile" data-route="#/start"><span><span class="tier-zeile__name">Startbildschirm</span><span class="schwach" style="display:block">Altersstufe neu waehlen</span></span><span class="tier-zeile__pfeil">›</span></button>
+      <button class="tier-zeile" data-route="#/start"><span><span class="tier-zeile__name">Startbildschirm</span><span class="schwach" style="display:block">Altersstufe neu wählen</span></span><span class="tier-zeile__pfeil">›</span></button>
     </div>
     <div class="hinweis" style="margin-top:14px">
-      <strong>Hinweis:</strong> Ein privat entwickelter Begleiter fuer den Besuch, unabhaengig vom Tierpark.
+      <strong>Hinweis:</strong> Ein privat entwickelter Begleiter für den Besuch, unabhängig vom Tierpark.
       Inhaltsstand ${META.stand}. ${esc(META.quelleHinweis)}
     </div>
   `;
@@ -1951,7 +1951,7 @@ function nachbereiten(teile) {
     });
   }
 
-  if (Vorleser.verfuegbar() && S.autoWeiter && teile[0] === 'tier' && window.__vorlesetext) {
+  if (Vorleser.verfügbar() && S.autoWeiter && teile[0] === 'tier' && window.__vorlesetext) {
     /* Bewusst nicht automatisch starten: Browser blockieren Tonausgabe
      * ohne Nutzeraktion. Der Schalter wirkt erst nach dem ersten Antippen. */
   }
@@ -1978,7 +1978,7 @@ document.addEventListener('click', (e) => {
   if (alter) { setze({ alter: alter.dataset.alter }); zeichne(); return; }
 
   if (ziel('[data-vorlesen]')) {
-    if (Vorleser.laeuft) Vorleser.stoppen();
+    if (Vorleser.läuft) Vorleser.stoppen();
     else if (window.__vorlesetext) Vorleser.starten(window.__vorlesetext());
     return;
   }
@@ -1989,12 +1989,12 @@ document.addEventListener('click', (e) => {
     const i = stufen.findIndex((v) => Math.abs(v - S.tempo) < 0.01);
     setze({ tempo: stufen[(i + 1) % stufen.length] });
     e.target.closest('[data-tempo]').textContent = S.tempo.toFixed(1) + '×';
-    if (Vorleser.laeuft && window.__vorlesetext) Vorleser.starten(window.__vorlesetext());
+    if (Vorleser.läuft && window.__vorlesetext) Vorleser.starten(window.__vorlesetext());
     return;
   }
 
   if (ziel('[data-probe]')) {
-    Vorleser.starten('So klingt die Sprachausgabe. Der Eisbaer ist das groesste an Land lebende Raubtier der Welt.');
+    Vorleser.starten('So klingt die Sprachausgabe. Der Eisbär ist das größte an Land lebende Raubtier der Welt.');
     return;
   }
 
@@ -2005,7 +2005,7 @@ document.addEventListener('click', (e) => {
     if (liste.has(stationId)) liste.delete(stationId);
     else {
       liste.add(stationId);
-      stempeln(stationId); // Tierpass fuellt sich beim Rundgang von selbst
+      stempeln(stationId); // Tierpass füllt sich beim Rundgang von selbst
     }
     setze({ besucht: { ...S.besucht, [tourId]: [...liste] } });
     zeichne();
@@ -2025,7 +2025,7 @@ document.addEventListener('click', (e) => {
     if (info) {
       info.innerHTML = t
         ? `<strong>${neu.length} Tiere</strong> · ${t.stationen.length - 1} Stationen · ${minutenText(t.minuten)} · ${t.laenge}`
-        : '<span class="schwach">Noch keine Tiere gewaehlt</span>';
+        : '<span class="schwach">Noch keine Tiere gewählt</span>';
     }
     document.querySelectorAll('[data-eigene-los]').forEach((b) => { b.disabled = !t; });
     document.querySelectorAll('[data-eigene-leeren]').forEach((b) => { b.disabled = !neu.length; });
@@ -2087,19 +2087,19 @@ document.addEventListener('click', (e) => {
   if (ziel('[data-ortung]')) {
     const knopf = ziel('[data-ortung]');
     knopf.textContent = 'Suche …';
-    orten((mir, naechste) => {
+    orten((mir, nah) => {
       knopf.textContent = '📍 Wo bin ich?';
-      const ungenau = koordinaten(naechste.st).geschaetzt;
+      const ungenau = koordinaten(nah.st).geschätzt;
       const feld = $('#ortungsergebnis');
-      const text = `Am naechsten liegt <strong>${esc(naechste.st.name)}</strong>, etwa ${naechste.m} m entfernt.` +
-        (ungenau ? ' Achtung: Diese Station ist noch nicht vor Ort kalibriert, die Entfernung ist grob geschaetzt.' : '');
+      const text = `Am nächsten liegt <strong>${esc(nah.st.name)}</strong>, etwa ${nah.m} m entfernt.` +
+        (ungenau ? ' Achtung: Diese Station ist noch nicht vor Ort kalibriert, die Entfernung ist grob geschätzt.' : '');
       if (feld) feld.innerHTML = `<div class="hinweis">${text}</div>`;
       else alert(text.replace(/<[^>]+>/g, ''));
 
       const svg = $('.kartenbox svg');
       if (svg) {
         const x = ((mir.lon - PARK_BOUNDS.west) / (PARK_BOUNDS.ost - PARK_BOUNDS.west)) * GEO.MASS.w;
-        const y = ((PARK_BOUNDS.nord - mir.lat) / (PARK_BOUNDS.nord - PARK_BOUNDS.sued)) * GEO.MASS.h;
+        const y = ((PARK_BOUNDS.nord - mir.lat) / (PARK_BOUNDS.nord - PARK_BOUNDS.süd)) * GEO.MASS.h;
         if (x > -10 && x < GEO.MASS.w + 10 && y > -10 && y < GEO.MASS.h + 10) {
           navPosition = [x, y];
           if (S.navZiel) { zeichne(); return; }
@@ -2126,20 +2126,20 @@ document.addEventListener('click', (e) => {
   if (antwort) {
     const block = antwort.closest('[data-quiz]');
     const richtig = Number(antwort.dataset.richtig);
-    const gewaehlt = Number(antwort.dataset.antwort);
-    const treffer = richtig === gewaehlt;
+    const getippt = Number(antwort.dataset.antwort);
+    const treffer = richtig === getippt;
     block.querySelectorAll('[data-antwort]').forEach((b) => {
       const i = Number(b.dataset.antwort);
       if (i === richtig) b.style.borderColor = 'var(--gruen)';
-      if (i === gewaehlt && !treffer) b.style.borderColor = 'var(--akzent)';
+      if (i === getippt && !treffer) b.style.borderColor = 'var(--akzent)';
     });
     const ergebnis = $('.quiz-ergebnis', block);
     ergebnis.hidden = false;
     ergebnis.innerHTML = treffer
       ? '<p style="color:var(--gruen);font-weight:650">✓ Richtig!</p>'
-      : '<p style="color:var(--akzent);font-weight:650">Fast! Die gruene Antwort stimmt.</p>';
-    $('.quiz-erklaerung', block).hidden = false;
-    if (treffer) setze({ quizGeloest: { ...S.quizGeloest, [block.dataset.quiz]: true } });
+      : '<p style="color:var(--akzent);font-weight:650">Fast! Die grüne Antwort stimmt.</p>';
+    $('.quiz-erklärung', block).hidden = false;
+    if (treffer) setze({ quizGelöst: { ...S.quizGelöst, [block.dataset.quiz]: true } });
     return;
   }
 
@@ -2150,7 +2150,7 @@ document.addEventListener('click', (e) => {
     document.querySelectorAll('[data-blatt]').forEach((x) => x.remove());
     navVerfolgung(true);
     const st = stationVon(id);
-    if (Vorleser.verfuegbar() && st) {
+    if (Vorleser.verfügbar() && st) {
       Vorleser.starten(`Los geht's! Folge den orangen Pfeilen zur Station ${st.name}.`);
     }
     if (location.hash.startsWith('#/karte')) zeichne();
@@ -2192,15 +2192,15 @@ document.addEventListener('click', (e) => {
   }
 
   if (ziel('[data-pass-reset]')) {
-    if (confirm('Stempel und Tagesrueckblick zuruecksetzen?')) {
+    if (confirm('Stempel und Tagesrückblick zurücksetzen?')) {
       setze({ entdeckt: [], passStart: null, questAufgaben: {} });
       zeichne();
     }
     return;
   }
 
-  if (ziel('[data-alles-loeschen]')) {
-    if (confirm('Fortschritt, Zeiten und Einstellungen auf diesem Geraet loeschen?')) {
+  if (ziel('[data-alles-löschen]')) {
+    if (confirm('Fortschritt, Zeiten und Einstellungen auf diesem Gerät löschen?')) {
       localStorage.removeItem(SPEICHER);
       S = { ...STANDARD };
       location.hash = '#/start';
@@ -2235,11 +2235,11 @@ if (S.erstbesuch && !location.hash) location.hash = '#/start';
 zeichne();
 try { sessionStorage.removeItem('reparaturversuch'); } catch { /* egal */ }
 
-/* Service Worker fuer Offline-Betrieb */
+/* Service Worker für Offline-Betrieb */
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('./sw.js').catch(() => {
-      /* Ohne Service Worker laeuft die App weiter, nur nicht offline. */
+      /* Ohne Service Worker läuft die App weiter, nur nicht offline. */
     });
   });
 }
